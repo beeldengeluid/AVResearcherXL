@@ -1,4 +1,4 @@
-from app import db
+from quamerdes import db
 
 
 class User(db.Model):

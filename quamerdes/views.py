@@ -19,7 +19,7 @@ from settings import (DEBUG, MESSAGES, MAIL_DEFAULT_SENDER,
                       ENABLE_USAGE_LOGGING, LOG_EVENTS, ES_SEARCH_INDEX,
                       ES_LOG_INDEX, ABOUT_PAGE_CONTENT_URL,
                       HELP_PAGE_CONTENT_URL)
-from app import app, db, es_search, es_log
+from quamerdes import app, db, es_search, es_log
 from models import User
 
 R_EMAIL = re.compile(r'^.+@[^.].*\.[a-z]{2,10}$', re.IGNORECASE)
@@ -297,15 +297,15 @@ def count():
 def log_usage():
     events = json.loads(request.form['events'])
     user_id = current_user.id
-    
+
     bulkrequest = ''
     # Add the user's ID to each event
     for event in events:
         event['user_id'] = user_id
         bulkrequest = bulkrequest + '\n' + '{ "create" : { "_index" : "' +  ES_LOG_INDEX + '", "_type" : "event" } }'
-        bulkrequest = bulkrequest + '\n' + json.dumps(event); 
+        bulkrequest = bulkrequest + '\n' + json.dumps(event);
 
     es_log.bulk(body=bulkrequest)
 
     return jsonify({'success': True})
-    
+

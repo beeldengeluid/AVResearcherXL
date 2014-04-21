@@ -1,0 +1,193 @@
+{
+  "settings": {
+    "index": {
+      "analyzer": "dutch",
+      "uuid": "rKNgoip1TZmT5Ej4ItUHOw",
+      "number_of_replicas": "0",
+      "analysis": {
+        "analyzer": {
+          "text_nl_stemmed": {
+            "type": "custom",
+            "filter": [
+              "asciifolding",
+              "lowercase",
+              "custom_word_delimiter",
+              "hunspell_nl"
+            ],
+            "tokenizer": "standard"
+          }
+        },
+        "filter": {
+          "custom_word_delimiter": {
+            "split_on_numerics": "false",
+            "generate_number_parts": "true",
+            "stem_english_possessive": "false",
+            "catenate_words": "false",
+            "catenate_numbers": "true",
+            "type": "word_delimiter",
+            "split_on_case_change": "false",
+            "generate_word_parts": "true"
+          },
+          "hunspell_nl": {
+            "type": "hunspell",
+            "dedup": true,
+            "locale": "nl_NL"
+          }
+        }
+      },
+      "number_of_shards": "1",
+      "translog": {
+        "disable_flush": false
+      }
+    }
+  },
+  "mappings": {
+    "expression": {
+      "properties": {
+        "broadcastDates": {
+          "type": "nested",
+          "properties": {
+            "end": {
+              "type": "date",
+              "format": "dateOptionalTime"
+            },
+            "start": {
+              "type": "date",
+              "format": "dateOptionalTime"
+            }
+          }
+        },
+        "broadcasters": {
+          "type": "string",
+          "analyzer": "text_nl_stemmed"
+        },
+        "categories": {
+          "type": "nested",
+          "properties": {
+            "categoryKey": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "categoryValue": {
+              "type": "string",
+              "analyzer": "text_nl_stemmed",
+              "fields": {
+                "untouched": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                }
+              }
+            }
+          }
+        },
+        "descriptions": {
+          "type": "string",
+          "index_name": "description",
+          "analyzer": "text_nl_stemmed"
+        },
+        "expressieId": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "immixDate": {
+          "type": "date",
+          "format": "dateOptionalTime"
+        },
+        "levelTitles": {
+          "properties": {
+            "expressie": {
+              "type": "string"
+            },
+            "realisatie": {
+              "type": "string"
+            },
+            "reeks": {
+              "type": "string"
+            },
+            "werk": {
+              "type": "string"
+            }
+          }
+        },
+        "mainTitle": {
+          "type": "string",
+          "analyzer": "text_nl_stemmed"
+        },
+        "realisatieId": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "reeksId": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "roles": {
+          "type": "nested",
+          "properties": {
+            "roleKey": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "rolePlayerFunction": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "rolePlayerName": {
+              "type": "string"
+            },
+            "roleValue": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "subtitles": {
+          "type": "string",
+          "index_name": "subtitle",
+          "analyzer": "text_nl_stemmed"
+        },
+        "summaries": {
+          "type": "string",
+          "index_name": "summary",
+          "analyzer": "text_nl_stemmed"
+        },
+        "titles": {
+          "type": "string",
+          "index_name": "title",
+          "analyzer": "text_nl_stemmed"
+        },
+        "top_100_subtitle_terms": {
+          "type": "string"
+        },
+        "top_100_twitter_terms": {
+          "type": "string"
+        },
+        "tweets": {
+          "type": "nested",
+          "properties": {
+            "tweetCreatedAt": {
+              "type": "date",
+              "format": "dateOptionalTime"
+            },
+            "tweetId": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "tweetText": {
+              "type": "string",
+              "analyzer": "text_nl_stemmed"
+            },
+            "twitterUserId": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "werkId": {
+          "type": "string",
+          "index": "not_analyzed"
+        }
+      }
+    }
+  }
+}

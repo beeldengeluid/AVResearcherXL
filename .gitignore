@@ -30,7 +30,7 @@ nosetests.xml
 # Translations
 *.mo
 
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
+elasticsearch/
+!elasticsearch/config
+dumps/
+indices/

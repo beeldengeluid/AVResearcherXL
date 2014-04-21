@@ -1,7 +1,7 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 
-import settings
+from quamerdes import settings
 
 from elasticsearch import Elasticsearch
 
@@ -13,8 +13,18 @@ app.secret_key = settings.SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URI
 db = SQLAlchemy(app)
 
-es_search = Elasticsearch([{'host': settings.ES_SEARCH_HOST, 'port': settings.ES_SEARCH_PORT, 'url_prefix': settings.ES_SEARCH_URL_PREFIX, 'use_ssl': False}])
-es_log = Elasticsearch([{'host': settings.ES_LOG_HOST, 'port': settings.ES_LOG_PORT, 'url_prefix': settings.ES_LOG_URL_PREFIX, 'use_ssl': False}])
+es_search = Elasticsearch([{
+    'host': settings.ES_SEARCH_HOST,
+    'port': settings.ES_SEARCH_PORT,
+    'url_prefix': settings.ES_SEARCH_URL_PREFIX,
+    'use_ssl': False
+}])
+es_log = Elasticsearch([{
+    'host': settings.ES_LOG_HOST,
+    'port': settings.ES_LOG_PORT,
+    'url_prefix': settings.ES_LOG_URL_PREFIX,
+    'use_ssl': False
+}])
 
 app.config['MAIL_SERVER'] = settings.MAIL_SERVER
 app.config['MAIL_PORT'] = settings.MAIL_PORT

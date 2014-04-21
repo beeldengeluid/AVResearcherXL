@@ -1,7 +1,6 @@
-werkzeug==0.8.3
-Flask==0.9
-Flask-Login==0.1.3
+Flask
+Flask-Login
 Flask-Bcrypt
 Flask-Mail
-Flask-SQLAlchemy==0.16
+Flask-SQLAlchemy
 elasticsearch
