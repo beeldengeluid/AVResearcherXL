@@ -1,21 +1,21 @@
-AVResearcher
+QuaMERDES
 ============
 
-AVResearcher is a prototype aimed at allowing media researchers to explore metadata associated with large numbers of audiovisual broadcasts. It allows them to compare and contrast the characteristics of search results for two topics, across time and in terms of content. Broadcasts can be searched and compared not only on the basis of traditional catalog descriptions, but also in terms of spoken content (subtitles), and social chatter (tweets associated with broadcasts). AVResearcher is a new and ongoing valorisation project at the Netherlands Institute for Sound and Vision. `more details <http://ceur-ws.org/Vol-986/paper_27.pdf>`_
+QuaMERDES is a tool based on `AVResearcher <https://github.com/beeldengeluid/audiovisual-researcher>`_.
 
-AVResearcher was developed by `Dispectu <http://dispectu.com>`_ for the Netherlands Institute for Sound and Vision.
+QuaMERDES is developed by `Dispectu <http://dispectu.com>`_.
 
 Requirements
 ------------
 
-- Python > 2.6
+- Python 2.7
 
   - pip
   - virtualenv
 
+- Elasticsearch 1.1
+
 - Relational database (e.g. SQLite, MySQL or PostgreSQL)
-- An ElasticSearch index that contains documents in the AVResearcher format
-- An ElasticSearch index used for storing usage logs
 - A webserver with WSGI or proxy capabilities
 
 Installation
@@ -25,15 +25,15 @@ Installation
 
 .. code-block:: bash
 
-  $ git clone https://github.com/beeldengeluid/audiovisual-researcher.git
-  $ cd audiovisual-researcher
+  $ git clone git@git.dispectu.com/dispectu/quamerdes.git
+  $ cd quamerdes
 
 2. Create a virtualenv, activate it and install the required Python packages:
 
 .. code-block:: bash
 
-  $ virtualenv ~/my_pyenvs/avresearcher
-  $ source ~/my_pyenvs/avresearcher/bin/activate
+  $ virtualenv ~/my_pyenvs/quamerdes
+  $ source ~/my_pyenvs/quamerdes/bin/activate
   $ pip install -r requirements.txt
 
 3. Create a local settings file to override the default settings specified in ``settings.py``. In the next steps we describe to miminal number of settings that should be changed to get the application up-and-running. Please have a look at the comments in ``settings.py`` to get an overview of all possible settings.
@@ -77,7 +77,7 @@ Installation
   MAIL_USERNAME = None
   MAIL_PASSWORD = None
 
-8. Provide the URI of the database. The SQLAlchemy documentation provides inforamation on how to `structure the URI <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html#database-urls>`_ for different databases. To use an SQLite database named ``avresearcher.db`` set ``DATABASE_URI`` to ``sqlite:///avresearcher.db``.
+8. Provide the URI of the database. The SQLAlchemy documentation provides information on how to `structure the URI <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html#database-urls>`_ for different databases. To use an SQLite database named ``avresearcher.db`` set ``DATABASE_URI`` to ``sqlite:///avresearcher.db``.
 
 9. Load the schema in the database configured in the previous step.
 
@@ -91,23 +91,10 @@ Installation
 .. code-block:: bash
 
    $ pip install gunicorn
-   $ gunicorn --bind 0.0.0.0 -w 4 app:app 
+   $ gunicorn --bind 0.0.0.0 -w 4 quamerdes:app
 
 
-License 
+License
 =======
 
-Copyright 2013 Beeld en Geluid
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
+Copyright 2014 Dispectu
