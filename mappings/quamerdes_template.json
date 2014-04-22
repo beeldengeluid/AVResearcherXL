@@ -1,0 +1,55 @@
+{
+    "template": "quamerdes_*",
+    "settings": {
+        "index": {
+            "analyzer": "dutch",
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+            "query": {
+                "default_field": "text"
+            },
+            "analysis": {
+                "analyzer": {
+                    "text_nl": {
+                        "type": "custom",
+                        "filter": [
+                            "asciifolding",
+                            "lowercase",
+                            "custom_word_delimiter",
+                            "hunspell_nl"
+                        ],
+                        "tokenizer": "standard"
+                    }
+                },
+                "filter": {
+                    "custom_word_delimiter": {
+                        "type": "word_delimiter",
+                        "split_on_numerics": false,
+                        "generate_number_parts": true,
+                        "stem_english_possesive": false,
+                        "catenate_words": false,
+                        "catenate_numbers": true,
+                        "split_on_case_change": false,
+                        "generate_word_parts": true
+                    },
+                    "hunspell_nl": {
+                        "type": "hunspell",
+                        "dedup": true,
+                        "locale": "nl_NL"
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "_default_": {
+            "_all": {
+                "enabled": false
+            },
+            "text": {
+                "type": "string",
+                "analyzer": "text_nl"
+            }
+        }
+    }
+}
