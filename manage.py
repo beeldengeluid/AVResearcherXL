@@ -2,9 +2,12 @@ from flask.ext.script import Server, Manager, Command, Option
 from quamerdes import app
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+import glob
 import json
 import logging
+import random
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
+import zipfile
 import pprint
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
@@ -42,7 +45,7 @@ class LoadAVRDataToES(Command):
             mapping = json.load(f)
             self.es.indices.create('avresearcher', body=mapping)
 
-        with open('dumps/avresearcher.json', 'rb') as f:
+        with zipfile.ZipFile('dumps/avresearcher.json.zip', 'rb') as f:
             docs = []
             i = 0
             for line in f:
@@ -142,10 +145,26 @@ class TransformAVRData(Command):
                     print 'Processed', i, 'documents'
 
 
+class LoadSampleKB(Command):
+
+    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
+
+    def run(self):
+        for item in random.sample(glob.glob('/Users/bart/Downloads/quamerdes/de-volkskrant/*.json'), 1000):
+            with open(item, 'rb') as f:
+                article = json.load(f)
+
+            doc_id = item.split('/')[-1].split('.')[0]
+            logging.debug('Indexing document %s' % doc_id)
+            self.es.create(index='quamerdes_kb', doc_type='article', id=doc_id,
+                           body=article)
+
+
 manager = Manager(app)
 manager.add_command('runserver', Server(host='0.0.0.0'))
 manager.add_command('load_test_avr_data', LoadAVRDataToES())
 manager.add_command('transform_avr_data', TransformAVRData())
+manager.add_command('load_sample_kb', LoadSampleKB())
 
 
 if __name__ == '__main__':
