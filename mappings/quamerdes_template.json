@@ -49,6 +49,21 @@
             "text": {
                 "type": "string",
                 "analyzer": "text_nl"
+            },
+            "date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "title": {
+                "type": "string",
+                "analyzer": "text_nl",
+                "fields": {
+                    "raw": { "type": "string", "index": "not_analyzed" }
+                }
+            },
+            "source": {
+                "type": "string",
+                "index": "not_analyzed"
             }
         }
     }
