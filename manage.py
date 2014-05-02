@@ -6,11 +6,17 @@ import glob
 import json
 import logging
 import random
+import os
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
 import zipfile
-import pprint
+import tarfile
+import cStringIO
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger('QuaMeRDES-management')
+logger.setLevel(logging.DEBUG)
+
+DATA = '/Users/bart/Desktop/quamerdes'
 
 
 def getAVRDoc(line):
@@ -27,10 +33,15 @@ def getAVRDoc(line):
     return None
 
 
-def serialize_quamerdes(data):
-    doc_id = data['_meta'].get('AVRID')
-    with open('dumps/data/immix/%s.json' % doc_id, 'wb') as f:
-        json.dump(data, f)
+def serialize_quamerdes(data, archive):
+    doc_id = data['_meta'].get('resource_identifier')
+    data = json.dumps(data)
+
+    info = tarfile.TarInfo('immix/%s.json' % doc_id)
+    info.size = len(data)
+
+    archive.addfile(info, cStringIO.StringIO(data))
+    logger.debug('Adding %s to archive' % doc_id)
 
 
 class LoadAVRDataToES(Command):
@@ -81,6 +92,7 @@ class TransformAVRData(Command):
         )
 
     def run(self, avrdump):
+        archive = tarfile.open(os.path.join(DATA, 'immix.tar.gz'), 'w:gz')
         with open(avrdump, 'rb') as f:
             i = 0
             for line in f:
@@ -103,7 +115,7 @@ class TransformAVRData(Command):
                     else:
                         data['date'] = None
 
-                    data['text'] = u' '.join([u' '.join(source.get(field, u''))
+                    data['text'] = u' '.join([u' '.join(source.get(field, u'')).replace('\n', ' ')
                                              for field in ['titles', 'mainTitle', 'summaries', 'descriptions']])
                     data['_meta'] = {
                         'broadcasters': source.get('broadcasters', []),
@@ -135,14 +147,15 @@ class TransformAVRData(Command):
                         'summaries': source.get('summaries', []),
                         'titles': source.get('titles', []),
                         'werkID': source.get('werkID'),
-                        'AVRID': doc.get('_id')
+                        'resource_identifier': doc.get('_id')
                     }
 
-                    serialize_quamerdes(data)
+                    serialize_quamerdes(data, archive)
 
                 i += 1
                 if i % 1000 == 0:
                     print 'Processed', i, 'documents'
+        archive.close()
 
 
 class LoadSampleKB(Command):
@@ -155,9 +168,32 @@ class LoadSampleKB(Command):
                 article = json.load(f)
 
             doc_id = item.split('/')[-1].split('.')[0]
-            logging.debug('Indexing document %s' % doc_id)
+            logger.debug('Indexing KB document %s' % doc_id)
             self.es.create(index='quamerdes_kb', doc_type='article', id=doc_id,
                            body=article)
+
+
+class LoadSampleImmix(Command):
+
+    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
+    size = 1000
+
+    def run(self):
+        with tarfile.open(os.path.join(DATA, 'immix.tar.gz'), 'r:gz') as t:
+            s = 0
+            for member in t:
+                if s == 1000:
+                    break
+                logger.debug('Extracting %s' % member.name)
+                f = t.extractfile(member)
+
+                logger.debug('Loaded %s' % member.name)
+                expression = json.load(f)
+
+                logger.info('Indexing iMMix document %s' % member.name)
+                self.es.create(index='quamerdes_immix', doc_type='expression',
+                               body=expression, id=member.name.split('/')[-1].split('.')[0])
+                s += 1
 
 
 manager = Manager(app)
@@ -165,6 +201,7 @@ manager.add_command('runserver', Server(host='0.0.0.0'))
 manager.add_command('load_test_avr_data', LoadAVRDataToES())
 manager.add_command('transform_avr_data', TransformAVRData())
 manager.add_command('load_sample_kb', LoadSampleKB())
+manager.add_command('load_sample_immix', LoadSampleImmix())
 
 
 if __name__ == '__main__':
