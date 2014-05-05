@@ -9,7 +9,9 @@ import random
 import os
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
 from quamerdes.models import User
+from quamerdes.views import bcrypt
 from quamerdes import db
+
 import zipfile
 import tarfile
 import cStringIO
@@ -254,6 +256,7 @@ class AddUser(Command):
         user_opts['name'] = prompt('Name')
         user_opts['email'] = prompt('Email')
         user_opts['password'] = prompt_pass('Password')
+        user_opts['password'] = password = bcrypt.generate_password_hash(user_opts['password'], 12)
         user_opts['organization'] = prompt('Organization')
 
         user_opts['email_verified'] = True
