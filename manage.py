@@ -34,7 +34,7 @@ def getAVRDoc(line):
 
 
 def serialize_quamerdes(data, archive):
-    doc_id = data['_meta'].get('resource_identifier')
+    doc_id = data['_meta'].get('record_identifier')
     data = json.dumps(data)
 
     info = tarfile.TarInfo('immix/%s.json' % doc_id)
@@ -147,7 +147,7 @@ class TransformAVRData(Command):
                         'summaries': source.get('summaries', []),
                         'titles': source.get('titles', []),
                         'werkID': source.get('werkID'),
-                        'resource_identifier': doc.get('_id')
+                        'record_identifier': doc.get('_id')
                     }
 
                     serialize_quamerdes(data, archive)
@@ -169,7 +169,7 @@ class LoadSampleKB(Command):
 
             doc_id = item.split('/')[-1].split('.')[0]
             logger.debug('Indexing KB document %s' % doc_id)
-            self.es.create(index='quamerdes_kb', doc_type='article', id=doc_id,
+            self.es.create(index='quamerdes_kb1', doc_type='article', id=doc_id,
                            body=article)
 
 
@@ -191,9 +191,29 @@ class LoadSampleImmix(Command):
                 expression = json.load(f)
 
                 logger.info('Indexing iMMix document %s' % member.name)
-                self.es.create(index='quamerdes_immix', doc_type='expression',
+                self.es.create(index='quamerdes_immix1', doc_type='expression',
                                body=expression, id=member.name.split('/')[-1].split('.')[0])
                 s += 1
+
+
+class CreateAliases(Command):
+
+    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
+
+    def run(self):
+        self.es.indices.put_alias(index='quamerdes_kb1', name='quamerdes_kb')
+        self.es.indices.put_alias(index='quamerdes_immix1', name='quamerdes_immix')
+
+
+class PutSettings(Command):
+
+    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
+
+    def run(self):
+        with open('mappings/quamerdes_template.json', 'rb') as f:
+            quamerdes_template = json.load(f)
+
+        self.es.indices.put_template(name='quamerdes', body=quamerdes_template)
 
 
 manager = Manager(app)
@@ -202,6 +222,8 @@ manager.add_command('load_test_avr_data', LoadAVRDataToES())
 manager.add_command('transform_avr_data', TransformAVRData())
 manager.add_command('load_sample_kb', LoadSampleKB())
 manager.add_command('load_sample_immix', LoadSampleImmix())
+manager.add_command('create_aliases', CreateAliases())
+manager.add_command('put_settings', PutSettings())
 
 
 if __name__ == '__main__':
