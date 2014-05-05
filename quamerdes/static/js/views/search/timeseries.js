@@ -8,6 +8,7 @@ define([
 function($, _, Backbone, d3, app){
     var TimeseriesView = Backbone.View.extend({
         initialize: function(){
+            if(DEBUG) console.log('TimeseriesView:initialize');
             var self = this;
 
             this.chart = {
@@ -70,12 +71,12 @@ function($, _, Backbone, d3, app){
             app.vent.once('QueryInput:input', this.toggleVisibility, this);
 
             _.each(this.options.models, function(model, name){
-                model.on('change:facets', function(){
+                model.on('change:aggregations', function(){
                     self.determineInterval(model);
                 });
 
                 app.vent.on('model:redraw:' + model.get('name'), function(){
-                    if(model.get('facets').broadcast_start_date.entries.length < 1){
+                    if(model.get('aggregations').dates.buckets.length < 1){
                         self.chart.disabled[model.get('name')] = true;
                     }
                     else {
@@ -165,13 +166,13 @@ function($, _, Backbone, d3, app){
             // Create an array with objects holding the data for a line,
             // padded with zeroes for missing dates
             var data = _.map(this.options.models, function(model, modelName){
-                if (model.get('facets')){
+                if (model.get('aggregations')){
                     self.chart.chartInterval = model.get('interval');
-                    var datum = _.map(model.get('facets').broadcast_start_date.entries, function(d){
-                        return {date: self.chart.ISOFormat(new Date(d.time)), count: d.count};
+                    var datum = _.map(model.get('aggregations').dates.buckets, function(d){
+                        return {date: self.chart.ISOFormat(new Date(d.key)), count: d.doc_count};
                     });
 
-                    var minMaxDates = d3.extent(model.get('facets').broadcast_start_date.entries, function(d){ return d.time; });
+                    var minMaxDates = d3.extent(model.get('aggregations').dates.buckets, function(d){ return d.key; });
                     var maxHits = d3.max(datum, function(d){ return d.count; });
 
                     self.chart.max.date[modelName] = minMaxDates[1];
@@ -397,7 +398,7 @@ function($, _, Backbone, d3, app){
             }
 
             model.getDateHistogram({}, function(data){
-                var extent = d3.extent(data.facets.broadcast_start_date.entries, function(d){ return d.time; });
+                var extent = d3.extent(data.aggregations.dates.buckets, function(d){ return d.key; });
 
                 var datapoints = d3.time[interval].range(
                     d3.time[interval].offset(new Date(extent[0]), -1),
