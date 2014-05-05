@@ -206,7 +206,7 @@ function($, _, Backbone, app){
                     f[filter.type][filter.field]['from'] = filter.values.from;
                     f[filter.type][filter.field]['to'] = filter.values.to;
                 }
-                else if(filter.type == 'term'){
+                else if(filter.type == 'terms'){
                     f[filter.type][filter.field] = filter.values
                 }
 
@@ -443,14 +443,14 @@ function($, _, Backbone, app){
                 // Facet of the 'terms' type
                 if('terms' in aggregation_settings){
                     filters[aggregation] = {
-                        facet_type: 'terms',
+                        type: 'terms',
                         field: aggregation_settings.terms.field,
                         values: ''
                     };
                 }
                 else if ('date_histogram' in aggregation_settings){
                     filters[aggregation] = {
-                        facet_type: 'range',
+                        type: 'range',
                         field: aggregation_settings.date_histogram.field,
                         values: {}
                     };
@@ -461,15 +461,10 @@ function($, _, Backbone, app){
             if('terms' in aggregation_settings){
                 // add term to terms filter
                 if(add){
-                    filters[facet].values = value;
+                    filters[aggregation].values = value;
                 }
                 else {
                     delete filters[aggregation];
-                    // var index = filters[facet].values.indexOf(value);
-                    // filters[facet].values.splice(index, 1);
-                    // if(filters[facet].values.length === 0){
-                    //     delete filters[facet];
-                    // }
                 }
             }
             else if('date_histogram' in aggregation_settings){
