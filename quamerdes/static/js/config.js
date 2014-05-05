@@ -145,7 +145,7 @@ define({
 	DEFAULT_DATE_FACET: 'broadcast_start_date',
 
 	// Defenition of sources/fields that can be used for free text searching
-	AVAILABLE_SEARCH_FIELDS: [
+	AVAILABLE_INDICES: [
 		{
 			id: 'immix',
 			name: 'iMMix metadata',
