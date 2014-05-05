@@ -112,7 +112,7 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             max = d3.time[interval].offset(max, 1);
 
             // Perform the actual query
-            this.model.modifyFacetFilter(this.date_aggregation, [min, max], true);
+            this.model.modifyAggregationFilter(this.date_aggregation, [min, max], true);
 
             // To prevent the date range slider from updating the min and max
             // values as soon as the user moves a handle, we temporary switch
