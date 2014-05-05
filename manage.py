@@ -163,15 +163,22 @@ class LoadSampleKB(Command):
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 
     def run(self):
-        for item in random.sample(glob.glob('/Users/bart/Downloads/quamerdes/de-volkskrant/*.json'), 1000):
-            with open(item, 'rb') as f:
+        with tarfile.open(os.path.join(DATA, 'de-volkskrant.tar.gz'), 'r:gz') as t:
+            s = 0
+            for member in t:
+                if s == 1000:
+                    break
+                logger.debug('Extracting %s' % member.name)
+                f = t.extractfile(member)
+
+                logger.debug('Loaded %s' % member.name)
                 article = json.load(f)
 
-            article['meta'] = article.pop('_meta')
-            doc_id = item.split('/')[-1].split('.')[0]
-            logger.debug('Indexing KB document %s' % doc_id)
-            self.es.create(index='quamerdes_kb1', doc_type='article', id=doc_id,
-                           body=article)
+                logger.info('Indexing KB article %s' % member.name)
+                self.es.create(index='quamerdes_kb1', doc_type='article',
+                               body=article, id=member.name.split('/')[-1].split('.')[0])
+
+                s += 1
 
 
 class LoadSampleImmix(Command):
