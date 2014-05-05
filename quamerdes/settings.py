@@ -82,165 +82,178 @@ MESSAGES = {
 HITS_PER_PAGE = 5
 ALLOWED_INTERVALS = ['year', 'month', 'week', 'day']
 
-AVAILABLE_FACETS = {
-    'broadcast_start_date': {
-        'name': 'Start Date',
+AVAILABLE_AGGREGATIONS = {
+    'dates': {
+        'name': 'Publication date',
         'description': '',
-        'ui_presentation': 'range',
         'date_histogram': {
-            'field': 'start',
+            'field': 'date',
             'interval': 'year'  # allowed values are ['year', 'month', 'week', 'day']
-        },
-        'nested': 'broadcastDates'
-    },
-    'channels': {
-        'name': 'Channels',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'terms': {
-            'field': 'broadcasters',
-            'size': 30
-        }
-    },
-    'producers': {
-        'name': 'Producers',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'terms': {
-            'field': 'roleValue',
-            'size': 30
-        },
-        'facet_filter': {
-            'term': {'roleKey': 'producent'}
-        },
-        'nested': 'roles'
-    },
-    'people': {
-        'name': 'People',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'nested_filter_field': 'categoryValue',
-        'terms': {
-            'field': 'untouched',
-            'size': 30
-        },
-        'facet_filter': {
-            'term': {'categoryKey': 'person'}
-        },
-        'nested': 'categories'
-        # 'terms': {
-        #     'field': 'roleValue',
-        #     'size': 30
-        # },
-        # 'facet_filter' : {
-        #     'or': [
-        #         {'term': {'roleKey': 'maker'}},
-        #         {'term': {'roleKey': 'executive'}},
-        #         {'term': {'roleKey': 'speaker'}}
-        #     ]
-        # },
-        # 'nested': 'roles'*/
-    },
-    'genres': {
-        'name': 'Genres',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'nested_filter_field': 'categoryValue',
-        'terms': {
-            'field': 'untouched',
-            'size': 30
-        },
-        'facet_filter': {
-            'term': {
-                'categoryKey': 'genre'
-            }
-        },
-        'nested': 'categories'
-    },
-    'keywords': {
-        'name': 'Keywords',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'nested_filter_field': 'categoryValue',
-        'terms': {
-            'field': 'untouched',
-            'size': 30
-        },
-        'facet_filter': {
-            'term': {'categoryKey': 'keyword'}
-        },
-        'nested': 'categories'
-    },
-    # This facet operates on the complete set of Twitter terms, but can be
-    # very memory expensive (every term present in the text has to be kept
-    # in memory)
-    'tweets': {
-        'name': 'Tweets',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'terms': {
-            'field': 'tweetText',
-            'size': 30
-        },
-        'nested': 'tweets'
-    },
-    # This facet operates on a list of the top 100 terms extracted from Tweets
-    # (generated in whatever way; that is up to the indexer), as to economize
-    # on memory usage
-    'top_100_twitter_terms': {
-        'name': 'Tweets',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'terms': {
-            'field': 'top_100_twitter_terms',
-            'size': 30
-        }
-    },
-    # This facet operates on the complete set of subtitle terms, but can be
-    # very memory expensive (every term present in the text has to be kept
-    # in memory)
-    'subtitles': {
-        'name': 'Subtitles',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'terms': {
-            'field': 'subtitles',
-            'size': 30
-        }
-    },
-    # This facet operates on a list of the top 100 terms extracted from subtitles
-    # (generated in whatever way; that is up to the indexer), as to economize
-    # on memory usage
-    'top_100_subtitle_terms': {
-        'name': 'Subtitles',
-        'description': '',
-        'ui_presentation': 'checkbox',
-        'terms': {
-            'field': 'top_100_subtitle_terms',
-            'size': 30
         }
     }
 }
+# AVAILABLE_FACETS = {
+#     'broadcast_start_date': {
+#         'name': 'Start Date',
+#         'description': '',
+#         'ui_presentation': 'range',
+#         'date_histogram': {
+#             'field': 'start',
+#             'interval': 'year'  # allowed values are ['year', 'month', 'week', 'day']
+#         },
+#         'nested': 'broadcastDates'
+#     },
+#     'channels': {
+#         'name': 'Channels',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'terms': {
+#             'field': 'broadcasters',
+#             'size': 30
+#         }
+#     },
+#     'producers': {
+#         'name': 'Producers',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'terms': {
+#             'field': 'roleValue',
+#             'size': 30
+#         },
+#         'facet_filter': {
+#             'term': {'roleKey': 'producent'}
+#         },
+#         'nested': 'roles'
+#     },
+#     'people': {
+#         'name': 'People',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'nested_filter_field': 'categoryValue',
+#         'terms': {
+#             'field': 'untouched',
+#             'size': 30
+#         },
+#         'facet_filter': {
+#             'term': {'categoryKey': 'person'}
+#         },
+#         'nested': 'categories'
+#         # 'terms': {
+#         #     'field': 'roleValue',
+#         #     'size': 30
+#         # },
+#         # 'facet_filter' : {
+#         #     'or': [
+#         #         {'term': {'roleKey': 'maker'}},
+#         #         {'term': {'roleKey': 'executive'}},
+#         #         {'term': {'roleKey': 'speaker'}}
+#         #     ]
+#         # },
+#         # 'nested': 'roles'*/
+#     },
+#     'genres': {
+#         'name': 'Genres',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'nested_filter_field': 'categoryValue',
+#         'terms': {
+#             'field': 'untouched',
+#             'size': 30
+#         },
+#         'facet_filter': {
+#             'term': {
+#                 'categoryKey': 'genre'
+#             }
+#         },
+#         'nested': 'categories'
+#     },
+#     'keywords': {
+#         'name': 'Keywords',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'nested_filter_field': 'categoryValue',
+#         'terms': {
+#             'field': 'untouched',
+#             'size': 30
+#         },
+#         'facet_filter': {
+#             'term': {'categoryKey': 'keyword'}
+#         },
+#         'nested': 'categories'
+#     },
+#     # This facet operates on the complete set of Twitter terms, but can be
+#     # very memory expensive (every term present in the text has to be kept
+#     # in memory)
+#     'tweets': {
+#         'name': 'Tweets',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'terms': {
+#             'field': 'tweetText',
+#             'size': 30
+#         },
+#         'nested': 'tweets'
+#     },
+#     # This facet operates on a list of the top 100 terms extracted from Tweets
+#     # (generated in whatever way; that is up to the indexer), as to economize
+#     # on memory usage
+#     'top_100_twitter_terms': {
+#         'name': 'Tweets',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'terms': {
+#             'field': 'top_100_twitter_terms',
+#             'size': 30
+#         }
+#     },
+#     # This facet operates on the complete set of subtitle terms, but can be
+#     # very memory expensive (every term present in the text has to be kept
+#     # in memory)
+#     'subtitles': {
+#         'name': 'Subtitles',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'terms': {
+#             'field': 'subtitles',
+#             'size': 30
+#         }
+#     },
+#     # This facet operates on a list of the top 100 terms extracted from subtitles
+#     # (generated in whatever way; that is up to the indexer), as to economize
+#     # on memory usage
+#     'top_100_subtitle_terms': {
+#         'name': 'Subtitles',
+#         'description': '',
+#         'ui_presentation': 'checkbox',
+#         'terms': {
+#             'field': 'top_100_subtitle_terms',
+#             'size': 30
+#         }
+#     }
+# }
 
 # List of facets that are displayed (in the different tabs) by default
-DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
-                  'tweets', 'subtitles']
+# DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
+#                   'tweets', 'subtitles']
+DEFAULT_AGGREGATIONS = []
 
 # The facet that is used for the date range slider
-DEFAULT_DATE_FACET = 'broadcast_start_date'
+DATE_AGGREGATION = 'dates'
 
 # Definition of sources/fields that can be used for free text searching
 AVAILABLE_INDICES = [
     {
         'id': 'immix',
         'name': 'iMMix metadata',
-        'icon': 'icon-film'
+        'icon': 'icon-film',
+        'doc_type': 'expression'
     },
     {
         'id': 'kb',
         'name': 'KB kranten',
         # This will be something else
-        'icon': 'icon-book'
+        'icon': 'icon-book',
+        'doc_type': 'article'
     }
     # {
     #     'id': 'immix',
