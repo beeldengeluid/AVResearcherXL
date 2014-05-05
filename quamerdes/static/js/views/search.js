@@ -9,7 +9,7 @@ define([
     'views/search/timeslider',
     'views/search/results_list',
     'views/search/paginator',
-    'views/search/facets'
+    'views/search/aggregations'
 ],
 function($, _, Backbone, BaseView, searchTemplate, QueryInputView, QueryPropertiesView,
          TimeSliderView, ResultsListView, PaginatorView, FacetsView){
@@ -20,7 +20,7 @@ function($, _, Backbone, BaseView, searchTemplate, QueryInputView, QueryProperti
             this.query_input = new QueryInputView({ model: this.model });
             this.timeslider = new TimeSliderView({
                 model: this.model,
-                date_facet: DEFAULT_DATE_FACET
+                date_aggregation: DATE_AGGREGATION
             });
 
             // Initialize subviews

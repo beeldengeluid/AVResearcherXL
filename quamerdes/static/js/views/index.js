@@ -5,11 +5,11 @@ define([
     'views/base',
     'views/search',
     'views/search/timeseries',
-    'views/search/facets',
+    'views/search/aggregations',
     'text!../../templates/index.html',
     'models/avrapi'
 ],
-function($, _, Backbone, BaseView, SearchView, TimeseriesView, FacetsView,
+function($, _, Backbone, BaseView, SearchView, TimeseriesView, AggregationsView,
          indexTemplate, AvrApiModel){
     var IndexView = Backbone.View.extend({
         parent: $('#main'),
@@ -41,7 +41,7 @@ function($, _, Backbone, BaseView, SearchView, TimeseriesView, FacetsView,
                 height: 280
             });
 
-            this.facets_view = new FacetsView({
+            this.aggregations_view = new AggregationsView({
                 models: {
                     q1: query_model_1,
                     q2: query_model_2
@@ -57,7 +57,7 @@ function($, _, Backbone, BaseView, SearchView, TimeseriesView, FacetsView,
             this.search_view_1.setElement(this.$el.find('#search_1')).render();
             this.search_view_2.setElement(this.$el.find('#search_2')).render();
             this.timeseries_view.setElement(this.$el.find('#timeseries')).render().toggleVisibility();
-            this.facets_view.setElement(this.$el.find('#facets')).render().toggleVisibility();
+            this.aggregations_view.setElement(this.$el.find('#aggregations_view')).render().toggleVisibility();
 
             return this;
         }
