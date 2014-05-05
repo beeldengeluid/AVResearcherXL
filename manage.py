@@ -224,6 +224,27 @@ class PutSettings(Command):
         self.es.indices.put_template(name='quamerdes', body=quamerdes_template)
 
 
+class InitTestEnv(Command):
+
+    option_list = (
+        Option('--data', '-d', dest='datadir'),
+    )
+
+    def run(self, datadir=DATA):
+        DATA = datadir
+        put_settings = PutSettings()
+        put_settings.run()
+
+        load_kb = LoadSampleKB()
+        load_kb.run()
+
+        load_immix = LoadSampleImmix()
+        load_immix.run()
+
+        create_aliases = CreateAliases()
+        create_aliases.run()
+
+
 manager = Manager(app)
 manager.add_command('runserver', Server(host='0.0.0.0'))
 manager.add_command('load_test_avr_data', LoadAVRDataToES())
@@ -232,6 +253,7 @@ manager.add_command('load_sample_kb', LoadSampleKB())
 manager.add_command('load_sample_immix', LoadSampleImmix())
 manager.add_command('create_aliases', CreateAliases())
 manager.add_command('put_settings', PutSettings())
+manager.add_command('init_test_env', InitTestEnv())
 
 
 if __name__ == '__main__':
