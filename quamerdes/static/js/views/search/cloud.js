@@ -44,17 +44,16 @@ define([
             var aggregationValues = this.model.get('aggregations');
 
             if(aggregationValues && tab){
-                console.log(tab);
                 this.fontSizeScale.domain(
-                    d3.extent(aggregationValues[tab].terms, function(d){
-                        return d.count;
+                    d3.extent(aggregationValues[tab].buckets, function(d){
+                        return d.doc_count;
                     })
                 );
                 this.$el.html(_.template(cloudTemplate, {
                     aggregationName: tab,
                     modelName: this.modelName,
                     scale: this.fontSizeScale,
-                    terms: aggregationValues[tab].terms,
+                    terms: aggregationValues[tab].buckets,
                     selectedAggregations: this.selectedAggregations,
                     aggregated: this.aggregated
                 }));
