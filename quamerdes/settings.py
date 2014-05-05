@@ -229,31 +229,45 @@ DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
 # The facet that is used for the date range slider
 DEFAULT_DATE_FACET = 'broadcast_start_date'
 
-# Defenition of sources/fields that can be used for free text searching
-AVAILABLE_SEARCH_FIELDS = [
+# Definition of sources/fields that can be used for free text searching
+AVAILABLE_INDICES = [
     {
         'id': 'immix',
         'name': 'iMMix metadata',
-        'icon': 'icon-film',
-        'fields': ['titles', 'mainTitle', 'summaries', 'descriptions']
+        'icon': 'icon-film'
     },
     {
-        'id': 'subtitles',
-        'name': 'T888 subtitles',
-        'icon': 'icon-comment',
-        'fields': ['subtitles']
-    },
-    {
-        'id': 'twitter',
-        'name': 'Tweets',
-        'icon': 'icon-twitter',
-        'fields': ['tweetText'],
-        'nested': 'tweets'
+        'id': 'kb',
+        'name': 'KB kranten',
+        # This will be something else
+        'icon': 'icon-book'
     }
+    # {
+    #     'id': 'immix',
+    #     'name': 'iMMix metadata',
+    #     'icon': 'icon-film',
+    #     'fields': ['titles', 'mainTitle', 'summaries', 'descriptions']
+    # }
+    # {
+    #     'id': 'subtitles',
+    #     'name': 'T888 subtitles',
+    #     'icon': 'icon-comment',
+    #     'fields': ['subtitles']
+    # },
+    # {
+    #     'id': 'twitter',
+    #     'name': 'Tweets',
+    #     'icon': 'icon-twitter',
+    #     'fields': ['tweetText'],
+    #     'nested': 'tweets'
+    # }
 ]
 
 # The fields that should be returned for each hit when searching
-SEARCH_HIT_FIELDS = ['mainTitle', 'broadcastDates', 'summaries']
+# SEARCH_HIT_FIELDS = ['mainTitle', 'broadcastDates', 'summaries']
+
+# List of available indices
+ES_ALL_INDICES = ['quamerdes_immix', 'quamerdes_kb']
 
 MINIMUM_CLOUD_FONTSIZE = 10
 MAXIMUM_CLOUD_FONTSIZE = 30
@@ -263,7 +277,8 @@ BARCHART_BAR_HEIGHT = 20
 
 # The fields that should be considered when creating highlighted snippets for
 # a search result.
-HIT_HIGHLIGHT_FIELDS = ['descriptions', 'summaries', 'subtitles', 'tweetText']
+# HIT_HIGHLIGHT_FIELDS = ['descriptions', 'summaries', 'subtitles', 'tweetText']
+HIT_HIGHLIGHT_FIELDS = ['text', 'title']
 # The max. length of a highlighted snippet (in chars)
 HIT_HIGHLIGHT_FRAGMENT_SIZE = 200
 # The max. number of highlighted snippets (per field) to return
