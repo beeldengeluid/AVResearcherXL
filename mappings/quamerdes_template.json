@@ -46,6 +46,7 @@
             "_all": {
                 "enabled": false
             },
+            "_index": {"enabled": true},
             "text": {
                 "type": "string",
                 "analyzer": "text_nl",
@@ -69,7 +70,7 @@
             },
             "_meta": {
                 "properties": {
-                    "resource_identifier": {
+                    "record_identifier": {
                         "type": "string",
                         "index": "not_analyzed"
                     }
@@ -79,6 +80,17 @@
         "article": {
             "_meta": {
                 "properties": {
+                    "article_type": {"type": "string", "index": "not_analyzed"},
+                    "issue": {
+                        "properties": {
+                            "identifier": {"type": "string", "index": "not_analyzed"},
+                            "issue_number": {"type": "number"},
+                            "publisher": {"type": "string", "index": "not_analyzed"},
+                            "record_identifier": {"type": "string", "index": "not_analyzed"},
+                            "source": {"type": "string", "index": "not_analyzed"},
+                            "volume": {"type": "integer"}
+                        }
+                    },
                     "html_text": {
                         "type": "string",
                         "index": "no"
