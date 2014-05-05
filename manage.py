@@ -34,7 +34,7 @@ def getAVRDoc(line):
 
 
 def serialize_quamerdes(data, archive):
-    doc_id = data['_meta'].get('record_identifier')
+    doc_id = data['meta'].get('record_identifier')
     data = json.dumps(data)
 
     info = tarfile.TarInfo('immix/%s.json' % doc_id)
@@ -117,7 +117,7 @@ class TransformAVRData(Command):
 
                     data['text'] = u' '.join([u' '.join(source.get(field, u'')).replace('\n', ' ')
                                              for field in ['titles', 'mainTitle', 'summaries', 'descriptions']])
-                    data['_meta'] = {
+                    data['meta'] = {
                         'broadcasters': source.get('broadcasters', []),
                         'broadcastdates': broadcastdates,
                         'categories': [{
@@ -167,6 +167,7 @@ class LoadSampleKB(Command):
             with open(item, 'rb') as f:
                 article = json.load(f)
 
+            article['meta'] = article.pop('_meta')
             doc_id = item.split('/')[-1].split('.')[0]
             logger.debug('Indexing KB document %s' % doc_id)
             self.es.create(index='quamerdes_kb1', doc_type='article', id=doc_id,

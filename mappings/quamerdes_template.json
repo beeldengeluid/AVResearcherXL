@@ -68,7 +68,7 @@
                 "type": "string",
                 "index": "not_analyzed"
             },
-            "_meta": {
+            "meta": {
                 "properties": {
                     "record_identifier": {
                         "type": "string",
@@ -78,7 +78,7 @@
             }
         },
         "article": {
-            "_meta": {
+            "meta": {
                 "properties": {
                     "article_type": {"type": "string", "index": "not_analyzed"},
                     "issue": {
@@ -99,7 +99,7 @@
             }
         },
         "expression": {
-            "_meta": {
+            "meta": {
                 "properties": {
                     "broadcastdates": {
                         "properties": {
