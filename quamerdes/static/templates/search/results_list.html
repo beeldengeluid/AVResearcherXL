@@ -1,7 +1,28 @@
 <ul>
-<% _.each(hits, function(hit){ %>
+<% _.each(hits, function(hit){ console.log(hit);%>
     <li>
-        <h2><a href="http://zoeken.beeldengeluid.nl/internet/index.aspx?chapterid=1164&contentid=7&verityID=<%= hit._id.replace(/_/g, '/') %>@expressies" target="_blank" data-id="<%= hit._id %>"><%= hit._source.mainTitle %></a></h2>
+        <h2>
+            <%
+                var hit_id = hit._id,
+                    source = hit._source.source;
+                if(hit._type == 'expression'){
+                    hit_id = hit_id.replace(/_/g, '/');
+                    source = source.replace(/_/g, '/');
+                }
+            %>
+            <a href="<%= source %>" target="_blank" data-id="<%= hit_id %>">
+                <%
+                var title = '<em>No title available</em>';
+                if(hit.highlight.title){
+                    title = hit.highlight.title;
+                }
+                else if(hit._source.title){
+                    title = hit._source.title;
+                }
+                print(title);
+                %>
+            </a>
+        </h2>
     <% if('highlight' in hit){ %>
         <ul class="description">
         <% _.each(hit.highlight, function(snippet, field){
@@ -27,21 +48,21 @@
         </ul>
     <% } %>
         <ul class="metadata">
-        <% if(hit._source.broadcastDates.length > 0){ %>
-        	<li>
-        		<i class="icon-calendar"></i>
-        	<%
-        		// Sort by air date
-        		_(hit._source.broadcastDates).sortBy(function(broadcast){
-                    return broadcast.start;
-        		});
-        		var format = d3.time.format('%a %b %-e, %Y at %H:%M');
-        		var firstBroadcast = format(new Date(hit._source.broadcastDates[0].start));
-        	%>
-        		<%= firstBroadcast %>
-        	</li>
-        <% } %>
+            <li>
+                <i class="icon-calendar"></i>
+                <%
+                    // KB articles do not have a time associated, so use other date
+                    // formatter. Include time by default
+                    if(hit._type == 'article'){
+                        var format = d3.time.format('%a %b %-e, %Y');
+                    } else {
+                        var format = d3.time.format('%a %b %-e, %Y at %H:%M');
+                    }
+                    var date_hit = format(new Date(hit._source.date));
+                %>
+                <%= date_hit %>
+            </li>
         </ul>
-	</li>
+    </li>
 <% }); %>
 </ul>
