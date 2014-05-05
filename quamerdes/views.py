@@ -2,7 +2,7 @@ import re
 import uuid
 import json
 
-from flask import request, render_template, jsonify, url_for, abort, redirect
+from flask import request, render_template, jsonify, abort
 from flask.ext.bcrypt import Bcrypt
 from flask.ext.mail import Mail, Message
 from flask.ext.login import (LoginManager, login_user, logout_user,
@@ -11,13 +11,13 @@ from flask.ext.login import (LoginManager, login_user, logout_user,
 from settings import (DEBUG, MESSAGES, MAIL_DEFAULT_SENDER,
                       MAIL_ACCOUNT_APPROVAL_ADDRESS, HITS_PER_PAGE,
                       ALLOWED_INTERVALS, AVAILABLE_FACETS, DEFAULT_FACETS,
-                      DEFAULT_DATE_FACET, AVAILABLE_SEARCH_FIELDS,
-                      SEARCH_HIT_FIELDS, MINIMUM_CLOUD_FONTSIZE,
+                      DEFAULT_DATE_FACET, AVAILABLE_INDICES,
+                      MINIMUM_CLOUD_FONTSIZE,
                       MAXIMUM_CLOUD_FONTSIZE, BARCHART_BARS,
                       BARCHART_BAR_HEIGHT, HIT_HIGHLIGHT_FIELDS,
                       HIT_HIGHLIGHT_FRAGMENT_SIZE, HIT_HIGHLIGHT_FRAGMENTS,
                       ENABLE_USAGE_LOGGING, LOG_EVENTS, ES_SEARCH_INDEX,
-                      ES_LOG_INDEX, ABOUT_PAGE_CONTENT_URL,
+                      ES_ALL_INDICES, ES_LOG_INDEX, ABOUT_PAGE_CONTENT_URL,
                       HELP_PAGE_CONTENT_URL)
 from quamerdes import app, db, es_search, es_log
 from models import User
@@ -59,8 +59,8 @@ def index():
         'AVAILABLE_FACETS': AVAILABLE_FACETS,
         'DEFAULT_FACETS': DEFAULT_FACETS,
         'DEFAULT_DATE_FACET': DEFAULT_DATE_FACET,
-        'AVAILABLE_SEARCH_FIELDS': AVAILABLE_SEARCH_FIELDS,
-        'SEARCH_HIT_FIELDS': SEARCH_HIT_FIELDS,
+        'AVAILABLE_INDICES': AVAILABLE_INDICES,
+        # 'SEARCH_HIT_FIELDS': SEARCH_HIT_FIELDS,
         'MINIMUM_CLOUD_FONTSIZE': MINIMUM_CLOUD_FONTSIZE,
         'MAXIMUM_CLOUD_FONTSIZE': MAXIMUM_CLOUD_FONTSIZE,
         'BARCHART_BARS': BARCHART_BARS,
@@ -107,8 +107,9 @@ def verify_email(user_id, token):
     db.session.commit()
 
     # Send email to mailadres responsible for approving accounts
-    approve_url = '%savresearcher/approve_user/%s/%s' % (request.url_root, user.id,
-                                                user.approval_token)
+    approve_url = '%savresearcher/approve_user/%s/%s' % (request.url_root,
+                                                         user.id,
+                                                         user.approval_token)
 
     msg = Message(MESSAGES['email_approval_subject'],
                   sender=MAIL_DEFAULT_SENDER,
@@ -132,7 +133,8 @@ def approve_user(user_id, token):
     this approval will be send to the user."""
 
     user = db.session.query(User)\
-        .filter_by(id=user_id, approval_token=token, email_verified=True).first()
+             .filter_by(id=user_id, approval_token=token, email_verified=True)\
+             .first()
 
     if not user:
         abort(401)
@@ -200,8 +202,9 @@ def register():
     db.session.commit()
 
     # Send account activation e-mail
-    verification_url = '%savresearcher/verify_email/%s/%s' % (request.url_root, user.id,
-                                                     user.email_verification_token)
+    verification_url = '%savresearcher/verify_email/%s/%s' % (request.url_root,
+                                                              user.id,
+                                                              user.email_verification_token)
 
     msg = Message(MESSAGES['email_verification_subject'],
                   sender=MAIL_DEFAULT_SENDER,
@@ -279,7 +282,11 @@ def logout():
 @login_required
 def search():
     payload = json.loads(request.form['payload'])
-    results = es_search.search(index=ES_SEARCH_INDEX, body=payload)
+    # We use aliases, so don't do this in the query
+    indices = payload.pop('indices', ','.join(ES_ALL_INDICES))
+    print indices
+    print payload
+    results = es_search.search(index=indices, body=payload)
     return jsonify(results)
 
 
@@ -287,7 +294,12 @@ def search():
 @login_required
 def count():
     payload = json.loads(request.form['payload'])
-    results = es_search.count(index=ES_SEARCH_INDEX, body=payload)
+    indices = payload.get('indices', ','.join(ES_ALL_INDICES))
+    query = payload.get('query')
+    if not query:
+        # Return error here
+        print 'No query provided'
+    results = es_search.count(index=indices, body=query)
 
     return jsonify(results)
 
@@ -302,10 +314,9 @@ def log_usage():
     # Add the user's ID to each event
     for event in events:
         event['user_id'] = user_id
-        bulkrequest = bulkrequest + '\n' + '{ "create" : { "_index" : "' +  ES_LOG_INDEX + '", "_type" : "event" } }'
-        bulkrequest = bulkrequest + '\n' + json.dumps(event);
+        bulkrequest = bulkrequest + '\n' + '{ "create" : { "_index" : "' + ES_LOG_INDEX + '", "_type" : "event" } }'
+        bulkrequest = bulkrequest + '\n' + json.dumps(event)
 
     es_log.bulk(body=bulkrequest)
 
     return jsonify({'success': True})
-
