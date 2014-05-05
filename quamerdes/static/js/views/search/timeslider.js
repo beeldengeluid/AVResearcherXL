@@ -13,15 +13,15 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             this.is_visible = true;
             app.vent.once('QueryInput:input', this.toggleVisibility, this);
 
-            this.date_facet_name = options.date_facet;
-            this.model.on('change:facets', this.updateFacetValues, this);
+            this.date_aggregation = options.date_aggregation;
+            this.model.on('change:aggregations', this.updateAggregations, this);
             app.vent.on('model:redraw:' + this.model.get('name'), function(){
-                var histogram = this.model.get('facets')[this.date_facet_name].entries;
+                var histogram = this.model.get('aggregations')[this.date_aggregation].buckets;
                 if(histogram.length < 1){
                     return;
                 }
-                var min = histogram[0].time;
-                var max = histogram[histogram.length - 1].time;
+                var min = histogram[0].key;
+                var max = histogram[histogram.length - 1].key;
                 this.updateSliderLabels(min, max);
             }, this);
 
@@ -51,7 +51,7 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
                     self.updateSliderLabels(ui.values[0], ui.values[1]);
                 },
                 stop: function(event, ui){
-                    self.changeFacet(event, ui, self.facetName);
+                    self.changeAggregation(event, ui, self.facetName);
                     app.vent.trigger('Logging:clicks', {
                         action: 'daterange_facet',
                         fromDateMs: self.startValue,
@@ -76,10 +76,9 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             this.$el.find('.slider-upper-val').html(max);
         },
 
-        updateFacetValues: function(){
-            if (DEBUG) console.log('TimeSliderView:updateFacetValues');
-
-            var histogram = this.model.get('facets')[this.date_facet_name].entries;
+        updateAggregations: function(){
+            if (DEBUG) console.log('TimeSliderView:updateAggregations');
+            var histogram = this.model.get('aggregations')[this.date_aggregation].buckets;
 
             if(histogram.length < 1){
                 this.disabled = true;
@@ -91,8 +90,8 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
                 }
             }
 
-            this.min = histogram[0].time;
-            this.max = histogram[histogram.length - 1].time;
+            this.min = histogram[0].key;
+            this.max = histogram[histogram.length - 1].key;
 
             this.timeslider.slider('option', 'min', this.min);
             this.timeslider.slider('option', 'max', this.max);
@@ -100,11 +99,11 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             this.updateSliderLabels(this.min, this.max);
         },
 
-        changeFacet: function(event, ui, facet){
+        changeAggregation: function(event, ui, facet){
             var self = this;
             var min = new Date(ui.values[0]);
             var max = new Date(ui.values[1]);
-            if (DEBUG) console.log('TimeSliderView:changeFacet', [min, max]);
+            if (DEBUG) console.log('TimeSliderView:changeAggregation', [min, max]);
 
             var interval = this.model.get('interval');
             if(!interval) interval = this.model.get('defaultInterval');
@@ -113,17 +112,17 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             max = d3.time[interval].offset(max, 1);
 
             // Perform the actual query
-            this.model.modifyFacetFilter(this.date_facet_name, [min, max], true);
+            this.model.modifyFacetFilter(this.date_aggregation, [min, max], true);
 
             // To prevent the date range slider from updating the min and max
             // values as soon as the user moves a handle, we temporary switch
             // off the facet value change listener.
-            this.model.off('change:facets', this.updateFacetValues, this);
+            this.model.off('change:aggregations', this.updateAggregations, this);
 
             // Update the facet values and set the slider to min/max positions directly after
             // the user submits a new keyword query
             app.vent.once('QueryInput:input:' + this.model.get('name'), function(){
-                self.updateFacetValues();
+                self.updateAggregations();
             });
         },
 
