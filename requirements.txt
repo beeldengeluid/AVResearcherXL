@@ -1,6 +1,7 @@
 Flask
 Flask-Login
 Flask-Bcrypt
+Flask-Script
 Flask-Mail
 Flask-SQLAlchemy
 elasticsearch

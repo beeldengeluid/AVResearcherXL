@@ -1,4 +1,4 @@
-from flask.ext.script import Server, Manager, Command, Option
+from flask.ext.script import Server, Manager, Command, Option, prompt, prompt_pass
 from quamerdes import app
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
@@ -8,6 +8,8 @@ import logging
 import random
 import os
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
+from quamerdes.models import User
+from quamerdes import db
 import zipfile
 import tarfile
 import cStringIO
@@ -245,6 +247,30 @@ class InitTestEnv(Command):
         create_aliases.run()
 
 
+class AddUser(Command):
+    """
+    Create a new user from the command line.
+    """
+    def run(self):
+        user_opts = {}
+
+        user_opts['name'] = prompt('Name')
+        user_opts['email'] = prompt('Email')
+        user_opts['password'] = prompt_pass('Password')
+        user_opts['organization'] = prompt('Organization')
+
+        user_opts['email_verified'] = True
+        user_opts['approved'] = True
+        user_opts['email_verification_token'] = 'test'
+        user_opts['approval_token'] = 'test'
+
+        user = User(**user_opts)
+        db.session.add(user)
+        db.session.commit()
+
+        print 'Created user: %s' % user
+
+
 manager = Manager(app)
 manager.add_command('runserver', Server(host='0.0.0.0'))
 manager.add_command('load_test_avr_data', LoadAVRDataToES())
@@ -254,6 +280,7 @@ manager.add_command('load_sample_immix', LoadSampleImmix())
 manager.add_command('create_aliases', CreateAliases())
 manager.add_command('put_settings', PutSettings())
 manager.add_command('init_test_env', InitTestEnv())
+manager.add_command('add_user', AddUser())
 
 
 if __name__ == '__main__':
