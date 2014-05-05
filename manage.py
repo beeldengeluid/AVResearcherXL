@@ -18,8 +18,6 @@ logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger('QuaMeRDES-management')
 logger.setLevel(logging.DEBUG)
 
-DATA = '/Users/bart/Desktop/quamerdes'
-
 
 def getAVRDoc(line):
     line = line.strip()
@@ -93,8 +91,8 @@ class TransformAVRData(Command):
                    dest='avrdump', ),
         )
 
-    def run(self, avrdump):
-        archive = tarfile.open(os.path.join(DATA, 'immix.tar.gz'), 'w:gz')
+    def run(self, avrdump, datadir='/Users/bart/Desktop/quamerdes'):
+        archive = tarfile.open(os.path.join(datadir, 'immix.tar.gz'), 'w:gz')
         with open(avrdump, 'rb') as f:
             i = 0
             for line in f:
@@ -164,8 +162,8 @@ class LoadSampleKB(Command):
 
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 
-    def run(self):
-        with tarfile.open(os.path.join(DATA, 'de-volkskrant.tar.gz'), 'r:gz') as t:
+    def run(self, datadir='/Users/bart/Desktop/quamerdes'):
+        with tarfile.open(os.path.join(datadir, 'de-volkskrant.tar.gz'), 'r:gz') as t:
             s = 0
             for member in t:
                 if s == 1000:
@@ -188,8 +186,8 @@ class LoadSampleImmix(Command):
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
     size = 1000
 
-    def run(self):
-        with tarfile.open(os.path.join(DATA, 'immix.tar.gz'), 'r:gz') as t:
+    def run(self, datadir='/Users/bart/Desktop/quamerdes'):
+        with tarfile.open(os.path.join(datadir, 'immix.tar.gz'), 'r:gz') as t:
             s = 0
             for member in t:
                 if s == 1000:
@@ -232,15 +230,14 @@ class InitTestEnv(Command):
         Option('--data', '-d', dest='datadir'),
     )
 
-    def run(self, datadir=DATA):
-        DATA = datadir
+    def run(self, datadir='/Users/bart/Desktop/quamerdes'):
         put_settings = PutSettings()
         put_settings.run()
 
         load_kb = LoadSampleKB()
-        load_kb.run()
+        load_kb.run(datadir=datadir)
 
-        load_immix = LoadSampleImmix()
+        load_immix = LoadSampleImmix(datadir=datadir)
         load_immix.run()
 
         create_aliases = CreateAliases()
