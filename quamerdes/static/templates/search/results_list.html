@@ -1,5 +1,5 @@
 <ul>
-<% _.each(hits, function(hit){ console.log(hit);%>
+<% _.each(hits, function(hit){ %>
     <li>
         <h2>
             <%
@@ -25,31 +25,18 @@
         </h2>
     <% if('highlight' in hit){ %>
         <ul class="description">
-        <% _.each(hit.highlight, function(snippet, field){
-                var source = '';
-                if(field == 'subtitles'){
-                    source = 'icon-comment';
-                }
-                else if(field == 'tweetText'){
-                    source = 'icon-twitter';
-                }
-                else if(field == 'summaries'){
-                    source = 'icon-film';
-                }
-                else if(field == 'descriptions'){
-                    source = 'icon-film';
-                }
-            %>
-            <li>
-                <i class="<%= source %>"></i>
-                <p class="snippet"><%= snippet[0] %></p>
-            </li>
+        <% _.each(hit.highlight, function(snippet, field){ %>
+            <% if(field == 'text'){ %>
+                <li>
+                    <p class="snippet"><%= snippet[0] %></p>
+                </li>
+            <% } %>
         <% }); %>
         </ul>
     <% } %>
         <ul class="metadata">
             <li>
-                <i class="icon-calendar"></i>
+                <span><i class="icon-calendar"></i>
                 <%
                     // KB articles do not have a time associated, so use other date
                     // formatter. Include time by default
@@ -60,7 +47,18 @@
                     }
                     var date_hit = format(new Date(hit._source.date));
                 %>
-                <%= date_hit %>
+                <%= date_hit %></span>
+                <span>
+                    <%
+                        var idx = _.find(AVAILABLE_INDICES, function(idx){
+                            if(idx.doc_type == hit._type) return idx;
+                        });
+                        var hit_source_icon = idx.icon,
+                            hit_source = idx.name;
+                    %>
+                    <i class="<%= hit_source_icon %>"></i>
+                    <%= hit_source %>
+                </span>
             </li>
         </ul>
     </li>
