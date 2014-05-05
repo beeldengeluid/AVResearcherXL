@@ -358,18 +358,18 @@ body {
 }
 
 /* Facets */
-#facets.boxed {
+#aggregations.boxed {
     padding: 10px 10px 0 10px;
 }
 
-#facets .representation {
+#aggregations .representation {
     padding: 4px 12px;
     margin-right: 3px;
     color: #08c;
     cursor: pointer;
 }
 
-#facets .representation.active {
+#aggregations .representation.active {
     color: #555;
     cursor: default;
     border: 1px solid #ddd;
@@ -379,7 +379,7 @@ body {
     border-radius: 4px 4px 0 0
 }
 
-#facets .representation.inactive:hover , #facets .representation.inactive:focus {
+#aggregations .representation.inactive:hover , #aggregations .representation.inactive:focus {
     color: #005580;
     background-color: #eee;
     -webkit-border-radius: 4px 4px 0 0;
