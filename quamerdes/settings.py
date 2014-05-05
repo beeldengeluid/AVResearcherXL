@@ -90,19 +90,22 @@ AVAILABLE_AGGREGATIONS = {
             'field': 'date',
             'interval': 'year'  # allowed values are ['year', 'month', 'week', 'day']
         }
+    },
+    'channels': {
+        'name': 'Channels',
+        'description': '',
+        'terms': {
+            'field': 'meta.broadcasters',
+            'size': 30
+        }
     }
 }
+
+# List of facets that are displayed (in the different tabs) by default
+# DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
+#                   'tweets', 'subtitles']
+DEFAULT_AGGREGATIONS = ['channels']
 # AVAILABLE_FACETS = {
-#     'broadcast_start_date': {
-#         'name': 'Start Date',
-#         'description': '',
-#         'ui_presentation': 'range',
-#         'date_histogram': {
-#             'field': 'start',
-#             'interval': 'year'  # allowed values are ['year', 'month', 'week', 'day']
-#         },
-#         'nested': 'broadcastDates'
-#     },
 #     'channels': {
 #         'name': 'Channels',
 #         'description': '',
@@ -231,11 +234,6 @@ AVAILABLE_AGGREGATIONS = {
 #         }
 #     }
 # }
-
-# List of facets that are displayed (in the different tabs) by default
-# DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
-#                   'tweets', 'subtitles']
-DEFAULT_AGGREGATIONS = []
 
 # The facet that is used for the date range slider
 DATE_AGGREGATION = 'dates'
