@@ -22,15 +22,14 @@ define({
         //     },
         //     nested: 'broadcastDates'
         // },
-        // 'channels': {
-        //     name: 'Channels',
-        //     description: '',
-        //     ui_presentation: 'checkbox',
-        //     terms: {
-        //         field: 'broadcasters',
-        //         size: 30
-        //     }
-        // },
+        'channels': {
+            name: 'Channels',
+            description: '',
+            terms: {
+                field: 'meta.broadcasters',
+                size: 30
+            }
+        },
         // 'producers': {
         //     name: 'Producers',
         //     description: '',
@@ -148,7 +147,7 @@ define({
     // List of facets that are displayed (in the different tabs) by default
     // DEFAULT_AGGREGATIONS: ['genres', 'channels', 'producers', 'keywords',
  //                     'people', 'tweets', 'subtitles'],
-    DEFAULT_AGGREGATIONS: [],
+    DEFAULT_AGGREGATIONS: ['channels'],
 
     // The facet that is used for the date range slider
     DATE_AGGREGATION: 'date',
