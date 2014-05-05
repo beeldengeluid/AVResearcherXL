@@ -237,8 +237,8 @@ class InitTestEnv(Command):
         load_kb = LoadSampleKB()
         load_kb.run(datadir=datadir)
 
-        load_immix = LoadSampleImmix(datadir=datadir)
-        load_immix.run()
+        load_immix = LoadSampleImmix()
+        load_immix.run(datadir=datadir)
 
         create_aliases = CreateAliases()
         create_aliases.run()
