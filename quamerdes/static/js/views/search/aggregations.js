@@ -26,8 +26,8 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
             this.clouds = {};
             this.barcharts = {};
 
-            this.selectedAggregations = {},
-            this.activeTab = DEFAULT_AGGREGATIONS[0],
+            this.selectedAggregations = {};
+            this.activeTab = DEFAULT_AGGREGATIONS[0];
 
             this.representation = 'clouds';
             this.models = options.models;
@@ -102,15 +102,15 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
         formatData: function(){
             if (DEBUG) console.log('AggregationsView:formatData');
             var self = this;
-            var aggregationss = {};
+            var aggregations = {};
 
             _.each(DEFAULT_AGGREGATIONS, function(aggregation){
                 aggregations[aggregation] = {};
                 _.each(self.models, function(model){
                     if(model.get('aggregations')){
                         aggregations[aggregation][model.get('name')] = {};
-                        _.each(model.get('aggregation')[aggregation].terms, function(term){
-                            aggregations[aggregation][model.get('name')][term.term] = term.count;
+                        _.each(model.get('aggregations')[aggregation].buckets, function(bucket){
+                            aggregations[aggregation][model.get('name')][bucket.key] = bucket.doc_count;
                         });
                     }
                 });
