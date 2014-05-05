@@ -14,14 +14,14 @@ function($, _, Backbone, app, queryInputTemplate){
 
         render: function(){
             this.$el.html(_.template(queryInputTemplate, {
-                searchFields: AVAILABLE_SEARCH_FIELDS
+                searchFields: AVAILABLE_INDICES
             }));
 
             this.$el.find('i').tooltip();
         },
 
         changeSearchFields: function(e){
-            var available_fields = AVAILABLE_SEARCH_FIELDS;
+            var available_fields = AVAILABLE_INDICES;
             var checked_fields = [];
 
             // Depending on the current state of the clicked icon, switch it
