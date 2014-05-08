@@ -197,6 +197,7 @@ function($, _, Backbone, app){
             var filters = this.get('filters');
             _.each(filters, function(filter, filtername){
                 // Generic filter structure
+                filter.type = filter.type == 'terms' ? 'term' : filter.type;
                 var f = {};
                 f[filter.type] = {};
                 f[filter.type][filter.field] = {}
@@ -206,7 +207,7 @@ function($, _, Backbone, app){
                     f[filter.type][filter.field]['from'] = filter.values.from;
                     f[filter.type][filter.field]['to'] = filter.values.to;
                 }
-                else if(filter.type == 'terms'){
+                else if(filter.type == 'term'){
                     f[filter.type][filter.field] = filter.values
                 }
 
@@ -227,7 +228,6 @@ function($, _, Backbone, app){
                 highlight.fields[field] = {};
             });
             payload.highlight = highlight;
-
 
             /*
             AGGREGATIONS
@@ -443,7 +443,7 @@ function($, _, Backbone, app){
                 // Facet of the 'terms' type
                 if('terms' in aggregation_settings){
                     filters[aggregation] = {
-                        type: 'terms',
+                        type: 'term',
                         field: aggregation_settings.terms.field,
                         values: ''
                     };
