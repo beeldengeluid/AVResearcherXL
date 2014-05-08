@@ -1,6 +1,7 @@
 from flask.ext.script import Server, Manager, Command, Option, prompt, prompt_pass
 from quamerdes import app
 from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import NotFoundError
 from elasticsearch.helpers import bulk
 import glob
 import json
@@ -226,13 +227,28 @@ class PutSettings(Command):
         self.es.indices.put_template(name='quamerdes', body=quamerdes_template)
 
 
+class DeleteIndices(Command):
+
+    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
+
+    def run(self):
+        try:
+            logger.info('Deleting indices')
+            self.es.indices.delete(index='quamerdes_kb1,quamerdes_immix1')
+        except NotFoundError:
+            logger.info('Indices already deleted')
+
+
 class InitTestEnv(Command):
 
     option_list = (
-        Option('--data', '-d', dest='datadir'),
+        Option('--data', '-d', dest='datadir', default='/Users/bart/Desktop/quamerdes'),
     )
 
-    def run(self, datadir='/Users/bart/Desktop/quamerdes'):
+    def run(self, datadir):
+        delete_indices = DeleteIndices()
+        delete_indices.run()
+
         put_settings = PutSettings()
         put_settings.run()
 
@@ -256,7 +272,7 @@ class AddUser(Command):
         user_opts['name'] = prompt('Name')
         user_opts['email'] = prompt('Email')
         user_opts['password'] = prompt_pass('Password')
-        user_opts['password'] = password = bcrypt.generate_password_hash(user_opts['password'], 12)
+        user_opts['password'] = bcrypt.generate_password_hash(user_opts['password'], 12)
         user_opts['organization'] = prompt('Organization')
 
         user_opts['email_verified'] = True
@@ -281,6 +297,7 @@ manager.add_command('create_aliases', CreateAliases())
 manager.add_command('put_settings', PutSettings())
 manager.add_command('init_test_env', InitTestEnv())
 manager.add_command('add_user', AddUser())
+manager.add_command('delete_indices', DeleteIndices())
 
 
 if __name__ == '__main__':
