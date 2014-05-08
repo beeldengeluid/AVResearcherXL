@@ -422,10 +422,12 @@ function($, _, Backbone, d3, app){
                        granularity.
 
                     */
-                    // QUICK FIX (otherwise interval becomes null and results in error)
-                    if (!usingDefaultInterval) {
-                        interval = ALLOWED_INTERVALS[ALLOWED_INTERVALS.indexOf(interval) - 1];
-                    }
+                    // console.log(interval, ALLOWED_INTERVALS, ALLOWED_INTERVALS.indexOf(interval));
+                    // debugger;
+                    // // QUICK FIX (otherwise interval becomes null and results in error)
+                    // if (!usingDefaultInterval) {
+                    //     interval = ALLOWED_INTERVALS[ALLOWED_INTERVALS.indexOf(interval) - 1];
+                    // }
                     if (DEBUG) console.log('TimeSeriesView:determinedInterval: ' + interval);
 
                     if(interval == 'year'){
