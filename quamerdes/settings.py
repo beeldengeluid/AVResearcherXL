@@ -110,6 +110,10 @@ AVAILABLE_AGGREGATIONS = {
                     'aggs': {'producers': {'terms': {'field': 'meta.roles.value', 'size': 30}}}
                 }
             }
+        },
+        'nested_filter': {
+            'path': 'meta.roles',
+            'field': 'meta.roles.value'
         }
     },
     'genres': {
@@ -123,6 +127,10 @@ AVAILABLE_AGGREGATIONS = {
                     'aggs': {'genres': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
                 }
             }
+        },
+        'nested_filter': {
+            'path': 'meta.categories',
+            'field': 'meta.categories.value'
         }
     },
     'people': {
@@ -136,6 +144,10 @@ AVAILABLE_AGGREGATIONS = {
                     'aggs': {'people': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
                 }
             }
+        },
+        'nested_filter': {
+            'path': 'meta.categories',
+            'field': 'meta.categories.value'
         }
     },
     'keywords': {
@@ -149,6 +161,10 @@ AVAILABLE_AGGREGATIONS = {
                     'aggs': {'keywords': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
                 }
             }
+        },
+        'nested_filter': {
+            'path': 'meta.categories',
+            'field': 'meta.categories.value'
         }
     },
     'descriptive_terms': {

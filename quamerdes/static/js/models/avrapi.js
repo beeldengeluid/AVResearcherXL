@@ -200,16 +200,24 @@ function($, _, Backbone, app){
                 filter.type = filter.type == 'terms' ? 'term' : filter.type;
                 var f = {};
                 f[filter.type] = {};
-                f[filter.type][filter.field] = {}
 
                 // Process range filter values
                 if(filter.type == 'range'){
+                    f[filter.type][filter.field] = {}
                     f[filter.type][filter.field]['from'] = filter.values.from;
                     f[filter.type][filter.field]['to'] = filter.values.to;
                 }
                 //
                 else if(filter.type == 'term'){
+                    f[filter.type][filter.field] = {}
                     f[filter.type][filter.field] = filter.values
+                }
+                else if(filter.type == 'nested'){
+                    f[filter.type] = {
+                        path: filter.values.path,
+                        filter: {term: {}}
+                    };
+                    f[filter.type].filter.term[filter.values.field] = filter.values.value;
                 }
 
                 payload.query.filtered.filter.bool.must.push(f);
@@ -455,12 +463,18 @@ function($, _, Backbone, app){
                         values: ''
                     };
                 }
-                else if ('date_histogram' in aggregation_settings){
+                else if('date_histogram' in aggregation_settings){
                     filters[aggregation] = {
                         type: 'range',
                         field: aggregation_settings.date_histogram.field,
                         values: {}
                     };
+                }
+                else if('nested' in aggregation_settings){
+                    filters[aggregation] = {
+                        type: 'nested',
+                        values: {}
+                    }
                 }
             }
 
@@ -478,6 +492,16 @@ function($, _, Backbone, app){
                 if(add){
                     filters[aggregation].values.from = value[0];
                     filters[aggregation].values.to = value[1];
+                }
+                else {
+                    delete filters[aggregation];
+                }
+            }
+            else if('nested' in aggregation_settings){
+                if(add){
+                    filters[aggregation].values.path = aggregation_settings.nested_filter.path;
+                    filters[aggregation].values.field = aggregation_settings.nested_filter.field;
+                    filters[aggregation].values.value = value;
                 }
                 else {
                     delete filters[aggregation];
