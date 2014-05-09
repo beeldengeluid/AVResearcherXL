@@ -12,7 +12,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
     var AggregationsView = Backbone.View.extend({
         events: {
             'click a.nav-tab': 'switchTab',
-            'click ul.nav i': 'swithAggregationRepresentation'
+            'click ul.nav i': 'switchAggregationRepresentation'
         },
 
         initialize: function(options){
@@ -84,8 +84,8 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
             return this;
         },
 
-        swithAggregationRepresentation: function(event){
-            if (DEBUG) console.log('AggregationsView:swithAggregationRepresentation');
+        switchAggregationRepresentation: function(event){
+            if (DEBUG) console.log('AggregationsView:switchAggregationRepresentation');
             var self = this;
 
             var clicked_rep = $(event.target);
