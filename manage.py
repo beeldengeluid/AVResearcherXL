@@ -178,7 +178,7 @@ class LoadSampleKB(Command):
                 article = json.load(f)
 
                 logger.info('Indexing KB article %s' % member.name)
-                self.es.create(index='quamerdes_kb1', doc_type='article',
+                self.es.create(index='quamerdes_kb1', doc_type='item',
                                body=article, id=member.name.split('/')[-1].split('.')[0])
 
                 s += 1
@@ -202,7 +202,7 @@ class LoadSampleImmix(Command):
                 expression = json.load(f)
 
                 logger.info('Indexing iMMix document %s' % member.name)
-                self.es.create(index='quamerdes_immix1', doc_type='expression',
+                self.es.create(index='quamerdes_immix1', doc_type='item',
                                body=expression, id=member.name.split('/')[-1].split('.')[0])
                 s += 1
 
@@ -216,15 +216,22 @@ class CreateAliases(Command):
         self.es.indices.put_alias(index='quamerdes_immix1', name='quamerdes_immix')
 
 
-class PutSettings(Command):
+class PutSettingsAndMappings(Command):
 
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
+    indices = ['quamerdes_kb', 'quamerdes_immix']
 
     def run(self):
         with open('mappings/quamerdes_template.json', 'rb') as f:
             quamerdes_template = json.load(f)
 
         self.es.indices.put_template(name='quamerdes', body=quamerdes_template)
+
+        for index in self.indices:
+            with open('mappings/%s.json' % index, 'rb') as f:
+                mapping = json.load(f)
+            logger.info('Creating %s' % index)
+            self.es.indices.create(index='%s1' % index, body=mapping)
 
 
 class DeleteIndices(Command):
@@ -249,7 +256,7 @@ class InitTestEnv(Command):
         delete_indices = DeleteIndices()
         delete_indices.run()
 
-        put_settings = PutSettings()
+        put_settings = PutSettingsAndMappings()
         put_settings.run()
 
         load_kb = LoadSampleKB()
@@ -294,7 +301,7 @@ manager.add_command('transform_avr_data', TransformAVRData())
 manager.add_command('load_sample_kb', LoadSampleKB())
 manager.add_command('load_sample_immix', LoadSampleImmix())
 manager.add_command('create_aliases', CreateAliases())
-manager.add_command('put_settings', PutSettings())
+manager.add_command('put_settings', PutSettingsAndMappings())
 manager.add_command('init_test_env', InitTestEnv())
 manager.add_command('add_user', AddUser())
 manager.add_command('delete_indices', DeleteIndices())
