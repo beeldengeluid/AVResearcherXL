@@ -357,9 +357,13 @@ body {
     border: 1px solid #7f7f7f
 }
 
-/* Facets */
+/* Aggregations */
 #aggregations.boxed {
     padding: 10px 10px 0 10px;
+}
+
+#aggregations .nav-tabs > li {
+    margin-bottom: -2px;
 }
 
 #aggregations .representation {
