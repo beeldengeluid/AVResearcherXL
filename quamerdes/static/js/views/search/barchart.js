@@ -7,7 +7,7 @@ define([
     'text!../../../templates/search/barchart.html'
 ],
 function($, _, Backbone, d3, app, barchartTemplate){
-    var FacetView = Backbone.View.extend({
+    var BarchartView = Backbone.View.extend({
         initialize: function(options){
             if (DEBUG) console.log('BarChartView:' + options.name + ':initialize');
             this.modelName = options.name;
@@ -32,11 +32,11 @@ function($, _, Backbone, d3, app, barchartTemplate){
         render: function(tab){
             if (DEBUG) console.log('BarChartView:' + this.modelName + ':render');
             var self = this;
-            var facets = this.model.get('facets');
+            var aggregations = this.model.get('aggregations');
             var heights = [];
 
-            if(facets){
-                var data = _.first(facets[tab].terms, this.chart.nrOfBars);
+            if(aggregations){
+                var data = _.first(aggregations[tab].buckets, this.chart.nrOfBars);
 
                 var svg = d3.select(this.el)
                     .append('svg')
@@ -63,11 +63,11 @@ function($, _, Backbone, d3, app, barchartTemplate){
 
                 this.chart.x
                     .range([0, width])
-                    .domain([0, d3.max(data, function(d){ return d.count; })]);
+                    .domain([0, d3.max(data, function(d){ return d.doc_count; })]);
 
                 this.chart.y
                     .rangeRoundBands([0, height], 0.1)
-                    .domain(data.map(function(d){ return d.term; }));
+                    .domain(data.map(function(d){ return d.key; }));
 
                 this.chart.yAxis
                     .scale(this.chart.y)
@@ -107,21 +107,21 @@ function($, _, Backbone, d3, app, barchartTemplate){
                 rects.enter().append('g') // Append g element so we can add a text label later
                     .append('rect')
                     .attr('y', function(d){
-                        return self.chart.y(d.term);
+                        return self.chart.y(d.key);
                     })
                     .attr('opacity', 0)
                     .attr('x', function(d){
                         // Invert the bars for chart q1
-                        return self.modelName === 'q1' ? (width - self.chart.x(d.count)) : 0;
+                        return self.modelName === 'q1' ? (width - self.chart.x(d.doc_count)) : 0;
                     })
                     .attr('width', function(d){
-                        return self.chart.x(d.count);
+                        return self.chart.x(d.doc_count);
                     })
                     // use rangeBand to maintain bar separation
                     .attr('height', self.chart.y.rangeBand())
                     .attr('class', self.modelName + ' bar ' + tab)
                     .append('title')
-                    .text(function(d){ return d.term; });
+                    .text(function(d){ return d.key; });
 
                 rects.transition()
                     // We actually have a g element, because we need a container for text:
@@ -149,12 +149,12 @@ function($, _, Backbone, d3, app, barchartTemplate){
                     d3.select(this).append('text')
                         .attr('x', xWidth)
                         .attr('dx', dx)
-                        .attr('y', self.chart.y(d.term) + self.chart.y.rangeBand() / 2)
+                        .attr('y', self.chart.y(d.key) + self.chart.y.rangeBand() / 2)
                         .attr('dy', '.35em')
                         .attr('text-anchor', textAnchor)
                         .attr('fill', 'white')
                         .attr('font-size', 10)
-                        .text(d.count);
+                        .text(d.doc_count);
                 });
             }
 
@@ -162,5 +162,5 @@ function($, _, Backbone, d3, app, barchartTemplate){
         }
     });
 
-    return FacetView;
+    return BarchartView;
 });
