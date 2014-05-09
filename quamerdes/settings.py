@@ -98,13 +98,24 @@ AVAILABLE_AGGREGATIONS = {
             'field': 'meta.broadcasters',
             'size': 30
         }
+    },
+    'producers': {
+        'name': 'Producers',
+        'description': '',
+        'terms': {
+            'field': 'value'
+        },
+        'filter': {
+            'term': {'key': 'producent'}
+        },
+        'nested': 'meta.roles'
     }
 }
 
 # List of facets that are displayed (in the different tabs) by default
 # DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
 #                   'tweets', 'subtitles']
-DEFAULT_AGGREGATIONS = ['channels']
+DEFAULT_AGGREGATIONS = ['channels', 'producers']
 # AVAILABLE_FACETS = {
 #     'channels': {
 #         'name': 'Channels',
@@ -244,14 +255,14 @@ AVAILABLE_INDICES = [
         'id': 'immix',
         'name': 'iMMix metadata',
         'icon': 'icon-film',
-        'doc_type': 'expression'
+        'index_name': 'quamerdes_immix'
     },
     {
         'id': 'kb',
         'name': 'KB kranten',
         # This will be something else
         'icon': 'icon-book',
-        'doc_type': 'article'
+        'index_name': 'quamerdes_kb'
     }
     # {
     #     'id': 'immix',

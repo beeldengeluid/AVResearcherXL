@@ -40,7 +40,7 @@
                 <%
                     // KB articles do not have a time associated, so use other date
                     // formatter. Include time by default
-                    if(hit._type == 'article'){
+                    if(hit._index.indexOf('quamerdes_kb') == 0){
                         var format = d3.time.format('%a %b %-e, %Y');
                     } else {
                         var format = d3.time.format('%a %b %-e, %Y at %H:%M');
@@ -51,7 +51,7 @@
                 <span>
                     <%
                         var idx = _.find(AVAILABLE_INDICES, function(idx){
-                            if(idx.doc_type == hit._type) return idx;
+                            if(hit._index.indexOf(idx.index_name) == 0) return idx;
                         });
                         var hit_source_icon = idx.icon,
                             hit_source = idx.name;
