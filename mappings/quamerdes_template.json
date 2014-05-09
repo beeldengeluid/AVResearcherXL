@@ -67,14 +67,6 @@
             "source": {
                 "type": "string",
                 "index": "not_analyzed"
-            },
-            "meta": {
-                "properties": {
-                    "record_identifier": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    }
-                }
             }
         }
     }
