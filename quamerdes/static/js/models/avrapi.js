@@ -170,14 +170,14 @@ function($, _, Backbone, app){
             var self = this;
             var payload = {
                 query: {},
-                indices: []
+                index: 'quamerdes_immix'
             };
 
-            // Determine which indices to search on
-            _.each(this.get('enabledCollections'), function(source){
-                // Determine which indices to search. Defaults to all
-                payload.indices.push('quamerdes_' + source.id);
-            });
+            // Determine which index to search on
+            // _.each(this.get('enabledCollections'), function(source){
+            //     // Determine which indices to search. Defaults to all
+            //     payload.indices.push('quamerdes_' + source.id);
+            // });
 
             payload.query.filtered = {
                 query: {
@@ -207,6 +207,7 @@ function($, _, Backbone, app){
                     f[filter.type][filter.field]['from'] = filter.values.from;
                     f[filter.type][filter.field]['to'] = filter.values.to;
                 }
+                //
                 else if(filter.type == 'term'){
                     f[filter.type][filter.field] = filter.values
                 }
@@ -233,26 +234,32 @@ function($, _, Backbone, app){
             AGGREGATIONS
             */
             var aggregations = {},
-                ESAggFields = ['date_histogram', 'terms', 'facet_filter', 'nested'];
+                ESAggFields = ['date_histogram', 'terms', 'nested', 'significant_terms'];
 
             _.each(this.get('enabledAggregations'), function(aggregation, aggregationName){
                 aggregations[aggregationName] = {};
-
                 _.each(aggregation, function(optionValue, optionName){
                     if(_.contains(ESAggFields, optionName)){
                         if(optionName == 'date_histogram'){
                             var interval = self.get('interval');
                             if(!interval) interval = self.get('defaultInterval');
                             optionValue.interval = interval;
+
+                            aggregations[aggregationName][optionName] = optionValue;
                         }
-                        aggregations[aggregationName][optionName] = optionValue;
+                        else if(optionName == 'nested'){
+                            aggregations[aggregationName] = optionValue;
+                        }
+                        else {
+                            aggregations[aggregationName][optionName] = optionValue;
+                        }
                     }
                 });
             });
 
             payload.aggregations = aggregations;
 
-            console.log(payload);
+            console.log('===============\n', payload, '\n===============');
             return payload;
 
             // // Only add the filter component to the query if at least one filter
@@ -409,7 +416,7 @@ function($, _, Backbone, app){
                         type: "range",
                         field: "date",
                         values: {
-                            from: new Date(1800,1,1),
+                            from: new Date(1951, 10, 2),
                             to: new Date()
                         }
                     }

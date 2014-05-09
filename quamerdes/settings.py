@@ -102,99 +102,71 @@ AVAILABLE_AGGREGATIONS = {
     'producers': {
         'name': 'Producers',
         'description': '',
-        'terms': {
-            'field': 'value'
-        },
-        'filter': {
-            'term': {'key': 'producent'}
-        },
-        'nested': 'meta.roles'
+        'nested': {
+            'nested': {'path': 'meta.roles'},
+            'aggs': {
+                'producers': {
+                    'filter': {'term': {'meta.roles.key': 'producent'}},
+                    'aggs': {'producers': {'terms': {'field': 'meta.roles.value', 'size': 30}}}
+                }
+            }
+        }
+    },
+    'genres': {
+        'name': 'Genres',
+        'description': '',
+        'nested': {
+            'nested': {'path': 'meta.categories'},
+            'aggs': {
+                'genres': {
+                    'filter': {'term': {'meta.categories.key': 'genre'}},
+                    'aggs': {'genres': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
+                }
+            }
+        }
+    },
+    'people': {
+        'name': 'People',
+        'description': '',
+        'nested': {
+            'nested': {'path': 'meta.categories'},
+            'aggs': {
+                'people': {
+                    'filter': {'term': {'meta.categories.key': 'person'}},
+                    'aggs': {'people': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
+                }
+            }
+        }
+    },
+    'keywords': {
+        'name': 'Keywords',
+        'description': '',
+        'nested': {
+            'nested': {'path': 'meta.categories'},
+            'aggs': {
+                'keywords': {
+                    'filter': {'term': {'meta.categories.key': 'keyword'}},
+                    'aggs': {'keywords': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
+                }
+            }
+        }
+    },
+    'descriptive_terms': {
+        'name': 'Descriptive terms',
+        'description': '',
+        'significant_terms': {
+            'field': 'text',
+            'size': 30
+        }
     }
 }
 
 # List of facets that are displayed (in the different tabs) by default
 # DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
 #                   'tweets', 'subtitles']
-DEFAULT_AGGREGATIONS = ['channels', 'producers']
+DEFAULT_AGGREGATIONS = ['genres', 'channels', 'producers', 'keywords', 'people',
+                        'descriptive_terms']
 # AVAILABLE_FACETS = {
-#     'channels': {
-#         'name': 'Channels',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'terms': {
-#             'field': 'broadcasters',
-#             'size': 30
-#         }
-#     },
-#     'producers': {
-#         'name': 'Producers',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'terms': {
-#             'field': 'roleValue',
-#             'size': 30
-#         },
-#         'facet_filter': {
-#             'term': {'roleKey': 'producent'}
-#         },
-#         'nested': 'roles'
-#     },
-#     'people': {
-#         'name': 'People',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'nested_filter_field': 'categoryValue',
-#         'terms': {
-#             'field': 'untouched',
-#             'size': 30
-#         },
-#         'facet_filter': {
-#             'term': {'categoryKey': 'person'}
-#         },
-#         'nested': 'categories'
-#         # 'terms': {
-#         #     'field': 'roleValue',
-#         #     'size': 30
-#         # },
-#         # 'facet_filter' : {
-#         #     'or': [
-#         #         {'term': {'roleKey': 'maker'}},
-#         #         {'term': {'roleKey': 'executive'}},
-#         #         {'term': {'roleKey': 'speaker'}}
-#         #     ]
-#         # },
-#         # 'nested': 'roles'*/
-#     },
-#     'genres': {
-#         'name': 'Genres',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'nested_filter_field': 'categoryValue',
-#         'terms': {
-#             'field': 'untouched',
-#             'size': 30
-#         },
-#         'facet_filter': {
-#             'term': {
-#                 'categoryKey': 'genre'
-#             }
-#         },
-#         'nested': 'categories'
-#     },
-#     'keywords': {
-#         'name': 'Keywords',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'nested_filter_field': 'categoryValue',
-#         'terms': {
-#             'field': 'untouched',
-#             'size': 30
-#         },
-#         'facet_filter': {
-#             'term': {'categoryKey': 'keyword'}
-#         },
-#         'nested': 'categories'
-#     },
 #     # This facet operates on the complete set of Twitter terms, but can be
 #     # very memory expensive (every term present in the text has to be kept
 #     # in memory)

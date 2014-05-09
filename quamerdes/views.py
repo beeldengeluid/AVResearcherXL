@@ -19,7 +19,7 @@ from settings import (DEBUG, MESSAGES, MAIL_DEFAULT_SENDER,
                       ENABLE_USAGE_LOGGING, LOG_EVENTS, ES_SEARCH_INDEX,
                       ES_ALL_INDICES, ES_LOG_INDEX, ABOUT_PAGE_CONTENT_URL,
                       HELP_PAGE_CONTENT_URL)
-from quamerdes import app, db, es_search, es_log
+from quamerdes import app, db, es_search, es_log, settings
 from models import User
 
 R_EMAIL = re.compile(r'^.+@[^.].*\.[a-z]{2,10}$', re.IGNORECASE)
@@ -283,10 +283,22 @@ def logout():
 def search():
     payload = json.loads(request.form['payload'])
     # We use aliases, so don't do this in the query
-    indices = payload.pop('indices', ','.join(ES_ALL_INDICES))
-    print indices
+    index = payload.pop('index', ','.join('quamerdes_immix'))
+    print index
     print payload
-    results = es_search.search(index=indices, body=payload)
+    results = es_search.search(index=index, body=payload)
+
+    aggregations = results.get('aggregations', None)
+
+    # We have to do this weird stuff because the aggregations module doesn't
+    # support our nested meta structure as well as the facets did; we should
+    # probably extract the data differently though
+    if aggregations:
+        for aggregation in aggregations:
+            agg_settings = settings.AVAILABLE_AGGREGATIONS.get(aggregation, None)
+            if agg_settings and agg_settings.get('nested'):
+                results['aggregations'][aggregation] = aggregations[aggregation][aggregation][aggregation]
+
     return jsonify(results)
 
 
