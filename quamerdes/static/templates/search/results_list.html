@@ -5,7 +5,7 @@
             <%
                 var hit_id = hit._id,
                     source = hit._source.source;
-                if(hit._type == 'expression'){
+                if(hit._index.indexOf('quamerdes_immix') == 0){
                     hit_id = hit_id.replace(/_/g, '/');
                     source = source.replace(/_/g, '/');
                 }
