@@ -363,8 +363,27 @@ body {
 }
 
 /* Aggregations */
-#aggregations.boxed {
-    padding: 10px 10px 0 10px;
+#aggregations {
+    /*padding: 10px 10px 0 10px;*/
+}
+
+.aggregation-box {
+    width: 47%;
+    float: left;
+    z-index: 100;
+    position: relative;
+}
+
+.aggregation-box:last-child {
+    float: right;
+}
+
+.aggregation-box.q1 {
+    border: 2px solid #009fda;
+}
+
+.aggregation-box.q2 {
+    border: 2px solid #e00034;
 }
 
 #aggregations .nav-tabs > li {

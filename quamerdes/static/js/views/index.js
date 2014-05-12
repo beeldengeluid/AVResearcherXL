@@ -41,11 +41,12 @@ function($, _, Backbone, BaseView, SearchView, TimeseriesView, AggregationsView,
                 height: 280
             });
 
-            this.aggregations_view = new AggregationsView({
-                models: {
-                    q1: query_model_1,
-                    q2: query_model_2
-                }
+            this.aggregations_view1 = new AggregationsView({
+                model: query_model_1
+            });
+
+            this.aggregations_view2 = new AggregationsView({
+                model: query_model_2
             });
         },
 
@@ -57,7 +58,8 @@ function($, _, Backbone, BaseView, SearchView, TimeseriesView, AggregationsView,
             this.search_view_1.setElement(this.$el.find('#search_1')).render();
             this.search_view_2.setElement(this.$el.find('#search_2')).render();
             this.timeseries_view.setElement(this.$el.find('#timeseries')).render().toggleVisibility();
-            this.aggregations_view.setElement(this.$el.find('#aggregations')).render().toggleVisibility();
+            this.aggregations_view1.setElement(this.$el.find('#aggregations .aggregation.q1')).render().toggleVisibility();
+            this.aggregations_view2.setElement(this.$el.find('#aggregations .aggregation.q2')).render().toggleVisibility();
 
             return this;
         }
