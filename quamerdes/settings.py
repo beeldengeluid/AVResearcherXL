@@ -107,6 +107,14 @@ AVAILABLE_AGGREGATIONS = {
             'size': 30
         }
     },
+    'descriptive_subtitle_terms': {
+        'name': 'Descriptive subtitle terms',
+        'description': '',
+        'significant_terms': {
+            'field': 'meta.subtitles',
+            'size': 30
+        }
+    },
     'producers': {
         'name': 'Producers',
         'description': '',
@@ -170,6 +178,14 @@ AVAILABLE_AGGREGATIONS = {
             'field': 'meta.theme',
             'size': 30
         }
+    },
+    'article_type': {
+        'name': 'Article type',
+        'description': '',
+        'terms': {
+            'field': 'meta.article_type',
+            'size': 30
+        }
     }
 }
 
@@ -177,58 +193,7 @@ AVAILABLE_AGGREGATIONS = {
 # DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
 #                   'tweets', 'subtitles']
 DEFAULT_AGGREGATIONS = ['genres', 'channels', 'producers', 'people',
-                        'geonames', 'keywords', 'descriptive_terms']
-# AVAILABLE_FACETS = {
-#     # This facet operates on the complete set of Twitter terms, but can be
-#     # very memory expensive (every term present in the text has to be kept
-#     # in memory)
-#     'tweets': {
-#         'name': 'Tweets',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'terms': {
-#             'field': 'tweetText',
-#             'size': 30
-#         },
-#         'nested': 'tweets'
-#     },
-#     # This facet operates on a list of the top 100 terms extracted from Tweets
-#     # (generated in whatever way; that is up to the indexer), as to economize
-#     # on memory usage
-#     'top_100_twitter_terms': {
-#         'name': 'Tweets',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'terms': {
-#             'field': 'top_100_twitter_terms',
-#             'size': 30
-#         }
-#     },
-#     # This facet operates on the complete set of subtitle terms, but can be
-#     # very memory expensive (every term present in the text has to be kept
-#     # in memory)
-#     'subtitles': {
-#         'name': 'Subtitles',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'terms': {
-#             'field': 'subtitles',
-#             'size': 30
-#         }
-#     },
-#     # This facet operates on a list of the top 100 terms extracted from subtitles
-#     # (generated in whatever way; that is up to the indexer), as to economize
-#     # on memory usage
-#     'top_100_subtitle_terms': {
-#         'name': 'Subtitles',
-#         'description': '',
-#         'ui_presentation': 'checkbox',
-#         'terms': {
-#             'field': 'top_100_subtitle_terms',
-#             'size': 30
-#         }
-#     }
-# }
+                        'geonames', 'keywords', 'descriptive_terms', 'article_type']
 
 # The facet that is used for the date range slider
 DATE_AGGREGATION = 'dates'
@@ -239,34 +204,18 @@ AVAILABLE_INDICES = [
         'id': 'immix',
         'name': 'iMMix metadata',
         'icon': 'icon-film',
-        'index_name': 'quamerdes_immix'
+        'index_name': 'quamerdes_immix',
+        'aggregations': ['genres', 'channels', 'producers', 'people', 'geonames',
+                         'keywords', 'descriptive_terms']
     },
     {
         'id': 'kb',
         'name': 'KB kranten',
         # This will be something else
         'icon': 'icon-book',
-        'index_name': 'quamerdes_kb'
+        'index_name': 'quamerdes_kb',
+        'aggregations': ['article_type', 'descriptive_terms']
     }
-    # {
-    #     'id': 'immix',
-    #     'name': 'iMMix metadata',
-    #     'icon': 'icon-film',
-    #     'fields': ['titles', 'mainTitle', 'summaries', 'descriptions']
-    # }
-    # {
-    #     'id': 'subtitles',
-    #     'name': 'T888 subtitles',
-    #     'icon': 'icon-comment',
-    #     'fields': ['subtitles']
-    # },
-    # {
-    #     'id': 'twitter',
-    #     'name': 'Tweets',
-    #     'icon': 'icon-twitter',
-    #     'fields': ['tweetText'],
-    #     'nested': 'tweets'
-    # }
 ]
 
 # The fields that should be returned for each hit when searching
