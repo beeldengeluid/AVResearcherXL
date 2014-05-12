@@ -162,7 +162,7 @@ body {
     margin-left: 110px;
 }
 
-/* Registartion verification */
+/* Registration verification */
 #registration_verification {
     width: 350px;
     margin: 30px auto 0 auto;
@@ -242,8 +242,13 @@ body {
     color: #fce300;
 }
 
-.search-box ul.fields i.active, .search-box ul.fields i:hover {
+.search-box ul.fields i.active, .search-box ul.fields i.active:hover {
     opacity: 1;
+    cursor: auto;
+}
+
+.search-box ul.fields i.:hover {
+    cursor: pointer;
 }
 
 .search-box .query-properties {
