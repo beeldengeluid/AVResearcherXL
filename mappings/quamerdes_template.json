@@ -59,10 +59,7 @@
             "title": {
                 "type": "string",
                 "analyzer": "text_nl",
-                "index_options": "offsets",
-                "fields": {
-                    "raw": { "type": "string", "index": "not_analyzed" }
-                }
+                "index_options": "offsets"
             },
             "source": {
                 "type": "string",
