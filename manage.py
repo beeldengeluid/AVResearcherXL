@@ -182,6 +182,8 @@ class LoadSampleKB(Command):
 
                 logger.debug('Loaded %s' % member.name)
                 article = json.load(f)
+                # Yuck
+                article['meta'] = article.pop('_meta')
 
                 logger.info('Indexing KB article %s' % member.name)
                 self.es.create(index='quamerdes_kb1', doc_type='item',
