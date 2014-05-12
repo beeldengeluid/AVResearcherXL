@@ -8,7 +8,7 @@ function($, _, Backbone, app){
     AvrApiModel = Backbone.Model.extend({
         defaults: function(){
             return {
-                enabledCollections: AVAILABLE_INDICES,
+                enabledIndex: 'quamerdes_immix',
                 enabledAggregations: AVAILABLE_AGGREGATIONS,
                 // enabledSearchHitFields: SEARCH_HIT_FIELDS,
                 hitsPerPage: HITS_PER_PAGE,
@@ -170,14 +170,8 @@ function($, _, Backbone, app){
             var self = this;
             var payload = {
                 query: {},
-                index: 'quamerdes_immix'
+                index: this.get('enabledIndex')
             };
-
-            // Determine which index to search on
-            // _.each(this.get('enabledCollections'), function(source){
-            //     // Determine which indices to search. Defaults to all
-            //     payload.indices.push('quamerdes_' + source.id);
-            // });
 
             payload.query.filtered = {
                 query: {
@@ -212,13 +206,6 @@ function($, _, Backbone, app){
                     f[filter.type][filter.field] = {}
                     f[filter.type][filter.field] = filter.values
                 }
-                else if(filter.type == 'nested'){
-                    f[filter.type] = {
-                        path: filter.values.path,
-                        filter: {term: {}}
-                    };
-                    f[filter.type].filter.term[filter.values.field] = filter.values.value;
-                }
 
                 payload.query.filtered.filter.bool.must.push(f);
             });
@@ -242,7 +229,7 @@ function($, _, Backbone, app){
             AGGREGATIONS
             */
             var aggregations = {},
-                ESAggFields = ['date_histogram', 'terms', 'nested', 'significant_terms'];
+                ESAggFields = ['date_histogram', 'terms', 'significant_terms'];
 
             _.each(this.get('enabledAggregations'), function(aggregation, aggregationName){
                 aggregations[aggregationName] = {};
@@ -255,9 +242,6 @@ function($, _, Backbone, app){
 
                             aggregations[aggregationName][optionName] = optionValue;
                         }
-                        else if(optionName == 'nested'){
-                            aggregations[aggregationName] = optionValue;
-                        }
                         else {
                             aggregations[aggregationName][optionName] = optionValue;
                         }
@@ -266,128 +250,29 @@ function($, _, Backbone, app){
             });
 
             payload.aggregations = aggregations;
+            // Number of hits to return and the offset
+            payload.size = this.get('hitsPerPage');
+            payload.from = this.get('startAtHit');
 
             console.log('===============\n', payload, '\n===============');
             return payload;
 
-            // // Only add the filter component to the query if at least one filter
-            // // is enabled.
-            // if(_.size(filters) > 0){
-            //     // Each facet is added as an AND filter
-            //     filtered.filter = {and: []};
-            // }
 
-            // _.each(filters, function(filter, facet_name){
-            //     // Term based filtering on nested attributes
-            //     if(filter.nested && filter.facet_type === 'terms'){
-            //         _.each(filter.values, function(value){
-            //             var facet = {};
-            //             facet.nested = {
-            //                 path: filter.path,
-            //                 // Take all nested documents of 'path' into consideration
-            //                 query: {match_all: {}}
-            //             };
-
-            //             // facet_filters and facet values are added as AND conditions
-            //             facet.nested.filter = { and: []};
-
-            //             // Use the specified field when dealing with multi-field types
-            //             if('nested_filter_field' in filter){
-            //                 field = filter.path + '.' + filter.nested_filter_field + '.' + filter.field;
-            //             }
-            //             else {
-            //                 field = filter.path + '.' + filter.field;
-            //             }
-
-            //             var term_filter = {term : {}};
-            //             term_filter.term[field] = value;
-            //             facet.nested.filter.and.push(term_filter);
-
-            //             // Add additonal filters for nested docuent selection
-            //             if('facet_filter' in filter){
-            //                 facet.nested.filter.and.push(filter.facet_filter);
-            //             }
-
-            //             filtered.filter.and.push(facet);
-            //         });
-            //     }
-
-            //     // Date range filter on nested attributes
-            //     else if(filter.nested && filter.facet_type === 'range'){
-            //         var facet = {};
-            //         facet.nested = {
-            //             path: filter.path,
-            //             // Take all nested documents of 'path' into consideration
-            //             query: {match_all: {}}
-            //         };
-
-            //         // facet_filters and facet values are added as AND conditions
-            //         facet.nested.filter = { and: []};
-
-            //         // Use the specified field when dealing with multi-field types
-            //         if('nested_filter_field' in filter){
-            //             field = filter.path + '.' + filter.nested_filter_field + '.' + filter.field;
-            //         }
-            //         else {
-            //             field = filter.path + '.' + filter.field;
-            //         }
-
-            //         var range_filter = {};
-            //         range_filter[field] = {
-            //             'from': filter.values.from,
-            //             'to': filter.values.to
-            //         };
-
-            //         facet.nested.filter.and.push({'range': range_filter});
-
-            //         if('facet_filter' in filter){
-            //             facet.nested.filter.and.push(filter.facet_filter);
-            //         }
-
-            //         filtered.filter.and.push(facet);
-            //     }
-
-            //     // Term based filtering on non-nested attributes
-            //     else if(filter.facet_type === 'terms'){
-            //         var facet = {};
-            //         field = filter.field;
-            //         values = filter.values;
-            //         facet.terms = {};
-            //         facet.terms[field] = values;
-            //         facet.terms.execution = 'and';
-
-            //         filtered.filter.and.push(facet);
-            //     }
-            // });
 
             // // Add the filters to the query payload
             // payload.query.filtered = filtered;
 
             // // The fields that are required to render the search results templates
             // payload._source = this.get('enabledSearchHitFields');
-
-            // // Number of hits to return and the offset
-            // payload.size = this.get('hitsPerPage');
-            // payload.from = this.get('startAtHit');
             // console.log('============\n', payload)
             // return payload;
         },
 
-        changeSearchFields: function(enabled_fields){
-            if (DEBUG) console.log('ElasticSearchModel:changeSearchFields', enabled_fields);
+        changeSearchIndex: function(index){
+            if (DEBUG) console.log('ElasticSearchModel:changeSearchIndex', index);
 
             var self = this;
-
-            // Get the config definitions of the enabled fields
-            var field_definitions = _.filter(AVAILABLE_INDICES, function(field){
-                if(_.contains(enabled_fields, field.id)){
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-
-            this.set('enabledCollections', field_definitions);
+            this.set('enabledIndex', 'quamerdes_' + index);
             this.set('currentPayload', this.constructQueryPayload());
 
             this.http.post('search', this.get('currentPayload'), function(data){
@@ -470,12 +355,6 @@ function($, _, Backbone, app){
                         values: {}
                     };
                 }
-                else if('nested' in aggregation_settings){
-                    filters[aggregation] = {
-                        type: 'nested',
-                        values: {}
-                    }
-                }
             }
 
             // Add or delete a facet value from the filters values array
@@ -492,16 +371,6 @@ function($, _, Backbone, app){
                 if(add){
                     filters[aggregation].values.from = value[0];
                     filters[aggregation].values.to = value[1];
-                }
-                else {
-                    delete filters[aggregation];
-                }
-            }
-            else if('nested' in aggregation_settings){
-                if(add){
-                    filters[aggregation].values.path = aggregation_settings.nested_filter.path;
-                    filters[aggregation].values.field = aggregation_settings.nested_filter.field;
-                    filters[aggregation].values.value = value;
                 }
                 else {
                     delete filters[aggregation];
