@@ -9,48 +9,50 @@ function($, _, Backbone, app, queryInputTemplate){
     var QueryInputView = Backbone.View.extend({
         events: {
             'submit': 'searchOnEnter',
-            'click i': 'changeSearchFields'
+            'click i': 'changeSearchIndex'
+        },
+
+        initialize: function(){
+            var self = this;
+            this.selectedIndex = 'immix';
+            this.listenTo(self, 'change:selectedIndex', this.searchIndex);
         },
 
         render: function(){
             this.$el.html(_.template(queryInputTemplate, {
-                searchFields: AVAILABLE_INDICES
+                searchFields: AVAILABLE_INDICES,
+                selectedIndex: this.selectedIndex
             }));
 
             this.$el.find('i').tooltip();
         },
 
-        changeSearchFields: function(e){
-            var available_fields = AVAILABLE_INDICES;
-            var checked_fields = [];
+        setIndex: function(selectedIndex){
+            this.selectedIndex = selectedIndex;
+            this.trigger('change:selectedIndex', selectedIndex);
+        },
 
-            // Depending on the current state of the clicked icon, switch it
-            // to active or inactive
-            $(e.target).toggleClass('active');
-
+        searchIndex: function(){
+            // Log change of index
             app.vent.trigger('Logging:clicks', {
                 action: 'change_search_field',
                 modelName: this.model.get('name'),
-                field: $(e.target).data('field'),
-                value: $(e.target).hasClass('active')
+                field: this.selectedIndex
             });
 
-            this.$el.find('i.active').each(function(){
-                checked_fields.push($(this).data('field'));
-            });
+            this.$el.find('i').removeClass('active');
+            this.$el.find('i[data-index="' + this.selectedIndex + '"]').addClass('active');
 
-            // If none of the fields are checked, re-check them all, and use all
-            // fields for searching
-            if(checked_fields.length === 0){
-                if (DEBUG) console.log('QueryInputView:changeSearchFields User un-checked all fields, re-checking them');
+            this.model.changeSearchIndex(this.selectedIndex);
+        },
 
-                var fields = this.$el.find('i').addClass('active');
-                fields.each(function(a){
-                    checked_fields.push($(this).data('field'));
-                });
-            }
+        changeSearchIndex: function(e){
+            var available_fields = AVAILABLE_INDICES,
+                target = $(e.target);
 
-            this.model.changeSearchFields(checked_fields);
+            // If the user clicks the currently selected index, do nothing
+            if(target.hasClass(this.checkedField)) return;
+            this.setIndex(target.data('index'));
         },
 
         searchOnEnter: function(e){

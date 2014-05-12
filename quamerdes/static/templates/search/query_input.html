@@ -7,7 +7,7 @@
 	</div>
 </form>
 <ul class="fields">
-<% _.each(searchFields, function(field){ %>
-    <li><i class="<%= field.icon %> active" data-field="<%= field.id %>" data-toggle="tooltip" title="<%= field.name %>"></i></li>
+<% _.each(searchFields, function(index){ %>
+    <li><i class="collection-selector <%= index.icon %> <%= selectedIndex == index.id ? 'active' : '' %>" data-index="<%= index.id %>" data-toggle="tooltip" title="<%= index.name %>"></i></li>
 <% }); %>
 </ul>
