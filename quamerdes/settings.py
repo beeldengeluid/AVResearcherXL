@@ -99,79 +99,75 @@ AVAILABLE_AGGREGATIONS = {
             'size': 30
         }
     },
-    'producers': {
-        'name': 'Producers',
-        'description': '',
-        'nested': {
-            'nested': {'path': 'meta.roles'},
-            'aggs': {
-                'producers': {
-                    'filter': {'term': {'meta.roles.key': 'producent'}},
-                    'aggs': {'producers': {'terms': {'field': 'meta.roles.value', 'size': 30}}}
-                }
-            }
-        },
-        'nested_filter': {
-            'path': 'meta.roles',
-            'field': 'meta.roles.value'
-        }
-    },
-    'genres': {
-        'name': 'Genres',
-        'description': '',
-        'nested': {
-            'nested': {'path': 'meta.categories'},
-            'aggs': {
-                'genres': {
-                    'filter': {'term': {'meta.categories.key': 'genre'}},
-                    'aggs': {'genres': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
-                }
-            }
-        },
-        'nested_filter': {
-            'path': 'meta.categories',
-            'field': 'meta.categories.value'
-        }
-    },
-    'people': {
-        'name': 'People',
-        'description': '',
-        'nested': {
-            'nested': {'path': 'meta.categories'},
-            'aggs': {
-                'people': {
-                    'filter': {'term': {'meta.categories.key': 'person'}},
-                    'aggs': {'people': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
-                }
-            }
-        },
-        'nested_filter': {
-            'path': 'meta.categories',
-            'field': 'meta.categories.value'
-        }
-    },
-    'keywords': {
-        'name': 'Keywords',
-        'description': '',
-        'nested': {
-            'nested': {'path': 'meta.categories'},
-            'aggs': {
-                'keywords': {
-                    'filter': {'term': {'meta.categories.key': 'keyword'}},
-                    'aggs': {'keywords': {'terms': {'field': 'meta.categories.value', 'size': 30}}}
-                }
-            }
-        },
-        'nested_filter': {
-            'path': 'meta.categories',
-            'field': 'meta.categories.value'
-        }
-    },
     'descriptive_terms': {
         'name': 'Descriptive terms',
         'description': '',
         'significant_terms': {
             'field': 'text',
+            'size': 30
+        }
+    },
+    'producers': {
+        'name': 'Producers',
+        'description': '',
+        'terms': {
+            'field': 'meta.producent',
+            'size': 30
+        }
+    },
+    'genres': {
+        'name': 'Genres',
+        'description': '',
+        'terms': {
+            'field': 'meta.genre',
+            'size': 30
+        }
+    },
+    'people': {
+        'name': 'People',
+        'description': '',
+        'terms': {
+            'field': 'meta.person',
+            'size': 30
+        }
+    },
+    'keywords': {
+        'name': 'Keywords',
+        'description': '',
+        'terms': {
+            'field': 'meta.keyword',
+            'size': 30
+        }
+    },
+    'geonames': {
+        'name': 'Locations',
+        'description': '',
+        'terms': {
+            'field': 'meta.geoName',
+            'size': 30
+        }
+    },
+    'cast': {
+        'name': 'Cast',
+        'description': '',
+        'terms': {
+            'field': 'meta.cast',
+            'size': 30
+        }
+    },
+    'maker': {
+        'name': 'Maker',
+        'description': '',
+        'terms': {
+            'field': 'meta.maker',
+            'size': 30
+        }
+    },
+    'theme': {
+        'name': 'Theme',
+        'description': '',
+        'terms': {
+            'field': 'meta.theme',
             'size': 30
         }
     }
@@ -180,8 +176,8 @@ AVAILABLE_AGGREGATIONS = {
 # List of facets that are displayed (in the different tabs) by default
 # DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
 #                   'tweets', 'subtitles']
-DEFAULT_AGGREGATIONS = ['genres', 'channels', 'producers', 'keywords', 'people',
-                        'descriptive_terms']
+DEFAULT_AGGREGATIONS = ['genres', 'channels', 'producers', 'people',
+                        'geonames', 'keywords', 'descriptive_terms']
 # AVAILABLE_FACETS = {
 #     # This facet operates on the complete set of Twitter terms, but can be
 #     # very memory expensive (every term present in the text has to be kept

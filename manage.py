@@ -123,10 +123,6 @@ class TransformAVRData(Command):
                     data['meta'] = {
                         'broadcasters': source.get('broadcasters', []),
                         'broadcastdates': broadcastdates,
-                        'categories': [{
-                            'key': category.get('categoryKey'),
-                            'value': category.get('categoryValue')
-                        } for category in source.get('categories', [])],
                         'descriptions': source.get('descriptions', []),
                         'expressieID': source.get('expressieId'),
                         # Not entirely sure what this is; maybe the date the
@@ -140,18 +136,28 @@ class TransformAVRData(Command):
                         'mainTitle': source.get('mainTitle'),
                         'realisatieID': source.get('realisatieId'),
                         'reeksID': source.get('reeksId'),
-                        'roles': [{
-                            'key': role.get('roleKey'),
-                            'value': role.get('roleValue'),
-                            'playerName': role.get('rolePlayerName'),
-                            'playerFunction': role.get('rolePlayerFunction')
-                        } for role in source.get('roles', [])],
                         'subtitles': source.get('subtitles', []),
                         'summaries': source.get('summaries', []),
                         'titles': source.get('titles', []),
                         'werkID': source.get('werkID'),
                         'record_identifier': doc.get('_id')
                     }
+
+                    for category in source.get('categories', []):
+                        key = category.get('categoryKey')
+                        value = category.get('categoryValue')
+                        if key not in data['meta']:
+                            data['meta'][key] = [value]
+                        else:
+                            data['meta'][key].append(value)
+
+                    for role in source.get('roles', []):
+                        key = role.get('roleKey')
+                        value = role.get('roleValue')
+                        if key not in data['meta']:
+                            data['meta'][key] = [value]
+                        else:
+                            data['meta'][key].append(value)
 
                     serialize_quamerdes(data, archive)
 
@@ -165,11 +171,11 @@ class LoadSampleKB(Command):
 
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 
-    def run(self, datadir='/Users/bart/Desktop/quamerdes'):
+    def run(self, datadir='/Users/bart/Desktop/quamerdes', sample_size=1000):
         with tarfile.open(os.path.join(datadir, 'de-volkskrant.tar.gz'), 'r:gz') as t:
             s = 0
             for member in t:
-                if s == 1000:
+                if s == sample_size:
                     break
                 logger.debug('Extracting %s' % member.name)
                 f = t.extractfile(member)
@@ -187,13 +193,12 @@ class LoadSampleKB(Command):
 class LoadSampleImmix(Command):
 
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
-    size = 1000
 
-    def run(self, datadir='/Users/bart/Desktop/quamerdes'):
+    def run(self, datadir='/Users/bart/Desktop/quamerdes', sample_size=1000):
         with tarfile.open(os.path.join(datadir, 'immix.tar.gz'), 'r:gz') as t:
             s = 0
             for member in t:
-                if s == 1000:
+                if s == sample_size:
                     break
                 logger.debug('Extracting %s' % member.name)
                 f = t.extractfile(member)
@@ -250,9 +255,10 @@ class InitTestEnv(Command):
 
     option_list = (
         Option('--data', '-d', dest='datadir', default='/Users/bart/Desktop/quamerdes'),
+        Option('--samplesize', '-s', dest='sample_size', default=1000),
     )
 
-    def run(self, datadir):
+    def run(self, datadir, sample_size):
         delete_indices = DeleteIndices()
         delete_indices.run()
 
@@ -260,10 +266,10 @@ class InitTestEnv(Command):
         put_settings.run()
 
         load_kb = LoadSampleKB()
-        load_kb.run(datadir=datadir)
+        load_kb.run(datadir=datadir, sample_size=sample_size)
 
         load_immix = LoadSampleImmix()
-        load_immix.run(datadir=datadir)
+        load_immix.run(datadir=datadir, sample_size=sample_size)
 
         create_aliases = CreateAliases()
         create_aliases.run()

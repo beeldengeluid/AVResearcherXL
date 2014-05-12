@@ -21,18 +21,9 @@
               "type": "string",
               "index": "not_analyzed"
             },
-            "categories": {
-              "properties": {
-                "key": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                },
-                "value": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                }
-              },
-              "type": "nested"
+            "cast": {
+                "type": "string",
+                "index": "not_analyzed"
             },
             "descriptions": {
               "type": "string"
@@ -41,9 +32,21 @@
               "type": "string",
               "index": "not_analyzed"
             },
+            "genre": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "geoName": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
             "immixDate": {
               "type": "date",
               "format": "dateOptionalTime"
+            },
+            "keyword": {
+                "type": "string",
+                "index": "not_analyzed"
             },
             "levelTitles": {
               "properties": {
@@ -74,6 +77,30 @@
                 }
               }
             },
+            "maker": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "name": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "oorspronkelijkartistiekmaker": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "opdrachtgever": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "person": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "producent": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
             "realisatieID": {
               "type": "string",
               "index": "not_analyzed"
@@ -90,26 +117,17 @@
               "type": "string",
               "index": "not_analyzed"
             },
-            "roles": {
-              "properties": {
-                "key": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                },
-                "value": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                },
-                "playerFunction": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                },
-                "playerName": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                }
-              },
-              "type": "nested"
+            "sponsor": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "spreker": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "subsidiegever": {
+                "type": "string",
+                "index": "not_analyzed"
             },
             "subtitles": {
               "type": "string"
@@ -117,8 +135,16 @@
             "summaries": {
               "type": "string"
             },
+            "theme": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
             "titles": {
               "type": "string"
+            },
+            "uitvoerende": {
+                "type": "string",
+                "index": "not_analyzed"
             }
           }
         }
