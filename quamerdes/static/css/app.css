@@ -442,15 +442,6 @@ svg.barchart .y.axis path, svg.barchart .y.axis line {
     padding: 0;
 }
 
-.q1 .cloud, svg.q1 {
-    border-bottom: 2px solid #009fda;
-}
-
-.q2 .cloud, svg.q2 {
-    border-bottom: 2px solid #e00034;
-    float: right;
-}
-
 svg.barchart rect.q1 {
     fill: #009fda;
 }
