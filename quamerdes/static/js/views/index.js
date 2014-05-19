@@ -42,11 +42,13 @@ function($, _, Backbone, BaseView, SearchView, TimeseriesView, AggregationsView,
             });
 
             this.aggregations_view1 = new AggregationsView({
-                model: query_model_1
+                model: query_model_1,
+                name: 'q1'
             });
 
             this.aggregations_view2 = new AggregationsView({
-                model: query_model_2
+                model: query_model_2,
+                name: 'q2'
             });
         },
 
