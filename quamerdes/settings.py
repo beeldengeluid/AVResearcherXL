@@ -199,24 +199,22 @@ DEFAULT_AGGREGATIONS = ['genres', 'channels', 'producers', 'people',
 DATE_AGGREGATION = 'dates'
 
 # Definition of sources/fields that can be used for free text searching
-AVAILABLE_INDICES = [
-    {
-        'id': 'immix',
+AVAILABLE_INDICES = {
+    'immix': {
         'name': 'iMMix metadata',
         'icon': 'icon-film',
         'index_name': 'quamerdes_immix',
-        'aggregations': ['genres', 'channels', 'producers', 'people', 'geonames',
-                         'keywords', 'descriptive_terms']
+        'aggregations': ['genres', 'channels', 'producers', 'people', 'dates',
+                         'geonames', 'keywords', 'descriptive_terms']
     },
-    {
-        'id': 'kb',
+    'kb': {
         'name': 'KB kranten',
         # This will be something else
         'icon': 'icon-book',
         'index_name': 'quamerdes_kb',
-        'aggregations': ['article_type', 'descriptive_terms']
+        'aggregations': ['article_type', 'descriptive_terms', 'dates']
     }
-]
+}
 
 # The fields that should be returned for each hit when searching
 # SEARCH_HIT_FIELDS = ['mainTitle', 'broadcastDates', 'summaries']
