@@ -8,8 +8,10 @@ function($, _, Backbone, app){
     AvrApiModel = Backbone.Model.extend({
         defaults: function(){
             return {
+                activeAgg: null,
                 enabledIndex: 'quamerdes_immix',
-                enabledAggregations: AVAILABLE_AGGREGATIONS,
+                availableAggregations: AVAILABLE_AGGREGATIONS,
+                availableIndices: AVAILABLE_INDICES,
                 // enabledSearchHitFields: SEARCH_HIT_FIELDS,
                 hitsPerPage: HITS_PER_PAGE,
                 startAtHit: 0,
@@ -167,10 +169,11 @@ function($, _, Backbone, app){
         // Use the query properties that are set as instance attributes to generate
         // an ES query
         constructQueryPayload: function(){
-            var self = this;
+            var self = this,
+                index = this.get('enabledIndex');
             var payload = {
                 query: {},
-                index: this.get('enabledIndex')
+                index: index
             };
 
             payload.query.filtered = {
@@ -228,25 +231,22 @@ function($, _, Backbone, app){
             /*
             AGGREGATIONS
             */
-            var aggregations = {},
-                ESAggFields = ['date_histogram', 'terms', 'significant_terms'];
+            var ESAggFields = ['date_histogram', 'terms', 'significant_terms'],
+                availableAggs = this.get('availableAggregations'),
+                aggsForIndex = this.getAggregationNames(),
+                // get appropriate aggregations for the currently searched index
+                aggregations = _.pick(availableAggs, aggsForIndex);
 
-            _.each(this.get('enabledAggregations'), function(aggregation, aggregationName){
-                aggregations[aggregationName] = {};
-                _.each(aggregation, function(optionValue, optionName){
-                    if(_.contains(ESAggFields, optionName)){
-                        if(optionName == 'date_histogram'){
-                            var interval = self.get('interval');
-                            if(!interval) interval = self.get('defaultInterval');
-                            optionValue.interval = interval;
+            _.each(aggregations, function(optionValue, optionName){
+                if(_.contains(ESAggFields, optionName)){
+                    if(optionName == 'date_histogram'){
+                        var interval = self.get('interval');
+                        if(!interval) interval = self.get('defaultInterval');
+                        optionValue.interval = interval;
 
-                            aggregations[aggregationName][optionName] = optionValue;
-                        }
-                        else {
-                            aggregations[aggregationName][optionName] = optionValue;
-                        }
+                        aggregations[aggregationName][optionName] = optionValue;
                     }
-                });
+                }
             });
 
             payload.aggregations = aggregations;
@@ -256,16 +256,10 @@ function($, _, Backbone, app){
 
             console.log('===============\n', payload, '\n===============');
             return payload;
+        },
 
-
-
-            // // Add the filters to the query payload
-            // payload.query.filtered = filtered;
-
-            // // The fields that are required to render the search results templates
-            // payload._source = this.get('enabledSearchHitFields');
-            // console.log('============\n', payload)
-            // return payload;
+        getAggregationNames: function(){
+            return this.get('availableIndices')[this.get('enabledIndex').replace('quamerdes_', '')].aggregations;
         },
 
         changeSearchIndex: function(index){
@@ -293,7 +287,7 @@ function($, _, Backbone, app){
 
             // Reset query properties
             this.set({
-                enabledAggregations: AVAILABLE_AGGREGATIONS,
+                availableAggregations: AVAILABLE_AGGREGATIONS,
                 hitsPerPage: HITS_PER_PAGE,
                 startAtHit: 0,
                 currentPage: 1,
