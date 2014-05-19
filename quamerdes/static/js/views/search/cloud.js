@@ -13,12 +13,12 @@ define([
         },
 
         initialize: function(options){
-            if (DEBUG) console.log('CloudView:' + options.name + ':initialize');
+            if (DEBUG) console.log('CloudView:' + this.model.get('name') + ':initialize');
             var self = this;
-            this.modelName = options.name;
 
-            this.selectedAggregations = {},
-            this.aggregated = false,
+            this.selectedAggregations = {};
+            this.aggregated = false;
+            this.name = options.name;
 
             this.fontSizeScale = d3.scale.linear()
                 .range([
@@ -26,9 +26,9 @@ define([
                     MAXIMUM_CLOUD_FONTSIZE
                 ]);
 
-            app.vent.on('QueryInput:input:' + this.modelName, function(){
-                _.each(DEFAULT_AGGREGATIONS, function(aggregation){
-                    // Reset selected aggregation values when the search button is clicked
+            // Reset selected aggregation values when the search button is clicked
+            app.vent.on('QueryInput:input:' + this.name, function(){
+                _.each(self.selectedAggregations, function(v, aggregation){
                     self.selectedAggregations[aggregation].length = 0;
                 });
             });
@@ -36,32 +36,26 @@ define([
             _.each(DEFAULT_AGGREGATIONS, function(aggregation){
                 self.selectedAggregations[aggregation] = [];
             });
+
+            return this;
         },
 
-        render: function(tab){
-            if (DEBUG) console.log('CloudView:' + this.modelName + ':render');
+        render: function(){
+            if (DEBUG) console.log('CloudView:' + this.model.get('name') + ':render');
+            if(this.model.get('formattedAggregations') === undefined) return this;
 
-            var aggregationValues = this.model.get('aggregations');
+            var self = this,
+                aggregationValues = _.find(this.model.get('formattedAggregations'), function(aggVal){ return aggVal.id == self.model.get('activeAgg') ? true : false; });
 
-            if(aggregationValues && tab){
-                this.fontSizeScale.domain(
-                    d3.extent(aggregationValues[tab].buckets, function(d){
-                        return d.doc_count;
-                    })
-                );
-                this.$el.html(_.template(cloudTemplate, {
-                    aggregationName: tab,
-                    modelName: this.modelName,
-                    scale: this.fontSizeScale,
-                    terms: aggregationValues[tab].buckets,
-                    selectedAggregations: this.selectedAggregations,
-                    aggregated: this.aggregated
-                }));
-            }
+            this.fontSizeScale.domain(d3.extent(aggregationValues.terms, function(d){ return d.doc_count; }));
 
-            this.$el.find('div.cloud a.aggregation').tooltip({
-                placement: 'right'
-            });
+            this.$el.html(_.template(cloudTemplate, {
+                scale: this.fontSizeScale,
+                aggregation: aggregationValues,
+                selectedAggregationValues: this.selectedAggregations,
+                modelName: this.name,
+                aggregated: this.aggregated
+            }));
 
             return this;
         },

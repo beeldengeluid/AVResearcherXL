@@ -17,43 +17,48 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
 
         initialize: function(options){
             if (DEBUG) console.log('AggregationsView:initialize');
-            // this.aggregated = { q1: false, q2: false },
             var self = this;
+            this.name = options.name;
 
             this.aggregations = {};
             this.aggregated = {};
-
-            this.clouds = {};
-            this.barcharts = {};
-
-            this.selectedAggregations = {};
-            this.activeTab = DEFAULT_AGGREGATIONS[0];
-
             this.representation = 'clouds';
-            this.models = options.models;
 
             // Control visibility on init. Element is shown on first query.
             this.is_visible = true;
             app.vent.once('QueryInput:input', this.toggleVisibility, this);
 
-            _.each(this.models, function(model, modelName){
-                self.clouds[modelName] = new CloudView({
-                    model: model,
-                    name: modelName
-                });
-                self.barcharts[modelName] = new BarChartView({
-                    model: model,
-                    name: modelName
-                });
+            this.cloud = new CloudView({
+                model: this.model,
+                name: this.name
             });
 
-            _.each(this.models, function(model, modelName){
-                model.on('change:aggregations', self.formatData, self);
+            this.barchart = new BarChartView({
+                model: this.model,
+                name: this.name
             });
 
-            _.each(DEFAULT_AGGREGATIONS, function(aggregation){
-                self.aggregations[aggregation] = {name: AVAILABLE_AGGREGATIONS[aggregation].name};
-            });
+            this.model.on('change:aggregations', this.formatData, this);
+            this.model.on('change:formattedAggregations', this.render, this);
+
+            // _.each(this.models, function(model, modelName){
+            //     self.clouds[modelName] = new CloudView({
+            //         model: model,
+            //         name: modelName
+            //     });
+            //     self.barcharts[modelName] = new BarChartView({
+            //         model: model,
+            //         name: modelName
+            //     });
+            // });
+
+            // _.each(this.models, function(model, modelName){
+            //     model.on('change:aggregations', self.formatData, self);
+            // });
+
+            // _.each(DEFAULT_AGGREGATIONS, function(aggregation){
+            //     self.aggregations[aggregation] = {name: AVAILABLE_AGGREGATIONS[aggregation].name};
+            // });
         },
 
         render: function(icon){
@@ -61,25 +66,13 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
             var self = this;
 
             this.$el.html(_.template(aggregationsTemplate, {
-                aggregations: this.aggregations,
-                activeTab: this.activeTab,
+                aggregations: this.model.get('formattedAggregations'),
+                activeTab: this.model.get('activeAgg'),
                 representation: this.representation
             }));
 
-            _.each(this.models, function(model, modelName){
-                var tab = self[self.representation][modelName];
-                tab.setElement(self.$el.find('div.tab-' + self.activeTab + ' div.' + modelName)).render(self.activeTab);
-            });
 
-            // Make sure the cloud boxes of Q1 and Q2 are of equal height
-            var height = 0;
-            this.$el.find('.tab-' + this.activeTab + ' .cloud').each(function(){
-                var el_height = $(this).height();
-                if(el_height > height){
-                    height = el_height;
-                }
-            });
-            this.$el.find('.tab-' + this.activeTab + ' .cloud').height(height);
+            this.cloud.setElement(this.$el.find('.tab-content')).render();
 
             return this;
         },
@@ -91,9 +84,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
             var clicked_rep = $(event.target);
 
             // Do nothing if we are already showing this representation
-            if(clicked_rep.data('representation') == this.representation){
-                return;
-            }
+            if(clicked_rep.data('representation') == this.representation) return;
 
             this.representation = clicked_rep.data('representation');
             this.render();
@@ -101,63 +92,29 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
 
         formatData: function(){
             if (DEBUG) console.log('AggregationsView:formatData');
-            var self = this;
-            var aggregations = {};
+            var self = this,
+                aggs = this.model.get('aggregations'),
+                availableAggregations = this.model.get('availableAggregations'),
+                facets = this.model.getAggregationNames();
 
-            _.each(DEFAULT_AGGREGATIONS, function(aggregation){
-                aggregations[aggregation] = {};
-                _.each(self.models, function(model){
-                    if(model.get('aggregations')){
-                        aggregations[aggregation][model.get('name')] = {};
-                        _.each(model.get('aggregations')[aggregation].buckets, function(bucket){
-                            aggregations[aggregation][model.get('name')][bucket.key] = bucket.doc_count;
-                        });
-                    }
-                });
-                if(_.keys(aggregations[aggregation]).length > 1){ // there is data for both search boxes
-                    self.aggregations[aggregation]['data'] = {
-                        // 'combined': {'terms': {}, totalCount: 0, maxCount: -Infinity},
-                        'q1': {'terms': {}, totalCount: 0, maxCount: -Infinity},
-                        'q2': {'terms': {}, totalCount: 0, maxCount: -Infinity}
-                    };
-                    var q1Aggregations = aggregations[aggregation].q1;
-                    var q2Aggregations = aggregations[aggregation].q2;
-
-                    _.each(q1Aggregations, function(count, term){
-                        self.aggregations[aggregation].data.q1.terms[term] = count;
-                        self.aggregations[aggregation].data.q1.totalCount += count;
-                        if(q1Aggregations[term] > self.aggregations[aggregation].data.q1.maxCount) self.aggregations[aggregation].data.q1.maxCount = count;
-                    });
-
-                    _.each(q1Aggregations, function(count, term){
-                        self.aggregations[aggregation].data.q2.terms[term] = count;
-                        self.aggregations[aggregation].data.q2.totalCount += count;
-                        if(q1Aggregations[term] > self.aggregations[aggregation].data.q2.maxCount) self.aggregations[aggregation].data.q2.maxCount = count;
-                    });
-
-                    // sum of aggregation counts
-                    self.aggregations[aggregation].sumOfCounts = _.reduce(
-                            _.values(
-                                self.aggregations[aggregation].data
-                            ).map(function(f){
-                                return f.totalCount;
-                            }), function(memo, num){
-                                return memo + num;
-                            }, 0); // zero is the initial state of the reduction (i.e. memo)
-                }
-                else {
-                    var query_id = _.keys(aggregations[aggregation])[0];
-                    self.aggregations[aggregation].data = {};
-                    var totalCount = _.reduce(_.values(_.values(aggregations[aggregation])[0]), function(memo, num){ return memo + num; }, 0);
-                    self.aggregations[aggregation].data[query_id] = {terms:
-                        aggregations[aggregation][query_id],
+            aggregations = [];
+            _.each(facets, function(aggName){
+                if(aggName != 'dates'){
+                    var totalCount = _.reduce(aggs[aggName].buckets, function(memo, bucket){
+                        return memo + bucket.doc_count;
+                    }, 0);
+                    aggregations.push({
+                        id: aggName,
+                        name: availableAggregations[aggName].name,
+                        terms: aggs[aggName].buckets,
                         totalCount: totalCount
-                    };
-                    self.aggregations[aggregation].sumOfCounts = totalCount;
+                    });
                 }
             });
-
-            this.render();
+            if(!this.model.get('activeAgg')){
+                this.model.set('activeAgg', aggregations[0].id);
+            }
+            this.model.set('formattedAggregations', aggregations);
         },
 
         switchTab: function(e){
@@ -169,14 +126,14 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
             if (DEBUG) console.log('AggregationsView:switchTab Switch to \"' + targetTab + '\"');
             app.vent.trigger('Logging:clicks', {
                 action: 'change_facet_tab',
-                fromTab: this.activeTab,
+                fromTab: this.model.get('activeAgg'),
                 toTab: targetTab
             });
 
             // Switch the active tab
             this.$el.find('a[data-target="' + targetTab + '"]').tab('show');
             // Set the active tab
-            this.activeTab = targetTab;
+            this.model.set('activeAgg', targetTab);
 
             // Switch to the correct tab content
             this.$el.find('.tab-pane.active').removeClass('active');

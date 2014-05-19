@@ -1,10 +1,10 @@
 <div class="tabbable">
     <ul class="nav nav-tabs">
-        <% _.each(aggregations, function(aggregation, aggregation_name){ %>
-            <% if(aggregation_name == activeTab){ %>
-                <li class="active"><a href="#" class="nav-tab" data-target="<%= aggregation_name %>"><%= aggregation.name %></a></li>
+        <% _.each(aggregations, function(aggregation){ %>
+            <% if(aggregation.id == activeTab){ %>
+                <li class="active"><a href="#" class="nav-tab" data-target="<%= aggregation.id %>"><%= aggregation.name %></a></li>
             <% } else { %>
-                <li><a href="#" class="nav-tab" data-target="<%= aggregation_name %>"><%= aggregation.name %></a></li>
+                <li><a href="#" class="nav-tab" data-target="<%= aggregation.id %>"><%= aggregation.name %></a></li>
             <% } %>
         <% }); %>
         <%
@@ -20,16 +20,5 @@
         <li class="pull-right representation <%= barcharts %>"><i class="icon-bar-chart icon-2x" data-representation="barcharts"></i></li>
         <li class="pull-right representation <%= clouds %>"><i class="icon-cloud icon-2x" data-representation="clouds"></i></li>
     </ul>
-    <div class="tab-content">
-        <% _.each(aggregations, function(aggregation, aggregation_name){ %>
-            <% if(aggregation_name == activeTab){ %>
-                <div class="tab-pane active tab-<%= aggregation_name %>" data-name="<%= aggregation_name %>">
-            <% } else { %>
-                <div class="tab-pane tab-<%= aggregation_name %>" data-name="<%= aggregation_name %>">
-            <% } %>
-            <div class="q1"></div>
-            <div class="q2"></div>
-        </div>
-        <% }); %>
-    </div>
+    <div class="tab-content"></div>
 </div>
