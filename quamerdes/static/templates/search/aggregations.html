@@ -8,17 +8,17 @@
             <% } %>
         <% }); %>
         <%
-            if(representation == "barcharts"){
-                barcharts = "active";
-                clouds = "inactive";
+            if(representation == "barchart"){
+                barchart = "active";
+                cloud = "inactive";
             }
             else {
-                barcharts = "inactive";
-                clouds = "active";
+                barchart = "inactive";
+                cloud = "active";
             }
         %>
-        <li class="pull-right representation <%= barcharts %>"><i class="icon-bar-chart icon-2x" data-representation="barcharts"></i></li>
-        <li class="pull-right representation <%= clouds %>"><i class="icon-cloud icon-2x" data-representation="clouds"></i></li>
+        <li class="pull-right representation <%= barchart %>"><i class="icon-bar-chart icon-2x" data-representation="barchart"></i></li>
+        <li class="pull-right representation <%= cloud %>"><i class="icon-cloud icon-2x" data-representation="cloud"></i></li>
     </ul>
     <div class="tab-content"></div>
 </div>

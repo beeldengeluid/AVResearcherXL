@@ -22,7 +22,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
 
             this.aggregations = {};
             this.aggregated = {};
-            this.representation = 'clouds';
+            this.representation = 'cloud';
 
             // Control visibility on init. Element is shown on first query.
             this.is_visible = true;
@@ -40,25 +40,6 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
 
             this.model.on('change:aggregations', this.formatData, this);
             this.model.on('change:formattedAggregations', this.render, this);
-
-            // _.each(this.models, function(model, modelName){
-            //     self.clouds[modelName] = new CloudView({
-            //         model: model,
-            //         name: modelName
-            //     });
-            //     self.barcharts[modelName] = new BarChartView({
-            //         model: model,
-            //         name: modelName
-            //     });
-            // });
-
-            // _.each(this.models, function(model, modelName){
-            //     model.on('change:aggregations', self.formatData, self);
-            // });
-
-            // _.each(DEFAULT_AGGREGATIONS, function(aggregation){
-            //     self.aggregations[aggregation] = {name: AVAILABLE_AGGREGATIONS[aggregation].name};
-            // });
         },
 
         render: function(icon){
@@ -71,8 +52,8 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
                 representation: this.representation
             }));
 
-
-            this.cloud.setElement(this.$el.find('.tab-content')).render();
+            if(this.representation == 'cloud') this.cloud.setElement(this.$el.find('.tab-content')).render();
+            if(this.representation == 'barchart') this.barchart.setElement(this.$el.find('.tab-content')).render();
 
             return this;
         },

@@ -30,13 +30,15 @@ function($, _, Backbone, d3, app, barchartTemplate){
         },
 
         render: function(tab){
+            if(this.model.get('formattedAggregations') === undefined) return this;
             if (DEBUG) console.log('BarChartView:' + this.modelName + ':render');
-            var self = this;
-            var aggregations = this.model.get('aggregations');
-            var heights = [];
+            var self = this,
+                aggregations = this.model.get('aggregations'),
+                aggregationValues = _.find(this.model.get('formattedAggregations'), function(aggVal){ return aggVal.id == self.model.get('activeAgg') ? true : false; }),
+                heights = [];
 
-            if(aggregations){
-                var data = _.first(aggregations[tab].buckets, this.chart.nrOfBars);
+            if(aggregationValues){
+                var data = _.first(aggregationValues.terms, this.chart.nrOfBars);
 
                 var svg = d3.select(this.el)
                     .append('svg')
@@ -45,7 +47,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
                 var height = this.chart.barHeight * data.length;
                 heights.push(height); // Use to determine optimal height
 
-                var width = this.$el.find('svg').width() - this.chart.margin.right - this.chart.margin.left;
+                 var width = this.$el.find('svg').width() - this.chart.margin.right - this.chart.margin.left;
 
                 // Add dimensions here, as we need to find the initial width that is inherited from the div above
                 svg.attr('height', height + this.chart.margin.top + this.chart.margin.bottom)
