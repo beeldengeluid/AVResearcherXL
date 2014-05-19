@@ -92,7 +92,11 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, aggregationsTemplate)
                     });
                 }
             });
-            if(!this.model.get('activeAgg')){
+
+            // If the active aggregations hasn't been set, or if it isn't in the aggragations
+            // anymore (when changing collections, for example), set the active aggregation to
+            // the first aggregation
+            if(!this.model.get('activeAgg') || !(_.contains(aggregations, this.model.get('activeAgg')))){
                 this.model.set('activeAgg', aggregations[0].id);
             }
             this.model.set('formattedAggregations', aggregations);
