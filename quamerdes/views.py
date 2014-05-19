@@ -288,16 +288,16 @@ def search():
     print payload
     results = es_search.search(index=index, body=payload)
 
-    aggregations = results.get('aggregations', None)
+    # aggregations = results.get('aggregations', None)
 
-    # We have to do this weird stuff because the aggregations module doesn't
-    # support our nested meta structure as well as the facets did; we should
-    # probably extract the data differently though
-    if aggregations:
-        for aggregation in aggregations:
-            agg_settings = settings.AVAILABLE_AGGREGATIONS.get(aggregation, None)
-            if agg_settings and agg_settings.get('nested'):
-                results['aggregations'][aggregation] = aggregations[aggregation][aggregation][aggregation]
+    # # We have to do this weird stuff because the aggregations module doesn't
+    # # support our nested meta structure as well as the facets did; we should
+    # # probably extract the data differently though
+    # if aggregations:
+    #     for aggregation in aggregations:
+    #         agg_settings = settings.AVAILABLE_AGGREGATIONS.get(aggregation, None)
+    #         if agg_settings and agg_settings.get('nested'):
+    #             results['aggregations'][aggregation] = aggregations[aggregation][aggregation][aggregation]
 
     return jsonify(results)
 
