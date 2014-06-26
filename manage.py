@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from flask.ext.script import Server, Manager, Command, Option, prompt, prompt_pass
 from quamerdes import app
 from elasticsearch import Elasticsearch
@@ -9,9 +11,9 @@ import logging
 import random
 import os
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
-from quamerdes.models import User
+from quamerdes_new.models import User
 from quamerdes.views import bcrypt
-from quamerdes import db
+from quamerdes_new.extensions import db
 
 import zipfile
 import tarfile
@@ -171,8 +173,8 @@ class LoadSampleKB(Command):
 
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 
-    def run(self, datadir='/Users/bart/Desktop/quamerdes', sample_size=1000):
-        with tarfile.open(os.path.join(datadir, 'de-volkskrant.tar.gz'), 'r:gz') as t:
+    def run(self, datadir='/vagrant/data', sample_size=10000):
+        with tarfile.open(os.path.join(datadir, 'leeuwarder-courant.tar.gz'), 'r:gz') as t:
             s = 0
             for member in t:
                 if s == sample_size:
@@ -196,7 +198,7 @@ class LoadSampleImmix(Command):
 
     es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 
-    def run(self, datadir='/Users/bart/Desktop/quamerdes', sample_size=1000):
+    def run(self, datadir='/vagrant/data/', sample_size=10000):
         with tarfile.open(os.path.join(datadir, 'immix.tar.gz'), 'r:gz') as t:
             s = 0
             for member in t:

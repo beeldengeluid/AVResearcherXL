@@ -14,7 +14,7 @@ function($, _, Backbone, app, resultsListTemplate){
         initialize: function(){
             // Control visibility on init. Element is shown on first query.
             this.is_visible = true;
-            app.vent.once('QueryInput:input', this.toggleVisibility, this);
+            //app.vent.once('QueryInput:input', this.toggleVisibility, this);
 
             this.model.on('change:hits', this.render, this);
             this.model.on('change:hits', this.logResults, this);
@@ -23,6 +23,7 @@ function($, _, Backbone, app, resultsListTemplate){
         render: function(){
             if (DEBUG) console.log('ResultsListView:render');
 
+            this.$el.find('li').remove();
             this.$el.html(_.template(resultsListTemplate, {
                 hits: this.model.get('hits')
             }));

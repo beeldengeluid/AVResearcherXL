@@ -2,98 +2,54 @@ import re
 import uuid
 import json
 
-from flask import request, render_template, jsonify, abort
-from flask.ext.bcrypt import Bcrypt
-from flask.ext.mail import Mail, Message
-from flask.ext.login import (LoginManager, login_user, logout_user,
-                             login_required, current_user)
+from flask import (Blueprint, current_app, render_template, abort, request,
+                   jsonify)
+from flask.ext.login import login_user, logout_user, login_required, current_user
+from flask.ext.mail import Message
 
-from settings import (DEBUG, MESSAGES, MAIL_DEFAULT_SENDER,
-                      MAIL_ACCOUNT_APPROVAL_ADDRESS, HITS_PER_PAGE,
-                      ALLOWED_INTERVALS, AVAILABLE_AGGREGATIONS, DEFAULT_AGGREGATIONS,
-                      DATE_AGGREGATION, AVAILABLE_INDICES,
-                      MINIMUM_CLOUD_FONTSIZE,
-                      MAXIMUM_CLOUD_FONTSIZE, BARCHART_BARS,
-                      BARCHART_BAR_HEIGHT, HIT_HIGHLIGHT_FIELDS,
-                      HIT_HIGHLIGHT_FRAGMENT_SIZE, HIT_HIGHLIGHT_FRAGMENTS,
-                      ENABLE_USAGE_LOGGING, LOG_EVENTS, ES_SEARCH_INDEX,
-                      ES_ALL_INDICES, ES_LOG_INDEX, ABOUT_PAGE_CONTENT_URL,
-                      HELP_PAGE_CONTENT_URL)
-from quamerdes import app, db, es_search, es_log, settings
-from models import User
+from .extensions import db, mail, bcrypt
+from .models import User
+
+
+views = Blueprint('views', __name__)
 
 R_EMAIL = re.compile(r'^.+@[^.].*\.[a-z]{2,10}$', re.IGNORECASE)
-bcrypt = Bcrypt(app)
-mail = Mail(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    """ Callback for reloading a user from the session. None is returned
-    if the user does not exist."""
-    return db.session.query(User).get(int(user_id))
-
-
-@login_manager.unauthorized_handler
-def unauthorized_response():
-    """ This response is returned when the user is required to log in
-    (i.e. the view function is decorated with `login_required`)."""
-
-    resp = jsonify({
-        'success': False,
-        'errors': [MESSAGES['login_required']]
-    })
-    resp.status_code = 401
-
-    return resp
-
-
-@app.route('/', methods=['GET'])
+@views.route('/', methods=['GET'])
 def index():
-    app_settings = {
-        'DEBUG': DEBUG,
-        'HITS_PER_PAGE': HITS_PER_PAGE,
-        'ALLOWED_INTERVALS': ALLOWED_INTERVALS,
-        'AVAILABLE_AGGREGATIONS': AVAILABLE_AGGREGATIONS,
-        'DEFAULT_AGGREGATIONS': DEFAULT_AGGREGATIONS,
-        'DATE_AGGREGATION': DATE_AGGREGATION,
-        'AVAILABLE_INDICES': AVAILABLE_INDICES,
-        # 'SEARCH_HIT_FIELDS': SEARCH_HIT_FIELDS,
-        'MINIMUM_CLOUD_FONTSIZE': MINIMUM_CLOUD_FONTSIZE,
-        'MAXIMUM_CLOUD_FONTSIZE': MAXIMUM_CLOUD_FONTSIZE,
-        'BARCHART_BARS': BARCHART_BARS,
-        'BARCHART_BAR_HEIGHT': BARCHART_BAR_HEIGHT,
-        'HIT_HIGHLIGHT_FIELDS': HIT_HIGHLIGHT_FIELDS,
-        'HIT_HIGHLIGHT_FRAGMENTS': HIT_HIGHLIGHT_FRAGMENTS,
-        'HIT_HIGHLIGHT_FRAGMENT_SIZE': HIT_HIGHLIGHT_FRAGMENT_SIZE,
-        'HELP_PAGE_CONTENT_URL': HELP_PAGE_CONTENT_URL,
-        'ABOUT_PAGE_CONTENT_URL': ABOUT_PAGE_CONTENT_URL,
-        'ENABLE_USAGE_LOGGING': ENABLE_USAGE_LOGGING,
-        'LOG_EVENTS': LOG_EVENTS,
-        'AUTHENTICATED_USER': False,
-        'USER': None
-    }
+    exposed_settings = [
+        'DEBUG', 'HITS_PER_PAGE', 'ALLOWED_INTERVALS', 'DATE_AGGREGATION',
+        'COLLECTIONS_CONFIG', 'ENABLED_COLLECTIONS', 'REQUIRED_FIELDS',
+        'MINIMUM_CLOUD_FONTSIZE', 'MAXIMUM_CLOUD_FONTSIZE', 'BARCHART_BARS',
+        'BARCHART_BAR_HEIGHT', 'HIT_HIGHLIGHT_FIELDS', 'HIT_HIGHLIGHT_FRAGMENTS',
+        'HIT_HIGHLIGHT_FRAGMENT_SIZE', 'HELP_PAGE_CONTENT_URL', 'LOG_EVENTS',
+        'ABOUT_PAGE_CONTENT_URL', 'ENABLE_USAGE_LOGGING', 'DATE_STATS_AGGREGATION'    ]
+
+    settings = {}
+    for setting in exposed_settings:
+        settings[setting] = current_app.config[setting]
 
     if current_user.is_authenticated():
-        app_settings['AUTHENTICATED_USER'] = True
-        app_settings['USER'] = {
+        settings['AUTHENTICATED_USER'] = True
+        settings['USER'] = {
             'name': current_user.name,
             'organization': current_user.organization,
             'email': current_user.email
         }
+    else:
+        settings['AUTHENTICATED_USER'] = False
+        settings['USER'] = None
 
-    return render_template('index.html', settings=app_settings)
+    return render_template('index.html', settings=settings)
 
 
-@app.route('/verify_email/<int:user_id>/<token>')
+@views.route('/verify_email/<int:user_id>/<token>')
 def verify_email(user_id, token):
-    """ When visited with a valid `user_id` and `token` combination,
+    """When visited with a valid `user_id` and `token` combination,
     the user's mailaddress is marked as 'verified'. The person
     responsible for approving accounts will recieve an email about the
     new registration with a link to approve the account."""
-
     user = db.session.query(User)\
         .filter_by(id=user_id, email_verification_token=token).first()
 
@@ -111,30 +67,32 @@ def verify_email(user_id, token):
                                                          user.id,
                                                          user.approval_token)
 
+    MESSAGES = current_app.config['MESSAGES']
+
     msg = Message(MESSAGES['email_approval_subject'],
-                  sender=MAIL_DEFAULT_SENDER,
-                  recipients=[MAIL_ACCOUNT_APPROVAL_ADDRESS])
+                  sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                  recipients=current_app.config['MAIL_ACCOUNT_APPROVAL_ADDRESS'])
 
     msg.body = MESSAGES['email_approval_body'] % (user.name, user.organization,
-                                                  user.email, approve_url)
+                                              user.email, approve_url)
     mail.send(msg)
 
     messages = {
         'email_verified_title': MESSAGES['email_verified_title'] % user.name,
         'email_verified_content': MESSAGES['email_verified_content']
     }
+
     return render_template('verify_email.html', **messages)
 
 
-@app.route('/approve_user/<int:user_id>/<token>')
+@views.route('/approve_user/<int:user_id>/<token>')
 def approve_user(user_id, token):
-    """ When visited with a valid `user_id` and `token` combination, the
+    """When visited with a valid `user_id` and `token` combination, the
     user's account is marked as 'approved'. An email notification of
     this approval will be send to the user."""
-
     user = db.session.query(User)\
-             .filter_by(id=user_id, approval_token=token, email_verified=True)\
-             .first()
+                     .filter_by(id=user_id, approval_token=token, email_verified=True)\
+                     .first()
 
     if not user:
         abort(401)
@@ -144,9 +102,12 @@ def approve_user(user_id, token):
     db.session.add(user)
     db.session.commit()
 
+    MESSAGES = current_app.config['MESSAGES']
+
     # Notify the user of approval by email
     msg = Message(MESSAGES['email_approved_subject'],
-                  sender=MAIL_DEFAULT_SENDER, recipients=[user.email])
+                  sender=current_app.config['MAIL_DEFAULT_SENDER'],
+                  recipients=[user.email])
 
     msg.body = MESSAGES['email_approved_body'] % (user.name, request.url_root + 'avresearcher/')
 
@@ -157,10 +118,12 @@ def approve_user(user_id, token):
                            % user.name)
 
 
-@app.route('/api/register', methods=['POST'])
+@views.route('/api/register', methods=['POST'])
 def register():
     """Register a new user account."""
     errors = []
+
+    MESSAGES = current_app.config['MESSAGES']
 
     # Return errors when required fields are not provided or empty
     required_field = ['name', 'email', 'password']
@@ -207,7 +170,7 @@ def register():
                                                               user.email_verification_token)
 
     msg = Message(MESSAGES['email_verification_subject'],
-                  sender=MAIL_DEFAULT_SENDER,
+                  sender=current_app.conf['MAIL_DEFAULT_SENDER'],
                   recipients=[request.form['email']])
     msg.body = MESSAGES['email_verification_body']\
         % (request.form['name'], verification_url)
@@ -216,10 +179,12 @@ def register():
     return jsonify({'success': True})
 
 
-@app.route('/api/login', methods=['POST'])
+@views.route('/api/login', methods=['POST'])
 def login():
     """Login the user."""
     errors = []
+
+    MESSAGES = current_app.config['MESSAGES']
 
     # Return errors when required fields are not provided or empty
     required_field = ['email', 'password']
@@ -269,7 +234,7 @@ def login():
     })
 
 
-@app.route('/api/logout', methods=['GET'])
+@views.route('/api/logout', methods=['GET'])
 @login_required
 def logout():
     """Logs out the user by deleting the session."""
@@ -278,45 +243,39 @@ def logout():
     return jsonify({'success': True})
 
 
-@app.route('/api/search', methods=['POST'])
+@views.route('/api/search', methods=['POST'])
 @login_required
 def search():
     payload = json.loads(request.form['payload'])
-    # We use aliases, so don't do this in the query
-    index = payload.pop('index', ','.join('quamerdes_immix'))
-    print index
-    print payload
-    results = es_search.search(index=index, body=payload)
+    if type(payload) is dict:
+        index = current_app.config['COLLECTIONS_CONFIG'].get(payload.pop('index'))['index_name']
+        results = current_app.es_search.search(index=index, body=payload)
+    elif type(payload) is list:
+        body = []
+        for query in payload:
+            body.append({'index': current_app.config['COLLECTIONS_CONFIG'].get(query.pop('index'))['index_name']})
+            body.append(query)
 
-    # aggregations = results.get('aggregations', None)
-
-    # # We have to do this weird stuff because the aggregations module doesn't
-    # # support our nested meta structure as well as the facets did; we should
-    # # probably extract the data differently though
-    # if aggregations:
-    #     for aggregation in aggregations:
-    #         agg_settings = settings.AVAILABLE_AGGREGATIONS.get(aggregation, None)
-    #         if agg_settings and agg_settings.get('nested'):
-    #             results['aggregations'][aggregation] = aggregations[aggregation][aggregation][aggregation]
+        results = current_app.es_search.msearch(body=body)
 
     return jsonify(results)
 
 
-@app.route('/api/count', methods=['POST'])
+@views.route('/api/count', methods=['POST'])
 @login_required
 def count():
     payload = json.loads(request.form['payload'])
-    indices = payload.get('indices', ','.join(ES_ALL_INDICES))
+    indices = payload.get('indices', ','.join(current_app.config['ES_ALL_INDICES']))
     query = payload.get('query')
     if not query:
         # Return error here
         print 'No query provided'
-    results = es_search.count(index=indices, body=query)
+    results = current_app.es_search.count(index=indices, body=query)
 
     return jsonify(results)
 
 
-@app.route('/api/log_usage', methods=['POST'])
+@views.route('/api/log_usage', methods=['POST'])
 @login_required
 def log_usage():
     events = json.loads(request.form['events'])
@@ -326,9 +285,9 @@ def log_usage():
     # Add the user's ID to each event
     for event in events:
         event['user_id'] = user_id
-        bulkrequest = bulkrequest + '\n' + '{ "create" : { "_index" : "' + ES_LOG_INDEX + '", "_type" : "event" } }'
+        bulkrequest = bulkrequest + '\n' + '{ "create" : { "_index" : "' + current_app.config['ES_LOG_INDEX'] + '", "_type" : "event" } }'
         bulkrequest = bulkrequest + '\n' + json.dumps(event)
 
-    es_log.bulk(body=bulkrequest)
+    current_app.es_log.bulk(body=bulkrequest)
 
     return jsonify({'success': True})

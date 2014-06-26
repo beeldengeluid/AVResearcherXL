@@ -4,6 +4,10 @@
       "properties": {
         "meta": {
           "properties": {
+            "publication_name": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
             "article_type": {
               "type": "string",
               "index": "not_analyzed"

@@ -1,0 +1,5 @@
+<ul>
+<% _.each(enabledCollections, function(collection){ %>
+  <li><a class="ir" title="<%= collections[collection].name %>" data-collection="<%= collection %>"><%= collection %></a></li>
+<% }); %>
+</ul>

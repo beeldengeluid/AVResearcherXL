@@ -1,66 +1,12 @@
 <ul>
 <% _.each(hits, function(hit){ %>
     <li>
-        <h2>
-            <%
-                var hit_id = hit._id,
-                    source = hit._source.source;
-                if(hit._index.indexOf('quamerdes_immix') == 0){
-                    hit_id = hit_id.replace(/_/g, '/');
-                    source = source.replace(/_/g, '/');
-                }
-            %>
-            <a href="<%= source %>" target="_blank" data-id="<%= hit_id %>">
-                <%
-                var title = '<em>No title available</em>';
-                if(hit.highlight.title){
-                    title = hit.highlight.title;
-                }
-                else if(hit._source.title){
-                    title = hit._source.title;
-                }
-                print(title);
-                %>
-            </a>
-        </h2>
-    <% if('highlight' in hit){ %>
-        <ul class="description">
-        <% _.each(hit.highlight, function(snippet, field){ %>
-            <% if(field == 'text'){ %>
-                <li>
-                    <p class="snippet"><%= snippet[0] %></p>
-                </li>
-            <% } %>
-        <% }); %>
-        </ul>
-    <% } %>
-        <ul class="metadata">
-            <li>
-                <span><i class="icon-calendar"></i>
-                <%
-                    // KB articles do not have a time associated, so use other date
-                    // formatter. Include time by default
-                    if(hit._index.indexOf('quamerdes_kb') == 0){
-                        var format = d3.time.format('%a %b %-e, %Y');
-                    } else {
-                        var format = d3.time.format('%a %b %-e, %Y at %H:%M');
-                    }
-                    var date_hit = format(new Date(hit._source.date));
-                %>
-                <%= date_hit %></span>
-                <span>
-                    <%
-                        var idx = _.find(AVAILABLE_INDICES, function(idx){
-                            if(hit._index.indexOf(idx.index_name) == 0) return idx;
-                        });
-                        var hit_source_icon = idx.icon,
-                            hit_source = idx.name;
-                    %>
-                    <i class="<%= hit_source_icon %>"></i>
-                    <%= hit_source %>
-                </span>
-            </li>
-        </ul>
+        <h2><a href="<%= hit.fields.source %>" target="_blank"><%= hit.fields.title %></a></h2>
+        <%
+            var format = d3.time.format('%a %b %-e, %Y at %H:%M');
+            var date = format(new Date(hit.fields.date));
+        %>
+        <div class="date"><%= date %></div>
     </li>
 <% }); %>
 </ul>

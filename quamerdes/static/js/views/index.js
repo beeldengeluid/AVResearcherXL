@@ -2,18 +2,21 @@ define([
     'jquery',
     'underscore',
     'backbone',
+    'app',
     'views/base',
     'views/search',
     'views/search/timeseries',
-    'views/search/aggregations',
     'text!../../templates/index.html',
     'models/avrapi'
 ],
-function($, _, Backbone, BaseView, SearchView, TimeseriesView, AggregationsView,
-         indexTemplate, AvrApiModel){
+function($, _, Backbone, app, BaseView, SearchView, TimeseriesView, indexTemplate,
+         AvrApiModel){
     var IndexView = Backbone.View.extend({
         parent: $('#main'),
         id: 'search',
+        events: {
+            'click .change-view a': 'changeViewClick'
+        },
 
         initialize: function(options){
             this.el = $(this.el);
@@ -40,16 +43,6 @@ function($, _, Backbone, BaseView, SearchView, TimeseriesView, AggregationsView,
                 widthElement: '#timeseries',
                 height: 280
             });
-
-            this.aggregations_view1 = new AggregationsView({
-                model: query_model_1,
-                name: 'q1'
-            });
-
-            this.aggregations_view2 = new AggregationsView({
-                model: query_model_2,
-                name: 'q2'
-            });
         },
 
         render: function(){
@@ -59,11 +52,18 @@ function($, _, Backbone, BaseView, SearchView, TimeseriesView, AggregationsView,
             // Setup all subviews
             this.search_view_1.setElement(this.$el.find('#search_1')).render();
             this.search_view_2.setElement(this.$el.find('#search_2')).render();
-            this.timeseries_view.setElement(this.$el.find('#timeseries')).render().toggleVisibility();
-            this.aggregations_view1.setElement(this.$el.find('#aggregations .aggregation.q1')).render().toggleVisibility();
-            this.aggregations_view2.setElement(this.$el.find('#aggregations .aggregation.q2')).render().toggleVisibility();
+            this.timeseries_view.setElement(this.$el.find('#timeseries')).render();
 
             return this;
+        },
+
+        changeViewClick: function(e) {
+            e.preventDefault();
+            var clicked_elem = $(e.currentTarget);
+            this.$el.find('.change-view a[data-view="'+ clicked_elem.data('view') +'"]').removeClass('active');
+            clicked_elem.addClass('active');
+
+            app.vent.trigger('changeview:' + clicked_elem.data('view'), clicked_elem.data('target'));
         }
     });
 

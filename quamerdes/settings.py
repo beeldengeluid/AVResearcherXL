@@ -1,6 +1,3 @@
-import os
-_basedir = os.path.abspath(os.path.dirname(__file__))
-
 DEBUG = False
 
 SECRET_KEY = ''
@@ -21,7 +18,7 @@ ES_LOG_URL_PREFIX = ES_SEARCH_URL_PREFIX
 ES_LOG_INDEX = 'avresearcher_logs'
 
 # User database URI
-DATABASE_URI = 'mysql://user:pass@host/db'
+SQLALCHEMY_DATABASE_URI = 'mysql://user:pass@host/db'
 
 # Email settings (used for account activation and user approval)
 MAIL_SERVER = 'localhost'
@@ -79,148 +76,96 @@ MESSAGES = {
     'login_required': 'You must be logged in to use this function'
 }
 
-HITS_PER_PAGE = 5
-ALLOWED_INTERVALS = ['year', 'month', 'week', 'day']
-
-AVAILABLE_AGGREGATIONS = {
-    'dates': {
-        'name': 'Publication date',
-        'description': '',
-        'date_histogram': {
-            'field': 'date',
-            'interval': 'year'  # allowed values are ['year', 'month', 'week', 'day']
-        }
-    },
-    'channels': {
-        'name': 'Channels',
-        'description': '',
-        'terms': {
-            'field': 'meta.broadcasters',
-            'size': 30
-        }
-    },
-    'descriptive_terms': {
-        'name': 'Descriptive terms',
-        'description': '',
-        'significant_terms': {
-            'field': 'text',
-            'size': 30
-        }
-    },
-    'descriptive_subtitle_terms': {
-        'name': 'Descriptive subtitle terms',
-        'description': '',
-        'significant_terms': {
-            'field': 'meta.subtitles',
-            'size': 30
-        }
-    },
-    'producers': {
-        'name': 'Producers',
-        'description': '',
-        'terms': {
-            'field': 'meta.producent',
-            'size': 30
-        }
-    },
-    'genres': {
-        'name': 'Genres',
-        'description': '',
-        'terms': {
-            'field': 'meta.genre',
-            'size': 30
-        }
-    },
-    'people': {
-        'name': 'People',
-        'description': '',
-        'terms': {
-            'field': 'meta.person',
-            'size': 30
-        }
-    },
-    'keywords': {
-        'name': 'Keywords',
-        'description': '',
-        'terms': {
-            'field': 'meta.keyword',
-            'size': 30
-        }
-    },
-    'geonames': {
-        'name': 'Locations',
-        'description': '',
-        'terms': {
-            'field': 'meta.geoName',
-            'size': 30
-        }
-    },
-    'cast': {
-        'name': 'Cast',
-        'description': '',
-        'terms': {
-            'field': 'meta.cast',
-            'size': 30
-        }
-    },
-    'maker': {
-        'name': 'Maker',
-        'description': '',
-        'terms': {
-            'field': 'meta.maker',
-            'size': 30
-        }
-    },
-    'theme': {
-        'name': 'Theme',
-        'description': '',
-        'terms': {
-            'field': 'meta.theme',
-            'size': 30
-        }
-    },
-    'article_type': {
-        'name': 'Article type',
-        'description': '',
-        'terms': {
-            'field': 'meta.article_type',
-            'size': 30
-        }
-    }
-}
-
-# List of facets that are displayed (in the different tabs) by default
-# DEFAULT_FACETS = ['genres', 'channels', 'producers', 'keywords', 'people',
-#                   'tweets', 'subtitles']
-DEFAULT_AGGREGATIONS = ['genres', 'channels', 'producers', 'people',
-                        'geonames', 'keywords', 'descriptive_terms', 'article_type']
-
-# The facet that is used for the date range slider
-DATE_AGGREGATION = 'dates'
-
-# Definition of sources/fields that can be used for free text searching
-AVAILABLE_INDICES = {
+COLLECTIONS_CONFIG = {
     'immix': {
         'name': 'iMMix metadata',
-        'icon': 'icon-film',
         'index_name': 'quamerdes_immix',
-        'aggregations': ['genres', 'channels', 'producers', 'people', 'dates',
-                         'geonames', 'keywords', 'descriptive_terms']
+        'enabled_facets': ['channels', 'descriptive_terms'],
+        'available_aggregations': {
+            'dates_stats': {
+                'stats' : { 'field' : 'date' }
+            },
+            'dates': {
+                'date_histogram': {
+                    'field': 'date',
+                    'interval': 'year',
+                    'min_doc_count': 0
+                }
+            },
+            'channels': {
+                'name': 'Channels',
+                'description': '',
+                'terms': {
+                    'field': 'meta.broadcasters',
+                    'size': 30
+                }
+            },
+            'descriptive_terms': {
+                'name': 'Descriptive terms',
+                'description': '',
+                'significant_terms': {
+                    'field': 'text',
+                    'size': 30
+                }
+            }
+        }
     },
     'kb': {
         'name': 'KB kranten',
-        # This will be something else
-        'icon': 'icon-book',
         'index_name': 'quamerdes_kb',
-        'aggregations': ['article_type', 'descriptive_terms', 'dates']
+        'enabled_facets': ['article_type', 'authors'],
+        'available_aggregations': {
+            'dates_stats': {
+                'stats' : { 'field' : 'date' }
+            },
+            'dates': {
+                'date_histogram': {
+                    'field': 'date',
+                    'interval': 'year',
+                    'min_doc_count': 0
+                }
+            },
+            'descriptive_terms': {
+                'name': 'Descriptive terms',
+                'description': '',
+                'significant_terms': {
+                    'field': 'text',
+                    'size': 30
+                }
+            },
+            'article_type': {
+                'name': 'Article type',
+                'description': '',
+                'terms': {
+                    'field': 'meta.article_type',
+                    'size': 30
+                }
+            },
+            'authors': {
+                'name': 'Authers',
+                'description': '',
+                'terms': {
+                    'field': 'meta.issue.publisher',
+                    'size': 30
+                }
+            }
+        }
     }
 }
 
+ENABLED_COLLECTIONS = ['immix', 'kb']
+
+HITS_PER_PAGE = 5
+ALLOWED_INTERVALS = ['year', 'month', 'week', 'day']
+
+REQUIRED_FIELDS = ['title', 'source', 'date']
+
+# The facet that is used for the date range slider
+DATE_AGGREGATION = 'dates'
+DATE_STATS_AGGREGATION = 'dates_stats'
+
 # The fields that should be returned for each hit when searching
 # SEARCH_HIT_FIELDS = ['mainTitle', 'broadcastDates', 'summaries']
-
-# List of available indices
-ES_ALL_INDICES = ['quamerdes_immix', 'quamerdes_kb']
 
 MINIMUM_CLOUD_FONTSIZE = 10
 MAXIMUM_CLOUD_FONTSIZE = 30

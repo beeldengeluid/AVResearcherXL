@@ -4,29 +4,33 @@ define([
     'backbone',
     'views/base',
     'text!../../templates/search.html',
+    'views/search/collection_selector',
     'views/search/query_input',
     'views/search/query_properties',
     'views/search/timeslider',
     'views/search/results_list',
     'views/search/paginator',
-    'views/search/aggregations'
+    'views/search/facets'
 ],
-function($, _, Backbone, BaseView, searchTemplate, QueryInputView, QueryPropertiesView,
-         TimeSliderView, ResultsListView, PaginatorView, FacetsView){
+function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, QueryInputView,
+         QueryPropertiesView, TimeSliderView, ResultsListView, PaginatorView, FacetsView){
     var SearchView = Backbone.View.extend({
         initialize: function(options){
             this.constructor.__super__.initialize.apply(this, [options]);
             this.name = this.options.name;
+            
+            this.collection_selector = new CollectionSelectorView({ model: this.model });
             this.query_input = new QueryInputView({ model: this.model });
-            this.timeslider = new TimeSliderView({
-                model: this.model,
-                date_aggregation: DATE_AGGREGATION
-            });
+            // this.timeslider = new TimeSliderView({
+            //     model: this.model,
+            //     date_facet: DATE_AGGREGATION
+            // });
 
             // Initialize subviews
             this.results_list = new ResultsListView({ model: this.model });
             this.query_properties = new QueryPropertiesView({ model: this.model });
             this.paginator = new PaginatorView({ model: this.model });
+            this.facets = new FacetsView({ model: this.model });
         },
 
         render: function(){
@@ -34,11 +38,13 @@ function($, _, Backbone, BaseView, searchTemplate, QueryInputView, QueryProperti
             this.$el.html(compiledTemplate);
 
             // Setup all subviews
+            this.collection_selector.setElement($('.collection-selector.' + this.name)).render();
             this.query_input.setElement($('.query-input.' + this.name)).render();
-            this.query_properties.setElement($('.query-properties.' + this.name)).render();
-            this.timeslider.setElement($('.timeslider.' + this.name)).render().toggleVisibility();
-            this.results_list.setElement($('.hits.' + this.name)).render().toggleVisibility();
+            //this.query_properties.setElement($('.query-properties.' + this.name)).render();
+            // this.timeslider.setElement($('.timeslider.' + this.name)).render().toggleVisibility();
+            this.results_list.setElement($('.hits.' + this.name)).render();
             this.paginator.setElement($('.pagination.' + this.name)).render();
+            this.facets.setElement($('.facets.' + this.name)).render();
         }
     });
 

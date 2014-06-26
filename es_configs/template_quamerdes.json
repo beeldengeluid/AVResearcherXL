@@ -16,6 +16,7 @@
                             "asciifolding",
                             "lowercase",
                             "custom_word_delimiter",
+                            "stop_nl",
                             "hunspell_nl"
                         ],
                         "tokenizer": "standard"
@@ -31,6 +32,10 @@
                         "catenate_numbers": true,
                         "split_on_case_change": false,
                         "generate_word_parts": true
+                    },
+                    "stop_nl": {
+                        "type": "stop",
+                        "stopwords": "_dutch_"
                     },
                     "hunspell_nl": {
                         "type": "hunspell",

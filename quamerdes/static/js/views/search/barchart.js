@@ -7,10 +7,9 @@ define([
     'text!../../../templates/search/barchart.html'
 ],
 function($, _, Backbone, d3, app, barchartTemplate){
-    var BarchartView = Backbone.View.extend({
+    var BarChartView = Backbone.View.extend({
         initialize: function(options){
             if (DEBUG) console.log('BarChartView:' + options.name + ':initialize');
-            this.modelName = options.name;
 
             var orient = (this.modelName === 'q1') ? 'right' : 'left';
             this.chart = {
@@ -29,16 +28,14 @@ function($, _, Backbone, d3, app, barchartTemplate){
             };
         },
 
-        render: function(tab){
-            if(this.model.get('formattedAggregations') === undefined) return this;
-            if (DEBUG) console.log('BarChartView:' + this.modelName + ':render');
-            var self = this,
-                aggregations = this.model.get('aggregations'),
-                aggregationValues = _.find(this.model.get('formattedAggregations'), function(aggVal){ return aggVal.id == self.model.get('activeAgg') ? true : false; }),
-                heights = [];
+        render: function(tab, facet_values){
+            if (DEBUG) console.log('BarChartView:render');
+            var self = this;
+            var facets = this.model.get('facets');
+            var heights = [];
 
-            if(aggregationValues){
-                var data = _.first(aggregationValues.terms, this.chart.nrOfBars);
+            if(facet_values){
+                var data = _.first(facet_values, this.chart.nrOfBars);
 
                 var svg = d3.select(this.el)
                     .append('svg')
@@ -47,7 +44,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
                 var height = this.chart.barHeight * data.length;
                 heights.push(height); // Use to determine optimal height
 
-                 var width = this.$el.find('svg').width() - this.chart.margin.right - this.chart.margin.left;
+                var width = this.$el.find('svg').width() - this.chart.margin.right - this.chart.margin.left;
 
                 // Add dimensions here, as we need to find the initial width that is inherited from the div above
                 svg.attr('height', height + this.chart.margin.top + this.chart.margin.bottom)
@@ -65,11 +62,11 @@ function($, _, Backbone, d3, app, barchartTemplate){
 
                 this.chart.x
                     .range([0, width])
-                    .domain([0, d3.max(data, function(d){ return d.doc_count; })]);
+                    .domain([0, d3.max(data, function(d){ return d[1]; })]);
 
                 this.chart.y
                     .rangeRoundBands([0, height], 0.1)
-                    .domain(data.map(function(d){ return d.key; }));
+                    .domain(data.map(function(d){ return d[0]; }));
 
                 this.chart.yAxis
                     .scale(this.chart.y)
@@ -109,21 +106,21 @@ function($, _, Backbone, d3, app, barchartTemplate){
                 rects.enter().append('g') // Append g element so we can add a text label later
                     .append('rect')
                     .attr('y', function(d){
-                        return self.chart.y(d.key);
+                        return self.chart.y(d[0]);
                     })
                     .attr('opacity', 0)
                     .attr('x', function(d){
                         // Invert the bars for chart q1
-                        return self.modelName === 'q1' ? (width - self.chart.x(d.doc_count)) : 0;
+                        return self.modelName === 'q1' ? (width - self.chart.x(d[1])) : 0;
                     })
                     .attr('width', function(d){
-                        return self.chart.x(d.doc_count);
+                        return self.chart.x(d[1]);
                     })
                     // use rangeBand to maintain bar separation
                     .attr('height', self.chart.y.rangeBand())
                     .attr('class', self.modelName + ' bar ' + tab)
                     .append('title')
-                    .text(function(d){ return d.key; });
+                    .text(function(d){ return d.term; });
 
                 rects.transition()
                     // We actually have a g element, because we need a container for text:
@@ -151,12 +148,12 @@ function($, _, Backbone, d3, app, barchartTemplate){
                     d3.select(this).append('text')
                         .attr('x', xWidth)
                         .attr('dx', dx)
-                        .attr('y', self.chart.y(d.key) + self.chart.y.rangeBand() / 2)
+                        .attr('y', self.chart.y(d[0]) + self.chart.y.rangeBand() / 2)
                         .attr('dy', '.35em')
                         .attr('text-anchor', textAnchor)
                         .attr('fill', 'white')
                         .attr('font-size', 10)
-                        .text(d.doc_count);
+                        .text(d[1]);
                 });
             }
 
@@ -164,5 +161,5 @@ function($, _, Backbone, d3, app, barchartTemplate){
         }
     });
 
-    return BarchartView;
+    return BarChartView;
 });

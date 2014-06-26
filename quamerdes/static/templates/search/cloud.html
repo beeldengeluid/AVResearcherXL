@@ -1,13 +1,8 @@
 <div class="cloud">
     <ul>
-        <% _.each(aggregation.terms, function(term){ %>
+        <% _.each(terms, function(term){ %>
             <li>
-                <% if(selectedAggregationValues[aggregation.id].indexOf(term.key) !== - 1) { %>
-                    <% aggregated ? colorStyle = ' color:black;' : colorStyle = ''; // only apply black if there has been faceted %>
-                    <a href="#" class="aggregation selected" data-aggregation="<%= aggregation.id %>" data-value="<%= term.key %>" data-model="<%= modelName %>" style="font-size:<%= scale(term.doc_count) %>px;<%= colorStyle %>" title="<%= term.doc_count %> hits"><%= term.key %></a>
-                <% } else { %>
-                    <a href="#" class="aggregation" data-aggregation="<%= aggregation.id %>" data-value="<%= term.key %>" data-model="<%= modelName %>" style="font-size:<%= scale(term.doc_count) %>px;" title="<%= term.doc_count %> hits"><%= term.key %></a>
-                <% } %>
+                <a href="#" class="facet" data-facet="<%= facetName %>" data-value="<%= term[0] %>" style="font-size:<%= scale(term[1]) %>px;" title="<%= term[1] %>"><%= term[0] %></a>
             </li>
         <% }); %>
     </ul>

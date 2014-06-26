@@ -5,21 +5,266 @@ define([
     'app'
 ],
 function($, _, Backbone, app){
-    AvrApiModel = Backbone.Model.extend({
+    AvrApiModel1 = Backbone.Model.extend({
         defaults: function(){
             return {
-                activeAgg: null,
-                enabledIndex: 'quamerdes_immix',
-                availableAggregations: AVAILABLE_AGGREGATIONS,
-                availableIndices: AVAILABLE_INDICES,
-                // enabledSearchHitFields: SEARCH_HIT_FIELDS,
+                enabledFacets: [],
+                enabledSearchFields: [],
+                enabledSearchHitFields: [],
+                requiredFields: REQUIRED_FIELDS,
                 hitsPerPage: HITS_PER_PAGE,
                 startAtHit: 0,
                 currentPage: 1,
                 highlightFragments: HIT_HIGHLIGHT_FRAGMENTS,
                 highlightFragmentSize: HIT_HIGHLIGHT_FRAGMENT_SIZE,
                 highlightFields: HIT_HIGHLIGHT_FIELDS,
-                queryString: null,
+                collection: null,
+                ftQuery: null,
+                filters: {},
+                currentPayload: {},
+
+                hits: {},
+                totalHits: 0,
+                queryTime: 0,
+                queryTimeMs: null,
+
+                interval: null,
+                dateHistogram: null,
+                globalDateHistogram: null,
+
+                user: USER
+            };
+        },
+
+        initialize: function(){
+            this.api_url = 'api/';
+
+            var self = this;
+            app.vent.on('QueryInput:input:' + this.get('name'), function(){
+                self.set('minDate', Infinity);
+                self.set('maxDate', -Infinity);
+            });
+
+            // app.vent.on('interval:set', function(){
+            //     self.setHistogram();
+            // });
+
+            app.vent.on('QueryInput:input:' + this.get('name'), function(){
+                self.set('interval', null);
+            });
+        },
+
+        http: {
+            get: function(url, data, callback){
+                url = ['api', url].join('/');
+
+                //if (DEBUG) console.log('AvrApiModel:http:post', url, payload);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: data,
+                    dataType: 'json',
+                    cache: true,
+                    success: callback,
+                    error: function(xhr, status, error){
+                        console.log(xhr);
+                        console.log(status);
+                        console.log(error);
+                    }
+                });
+            },
+            post: function(url, data, callback){
+                if($.inArray(url, ['search', 'count']) !== -1){
+                    data = {'payload': JSON.stringify(data)};
+                }
+                else if(url === 'log_usage'){
+                    data = {'events': JSON.stringify(data)};
+                }
+
+                url = ['api', url].join('/');
+
+                if (DEBUG) console.log('AvrApiModel:http:post', url, data);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    cache: true,
+                    success: callback,
+                    error: function(xhr, status, error){
+                        console.log(xhr);
+                        console.log(status);
+                        console.log(error);
+                    }
+                });
+            }
+        },
+
+        changeCollection: function(collection) {
+            if (DEBUG) console.log('AvrApiModel:changeCollection', collection);
+
+            var collection_config = COLLECTIONS_CONFIG[collection];
+
+            this.set({
+                collection: collection,
+                enabledAggregations: this.getAggregationsConfig(collection)
+            });
+        },
+
+        getAggregationsConfig: function(collection) {
+            var collection_config = COLLECTIONS_CONFIG[collection];
+
+            var aggregations = {};
+            _.each(collection_config.enabled_facets, function(facet_name) {
+                aggregations[facet_name] = _.omit(collection_config.available_aggregations[facet_name], 'name', 'description');
+            });
+
+            aggregations[DATE_STATS_AGGREGATION] = collection_config.available_aggregations[DATE_STATS_AGGREGATION];
+
+            return aggregations;
+        },
+
+        getDateHistogram: function(interval) {
+            if (DEBUG) console.log('AvrApiModel:getDateHistogram', interval);
+            var self = this;
+
+            var date_stats = this.get('aggregations')[DATE_STATS_AGGREGATION];
+            if (date_stats.min === null && date_stats.max === null) {
+                self.set({
+                    dateHistogram: null,
+                    globalDateHistogram: null
+                });
+                return;
+            }
+
+            var collection_config = COLLECTIONS_CONFIG[this.get('collection')];
+            
+            // Query that returns the date histogram while respecting the
+            // current query  
+            var date_agg_query = _.clone(this.get('currentPayload'));
+            date_agg_query.size = 0;
+            date_agg_query.aggs = {};
+            date_agg_query.aggs[DATE_AGGREGATION] = _.clone(collection_config.available_aggregations[DATE_AGGREGATION]);
+            date_agg_query.aggs[DATE_AGGREGATION].date_histogram.interval = interval;
+
+            var date_field = collection_config.available_aggregations[DATE_AGGREGATION].date_histogram.field;
+            var global_date_agg_query = {
+                'index': date_agg_query.index,
+                'query': {
+                    'constant_score': {
+                        'filter': {
+                            'range': {}
+                        }
+                    }
+                },
+                'aggs': {},
+                'size': 0
+            };
+            global_date_agg_query.query.constant_score.filter.range[date_field] =  {
+                'gte': date_stats.min,
+                'lte': date_stats.max
+            };
+            global_date_agg_query.aggs[DATE_AGGREGATION] = _.clone(collection_config.available_aggregations[DATE_AGGREGATION]);
+            global_date_agg_query.aggs[DATE_AGGREGATION].date_histogram.interval = interval;
+
+            this.http.post('search', [date_agg_query, global_date_agg_query], function(data){
+                self.set({
+                    dateHistogram: data.responses[0].aggregations[DATE_AGGREGATION],
+                    globalDateHistogram: data.responses[1].aggregations[DATE_AGGREGATION]
+                });
+            });
+        },
+
+        // Execute a new query based on an ft query string and the default
+        // query properties defined in the config
+        freeTextQuery: function(querystring){
+            if (DEBUG) console.log('AvrApiModel:freeTextQuery', querystring);
+
+            var self = this;
+
+            // Reset query properties
+            this.set({
+                //enabledFacets: AVAILABLE_FACETS,
+                //enabledSearchHitFields: SEARCH_HIT_FIELDS,
+                hitsPerPage: HITS_PER_PAGE,
+                startAtHit: 0,
+                currentPage: 1,
+                ftQuery: querystring
+            });
+
+            this.set('currentPayload', this.constructQueryPayload());
+            this.http.post('search', this.get('currentPayload'), function(data){
+                self.set({
+                    hits: data.hits.hits,
+                    aggregations: data.aggregations,
+                    totalHits: data.hits.total,
+                    queryTime: data.took,
+                    queryTimeMs: (data.took / 1000).toFixed(2),
+                    queryString: querystring
+                });
+            });
+        },
+
+        constructQueryPayload: function() {
+            var filtered = {
+                query: {
+                    query_string: {
+                        query: this.get('ftQuery'),
+                        default_operator: 'AND',
+                        fields: ['title', 'text']
+                    }
+                }
+            };
+
+            return {
+                index: this.get('collection'),
+                query: {
+                    filtered: filtered
+                },
+                aggs: this.get('enabledAggregations'),
+                fields: this.get('requiredFields'),
+                size: this.get('hitsPerPage'),
+                from: this.get('startAtHit')
+            };
+        },
+
+        // Navigate to a given page using the existing query (currentPayload)
+        paginateToPage: function(page){
+            var self = this;
+            this.set('startAtHit', this.get('hitsPerPage') * (page - 1));
+
+            // Get a copy of the current payload
+            var payload = this.get('currentPayload');
+            payload.from = this.get('startAtHit');
+
+            // Since we only have to replace hits, don't request aggregations.
+            // This is less expensive on the ES side, and reduces the
+            // size of the response.
+            delete payload.aggregations;
+
+            this.http.post('search', payload, function(data){
+                self.set({
+                    hits: data.hits.hits,
+                    queryTime: data.took,
+                    queryTimeMs: (data.took / 1000).toFixed(2)
+                });
+            });
+        }
+    });
+
+    AvrApiModel = Backbone.Model.extend({
+        defaults: function(){
+            return {
+                enabledSearchFields: [],
+                enabledFacets: [],
+                enabledSearchHitFields: [],
+                hitsPerPage: HITS_PER_PAGE,
+                startAtHit: 0,
+                currentPage: 1,
+                highlightFragments: HIT_HIGHLIGHT_FRAGMENTS,
+                highlightFragmentSize: HIT_HIGHLIGHT_FRAGMENT_SIZE,
+                highlightFields: HIT_HIGHLIGHT_FIELDS,
+                ftQuery: null,
                 filters: {},
                 currentPayload: { facets: {}},
 
@@ -39,7 +284,7 @@ function($, _, Backbone, app){
                 // Number of broadcasts that contain subtitles
                 docsWithSubtitleCount: null,
 
-                defaultInterval: AVAILABLE_AGGREGATIONS.dates.date_histogram.interval,
+                defaultInterval: 'year',
                 interval: null,
 
                 user: USER
@@ -169,53 +414,157 @@ function($, _, Backbone, app){
         // Use the query properties that are set as instance attributes to generate
         // an ES query
         constructQueryPayload: function(){
-            var self = this,
-                index = this.get('enabledIndex');
+            var self = this;
             var payload = {
-                query: {},
-                index: index
+                query: {}
             };
 
-            payload.query.filtered = {
-                query: {
-                    query_string: {
-                        query: this.get('queryString'),
-                        default_operator: 'and'
+            var filtered = {};
+            // Construct the filtered free text query based on enabled sources/fields
+            var enabledSources = this.get('enabledSearchFields');
+            var ftQuery = this.get('ftQuery');
+            filtered.query = {
+                bool: {
+                    should: [],
+                    minimum_number_should_match : 1
+                }
+            };
+
+            // First add non-nested fields as a single query_string query
+            _.each(enabledSources, function(source){
+                if(!('nested' in source)){
+                    // Only add the query_string defention if the array is still empty
+                    if(filtered.query.bool.should.length === 0){
+                        filtered.query.bool.should.push({
+                            query_string: {
+                                fields: [],
+                                query: ftQuery,
+                                default_operator: 'AND'
+                            }
+                        });
                     }
-                },
-                filter: {
-                    bool: {must: []}
-                }
-            }
 
-            /*
-            FILTERING
-            */
-            var filters = this.get('filters');
-            _.each(filters, function(filter, filtername){
-                // Generic filter structure
-                filter.type = filter.type == 'terms' ? 'term' : filter.type;
-                var f = {};
-                f[filter.type] = {};
-
-                // Process range filter values
-                if(filter.type == 'range'){
-                    f[filter.type][filter.field] = {}
-                    f[filter.type][filter.field]['from'] = filter.values.from;
-                    f[filter.type][filter.field]['to'] = filter.values.to;
+                    _.each(source.fields, function(field){
+                        filtered.query.bool.should[0].query_string.fields.push(field);
+                    });
                 }
-                //
-                else if(filter.type == 'term'){
-                    f[filter.type][filter.field] = {}
-                    f[filter.type][filter.field] = filter.values
-                }
-
-                payload.query.filtered.filter.bool.must.push(f);
             });
 
-            /*
-            SNIPPETS AND HIGHLIGHTING
-            */
+            // Add the fields of a nested document as a seperate 'should' to the bool
+            // query. Each nested document is added as a seperate 'should'.
+            _.each(enabledSources, function(source){
+                if('nested' in source){
+                    filtered.query.bool.should.push({
+                        nested: {
+                            path: source.nested,
+                            query: {
+                                query_string: {
+                                    fields: source.fields,
+                                    query: ftQuery,
+                                    default_operator: 'AND'
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            var filters = this.get('filters');
+
+            // Only add the filter component to the query if at least one filter
+            // is enabled.
+            if(_.size(filters) > 0){
+                // Each facet is added as an AND filter
+                filtered.filter = {and: []};
+            }
+
+            _.each(filters, function(filter, facet_name){
+                // Term based filtering on nested attributes
+                if(filter.nested && filter.facet_type === 'terms'){
+                    _.each(filter.values, function(value){
+                        var facet = {};
+                        facet.nested = {
+                            path: filter.path,
+                            // Take all nested documents of 'path' into consideration
+                            query: {match_all: {}}
+                        };
+
+                        // facet_filters and facet values are added as AND conditions
+                        facet.nested.filter = { and: []};
+
+                        // Use the specified field when dealing with multi-field types
+                        if('nested_filter_field' in filter){
+                            field = filter.path + '.' + filter.nested_filter_field + '.' + filter.field;
+                        }
+                        else {
+                            field = filter.path + '.' + filter.field;
+                        }
+
+                        var term_filter = {term : {}};
+                        term_filter.term[field] = value;
+                        facet.nested.filter.and.push(term_filter);
+
+                        // Add additonal filters for nested docuent selection
+                        if('facet_filter' in filter){
+                            facet.nested.filter.and.push(filter.facet_filter);
+                        }
+
+                        filtered.filter.and.push(facet);
+                    });
+                }
+
+                // Date range filter on nested attributes
+                else if(filter.nested && filter.facet_type === 'range'){
+                    var facet = {};
+                    facet.nested = {
+                        path: filter.path,
+                        // Take all nested documents of 'path' into consideration
+                        query: {match_all: {}}
+                    };
+
+                    // facet_filters and facet values are added as AND conditions
+                    facet.nested.filter = { and: []};
+
+                    // Use the specified field when dealing with multi-field types
+                    if('nested_filter_field' in filter){
+                        field = filter.path + '.' + filter.nested_filter_field + '.' + filter.field;
+                    }
+                    else {
+                        field = filter.path + '.' + filter.field;
+                    }
+
+                    var range_filter = {};
+                    range_filter[field] = {
+                        'from': filter.values.from,
+                        'to': filter.values.to
+                    };
+
+                    facet.nested.filter.and.push({'range': range_filter});
+
+                    if('facet_filter' in filter){
+                        facet.nested.filter.and.push(filter.facet_filter);
+                    }
+
+                    filtered.filter.and.push(facet);
+                }
+
+                // Term based filtering on non-nested attributes
+                else if(filter.facet_type === 'terms'){
+                    var facet = {};
+                    field = filter.field;
+                    values = filter.values;
+                    facet.terms = {};
+                    facet.terms[field] = values;
+                    facet.terms.execution = 'and';
+
+                    filtered.filter.and.push(facet);
+                }
+            });
+
+            // Add the filters to the query payload
+            payload.query.filtered = filtered;
+
+            // Snippets and highlighting
             var highlight = {
                 fields: {},
                 number_of_fragments: this.get('highlightFragments'),
@@ -228,51 +577,59 @@ function($, _, Backbone, app){
             });
             payload.highlight = highlight;
 
-            /*
-            AGGREGATIONS
-            */
-            var ESAggFields = ['date_histogram', 'terms', 'significant_terms'],
-                availableAggs = this.get('availableAggregations'),
-                aggsForIndex = this.getAggregationNames(),
-                // get appropriate aggregations for the currently searched index
-                aggregations = _.pick(availableAggs, aggsForIndex);
+            // Facets
+            var facets = {};
+            var enabled_facets = this.get('enabledFacets');
+            // The facet settings we need and Elastic Search supports
+            var es_facet_fields = ['date_histogram', 'terms', 'facet_filter', 'nested'];
+             _.each(enabled_facets, function(facet, facet_name){
+                facets[facet_name] = {};
 
-            _.each(aggregations, function(optionValue, optionName){
-                if(_.contains(ESAggFields, optionName)){
-                    if(optionName == 'date_histogram'){
-                        var interval = self.get('interval');
-                        if(!interval) interval = self.get('defaultInterval');
-                        optionValue.interval = interval;
-
-                        aggregations[aggregationName][optionName] = optionValue;
+                _.each(facet, function(option_value, option_name){
+                    // Only add to payload if facet setting is supported by ES
+                    if(_.contains(es_facet_fields, option_name)){
+                        if(option_name === 'date_histogram'){
+                            var interval = self.get('interval');
+                            if(!interval) interval = self.get('defaultInterval');
+                            option_value.interval = interval;
+                        }
+                        facets[facet_name][option_name] = option_value;
                     }
-                }
+                });
             });
+            payload.facets = facets;
 
-            payload.aggregations = aggregations;
+            // The fields that are required to render the search results templates
+            payload._source = this.get('enabledSearchHitFields');
+
             // Number of hits to return and the offset
             payload.size = this.get('hitsPerPage');
             payload.from = this.get('startAtHit');
 
-            console.log('===============\n', payload, '\n===============');
             return payload;
         },
 
-        getAggregationNames: function(){
-            return this.get('availableIndices')[this.get('enabledIndex').replace('quamerdes_', '')].aggregations;
-        },
-
-        changeSearchIndex: function(index){
-            if (DEBUG) console.log('ElasticSearchModel:changeSearchIndex', index);
+        changeSearchFields: function(enabled_fields){
+            if (DEBUG) console.log('ElasticSearchModel:changeSearchFields', enabled_fields);
 
             var self = this;
-            this.set('enabledIndex', 'quamerdes_' + index);
+
+            // Get the config definitions of the enabled fields
+            var field_definitions = _.filter(AVAILABLE_SEARCH_FIELDS, function(field){
+                if(_.contains(enabled_fields, field.id)){
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+
+            this.set('enabledSearchFields', field_definitions);
             this.set('currentPayload', this.constructQueryPayload());
 
             this.http.post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
-                    aggregations: data.aggregations,
+                    facets: data.facets,
                     totalHits: data.hits.total,
                     queryTime: data.took,
                     queryTimeMs: (data.took / 1000).toFixed(2)
@@ -287,34 +644,20 @@ function($, _, Backbone, app){
 
             // Reset query properties
             this.set({
-                availableAggregations: AVAILABLE_AGGREGATIONS,
+                enabledFacets: AVAILABLE_FACETS,
+                enabledSearchHitFields: SEARCH_HIT_FIELDS,
                 hitsPerPage: HITS_PER_PAGE,
                 startAtHit: 0,
                 currentPage: 1,
-                queryString: querystring,
-
-                // TODO: use other filter here
-                // This filter was introduced by B&G to ensure returned objects
-                // had a date, and should cover any data they have; however, the
-                // KB corpus goes back further, so we may want to do another
-                // filter here
-                filters: {
-                    dates: {
-                        type: "range",
-                        field: "date",
-                        values: {
-                            from: new Date(1951, 10, 2),
-                            to: new Date()
-                        }
-                    }
-                }
+                ftQuery: querystring,
+                filters: {broadcast_start_date: {facet_type: "range", field: "start", nested: true, path: "broadcastDates", values: {from: new Date(1800,1,1), to: new Date()}}}
             });
 
             this.set('currentPayload', this.constructQueryPayload());
             this.http.post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
-                    aggregations: data.aggregations,
+                    facets: data.facets,
                     totalHits: data.hits.total,
                     queryTime: data.took,
                     queryTimeMs: (data.took / 1000).toFixed(2),
@@ -324,50 +667,69 @@ function($, _, Backbone, app){
         },
 
         // Add or remove facet values from the set of active filters
-        modifyAggregationFilter: function(aggregation, value, add){
-            console.log('AvrApiModel:modifyAggregationFilter', aggregation, value);
+        modifyFacetFilter: function(facet, value, add){
             var self = this;
-            var aggregation_settings = AVAILABLE_AGGREGATIONS[aggregation];
+            var facet_settings = AVAILABLE_FACETS[facet];
 
             // Get the currently active filters
             var filters = this.get('filters');
 
-            // Add filter definitions to the filters object if it does not yet exist
-            if(!(aggregation in filters)){
+            // Add filter defenitions to the filters object if it does not yet exist
+            if(!(facet in filters)){
                 // Facet of the 'terms' type
-                if('terms' in aggregation_settings){
-                    filters[aggregation] = {
-                        type: 'term',
-                        field: aggregation_settings.terms.field,
-                        values: ''
+                if('terms' in facet_settings){
+                    filters[facet] = {
+                        facet_type: 'terms',
+                        field: facet_settings.terms.field,
+                        values: []
                     };
                 }
-                else if('date_histogram' in aggregation_settings){
-                    filters[aggregation] = {
-                        type: 'range',
-                        field: aggregation_settings.date_histogram.field,
+                else if ('date_histogram' in facet_settings){
+                    filters[facet] = {
+                        facet_type: 'range',
+                        field: facet_settings.date_histogram.field,
                         values: {}
                     };
+                }
+
+                // Add required addtional info for 'nested' documents
+                if('nested' in facet_settings){
+                    filters[facet].nested = true;
+                    filters[facet].path = facet_settings.nested;
+
+                    // Additional filters that indicate which nested documents of 'path'
+                    // should be taken into consideration
+                    if('facet_filter' in facet_settings){
+                        filters[facet].facet_filter = facet_settings.facet_filter;
+                    }
+
+                    // Use a specific field in case of a multi-field
+                    if('nested_filter_field' in facet_settings){
+                        filters[facet].nested_filter_field = facet_settings.nested_filter_field;
+                    }
                 }
             }
 
             // Add or delete a facet value from the filters values array
-            if('terms' in aggregation_settings){
-                // add term to terms filter
+            if('terms' in facet_settings){
                 if(add){
-                    filters[aggregation].values = value;
+                    filters[facet].values.push(value);
                 }
                 else {
-                    delete filters[aggregation];
+                    var index = filters[facet].values.indexOf(value);
+                    filters[facet].values.splice(index, 1);
+                    if(filters[facet].values.length === 0){
+                        delete filters[facet];
+                    }
                 }
             }
-            else if('date_histogram' in aggregation_settings){
+            else if('date_histogram' in facet_settings){
                 if(add){
-                    filters[aggregation].values.from = value[0];
-                    filters[aggregation].values.to = value[1];
+                    filters[facet].values.from = value[0];
+                    filters[facet].values.to = value[1];
                 }
                 else {
-                    delete filters[aggregation];
+                    delete filters[facet];
                 }
             }
 
@@ -376,7 +738,7 @@ function($, _, Backbone, app){
             this.http.post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
-                    aggregations: data.aggregations,
+                    facets: data.facets,
                     queryTime: data.took,
                     totalHits: data.hits.total,
                     queryTimeMs: (data.took / 1000).toFixed(2)
@@ -397,14 +759,15 @@ function($, _, Backbone, app){
             var payload = _.clone(this.get('currentPayload'));
             delete payload.highlight;
             payload.size = 0;
-            payload.aggregations = {
-                dates: {
+            payload.facets = {
+                broadcast_start_date: {
                     date_histogram: {
-                        field: 'date',
+                        field: 'start',
                         interval: interval
-                    }
+                    },
+                    nested: 'broadcastDates'
                 }
-            }
+            };
 
             this.http.post('search', payload, function(data){
                 callback(data);
@@ -421,21 +784,22 @@ function($, _, Backbone, app){
 
             delete payload.highlight;
             payload.size = 0;
-            payload.aggregations = {
-                dates: {
+            payload.facets = {
+                broadcast_start_date: {
                     date_histogram: {
-                        field: 'date',
+                        field: 'start',
                         interval: this.get('interval')
-                    }
+                    },
+                    nested: 'broadcastDates'
                 }
             };
 
             this.http.post('search', payload, function(data){
-                var aggregations = self.get('aggregations');
-                aggregations.dates = data.aggregations.dates;
+                var facets = self.get('facets');
+                facets.broadcast_start_date = data.facets.broadcast_start_date;
 
                 self.set({
-                    aggregations: aggregations
+                    facets: facets
                 }, {silent: true});
 
                 app.vent.trigger('model:redraw:' + self.get('name'));
@@ -559,5 +923,5 @@ function($, _, Backbone, app){
         }
     });
 
-    return AvrApiModel;
+    return AvrApiModel1;
 });

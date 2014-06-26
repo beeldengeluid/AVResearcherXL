@@ -4,7 +4,7 @@ require.config({
         'underscore': 'lib/underscore',
         'backbone': 'lib/backbone.min',
         'bootstrap': 'lib/bootstrap.min',
-        'd3': 'lib/d3.v3.min',
+        'd3': 'lib/d3.v3',
         'jquery-ui': 'lib/jquery-ui-1.10.2.custom'
     },
     shim: {
