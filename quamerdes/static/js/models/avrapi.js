@@ -116,7 +116,7 @@ function($, _, Backbone, app){
 
             var aggregations = {};
             _.each(collection_config.enabled_facets, function(facet_name) {
-                aggregations[facet_name] = _.omit(collection_config.available_aggregations[facet_name], 'name', 'description');
+                aggregations[facet_name] = _.omit(collection_config.available_aggregations[facet_name], 'name', 'description', 'buckets_path');
             });
 
             aggregations[DATE_STATS_AGGREGATION] = collection_config.available_aggregations[DATE_STATS_AGGREGATION];

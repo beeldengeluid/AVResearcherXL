@@ -118,6 +118,8 @@ def get_immix_items(archive_path):
             else:
                 yield doc_id, expression
 
+            tar.members = []
+
 
 def get_kb_items(archive_path):
     min_date = datetime.strptime('1900-01-01', '%Y-%m-%d')

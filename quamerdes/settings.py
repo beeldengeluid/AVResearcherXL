@@ -80,7 +80,7 @@ COLLECTIONS_CONFIG = {
     'immix': {
         'name': 'iMMix metadata',
         'index_name': 'quamerdes_immix',
-        'enabled_facets': ['channels', 'descriptive_terms'],
+        'enabled_facets': ['keywords', 'channels', 'persons', 'genres'],
         'available_aggregations': {
             'dates_stats': {
                 'stats' : { 'field' : 'date' }
@@ -97,7 +97,76 @@ COLLECTIONS_CONFIG = {
                 'description': '',
                 'terms': {
                     'field': 'meta.broadcasters',
-                    'size': 30
+                    'size': 15
+                }
+            },
+            'genres': {
+                'name': 'Genres',
+                'description': '',
+                'buckets_path': 'genre.genre.buckets',
+                'nested': {
+                    'path': 'meta.categories'
+                },
+                'aggs': {
+                    'genre': {
+                        'filter': {
+                            'term' : { 'key' : 'genre' }
+                        },
+                        'aggs':{
+                            'genre': {
+                                'terms': {
+                                    'field': 'meta.categories.value.untouched',
+                                    'size': 15
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            'persons': {
+                'name': 'Persons',
+                'description': '',
+                'buckets_path': 'person.person.buckets',
+                'nested': {
+                    'path': 'meta.categories'
+                },
+                'aggs': {
+                    'person': {
+                        'filter': {
+                            'term' : { 'key' : 'person' }
+                        },
+                        'aggs': {
+                            'person': {
+                                'terms': {
+                                    'field': 'meta.categories.value.untouched',
+                                    'size': 15
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            'keywords': {
+                'name': 'Keywords',
+                'description': '',
+                'buckets_path': 'keyword.keyword.buckets',
+                'nested': {
+                    'path': 'meta.categories'
+                },
+                'aggs': {
+                    'keyword': {
+                        'filter': {
+                            'term' : { 'key' : 'keyword' }
+                        },
+                        'aggs':{
+                            'keyword': {
+                                'terms': {
+                                    'field': 'meta.categories.value.untouched',
+                                    'size': 15
+                                }
+                            }
+                        }
+                    }
                 }
             },
             'descriptive_terms': {
@@ -105,7 +174,7 @@ COLLECTIONS_CONFIG = {
                 'description': '',
                 'significant_terms': {
                     'field': 'text',
-                    'size': 30
+                    'size': 15
                 }
             }
         }
@@ -113,7 +182,7 @@ COLLECTIONS_CONFIG = {
     'kb': {
         'name': 'KB kranten',
         'index_name': 'quamerdes_kb',
-        'enabled_facets': ['article_type', 'authors'],
+        'enabled_facets': ['publication', 'article_type'],
         'available_aggregations': {
             'dates_stats': {
                 'stats' : { 'field' : 'date' }
@@ -130,7 +199,7 @@ COLLECTIONS_CONFIG = {
                 'description': '',
                 'significant_terms': {
                     'field': 'text',
-                    'size': 30
+                    'size': 15
                 }
             },
             'article_type': {
@@ -138,15 +207,15 @@ COLLECTIONS_CONFIG = {
                 'description': '',
                 'terms': {
                     'field': 'meta.article_type',
-                    'size': 30
+                    'size': 15
                 }
             },
-            'authors': {
-                'name': 'Authers',
+            'publication': {
+                'name': 'Publication',
                 'description': '',
                 'terms': {
-                    'field': 'meta.issue.publisher',
-                    'size': 30
+                    'field': 'meta.publication_name',
+                    'size': 15
                 }
             }
         }
