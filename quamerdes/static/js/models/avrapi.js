@@ -193,7 +193,8 @@ function($, _, Backbone, app){
                 hitsPerPage: HITS_PER_PAGE,
                 startAtHit: 0,
                 currentPage: 1,
-                ftQuery: querystring
+                ftQuery: querystring,
+                filters: {}
             });
 
             this.set('currentPayload', this.constructQueryPayload());
@@ -210,6 +211,8 @@ function($, _, Backbone, app){
         },
 
         modifyQueryFilter: function(aggregation, value, add) {
+            var self = this;
+
             var aggregation_config = COLLECTIONS_CONFIG[this.get('collection')].available_aggregations[aggregation];
 
             // Get the currently active filters
@@ -289,6 +292,16 @@ function($, _, Backbone, app){
             }
 
             this.set('filters', filters);
+            this.set('currentPayload', this.constructQueryPayload());
+            this.http.post('search', this.get('currentPayload'), function(data){
+                self.set({
+                    hits: data.hits.hits,
+                    aggregations: data.aggregations,
+                    totalHits: data.hits.total,
+                    queryTime: data.took,
+                    queryTimeMs: (data.took / 1000).toFixed(2),
+                });
+            });
         },
 
         constructQueryPayload: function() {
@@ -304,7 +317,7 @@ function($, _, Backbone, app){
             };
 
 
-            this.modifyQueryFilter('publication', 'De Telegraaf', true);
+            //this.modifyQueryFilter('publication', 'De Telegraaf', true);
             
             var filters = this.get('filters');
 
@@ -376,15 +389,17 @@ function($, _, Backbone, app){
                 }
                 // Range based filtering
                 else if (filter.filter_type == 'range') {
-                    var range_filter = {};
+                    var range_filter = { range: {} };
                     range_filter.range[filter.field] = {
-                        gte: filter.from,
-                        lte: filter.to
+                        gte: filter.values.from,
+                        lte: filter.values.to
                     };
 
                     filteredQuery.filter.bool.must.push(range_filter);
                 }
             });
+
+            console.log(filteredQuery);
 
             return {
                 index: this.get('collection'),
