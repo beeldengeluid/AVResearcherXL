@@ -14,9 +14,9 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             app.vent.once('QueryInput:input', this.toggleVisibility, this);
 
             this.date_facet_name = options.date_facet;
-            this.model.on('change:facets', this.updateFacetValues, this);
+            this.model.on('change:dateHistogram', this.updateFacetValues, this);
             app.vent.on('model:redraw:' + this.model.get('name'), function(){
-                var histogram = this.model.get('facets')[this.date_facet_name].entries;
+                var histogram = this.model.get('dateHistogram');
                 if(histogram.length < 1){
                     return;
                 }
@@ -51,7 +51,7 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
                     self.updateSliderLabels(ui.values[0], ui.values[1]);
                 },
                 stop: function(event, ui){
-                    self.changeFacet(event, ui, self.facetName);
+                    self.changeFacet(event, ui, self.date_facet_name);
                     app.vent.trigger('Logging:clicks', {
                         action: 'daterange_facet',
                         fromDateMs: self.startValue,
@@ -67,7 +67,9 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
         updateSliderLabels: function(min, max){
             if (DEBUG) console.log('TimeSliderView:updateSliderLabels');
             var interval = this.model.get('interval');
-            if(!interval) interval = this.model.get('defaultInterval');
+            if(!interval) interval = 'year';
+
+            console.log(interval);
 
             min = this.convertTime[interval](new Date(min));
             max = this.convertTime[interval](new Date(max));
@@ -79,20 +81,20 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
         updateFacetValues: function(){
             if (DEBUG) console.log('TimeSliderView:updateFacetValues');
 
-            var histogram = this.model.get('facets')[this.date_facet_name].entries;
+            var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
 
-            if(histogram.length < 1){
-                this.disabled = true;
-                return;
-            }
-            else {
-                if(this.disabled === true){
-                    this.disabled = false;
-                }
-            }
+            // if(histogram.length < 1){
+            //     this.disabled = true;
+            //     return;
+            // }
+            // else {
+            //     if(this.disabled === true){
+            //         this.disabled = false;
+            //     }
+            // }
 
-            this.min = histogram[0].time;
-            this.max = histogram[histogram.length - 1].time;
+            this.min = date_stats.min;
+            this.max = date_stats.max;
 
             this.timeslider.slider('option', 'min', this.min);
             this.timeslider.slider('option', 'max', this.max);
@@ -102,12 +104,15 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
 
         changeFacet: function(event, ui, facet){
             var self = this;
+            console.log(ui);
+            console.log(facet);
             var min = new Date(ui.values[0]);
             var max = new Date(ui.values[1]);
             if (DEBUG) console.log('TimeSliderView:changeFacet', [min, max]);
 
             var interval = this.model.get('interval');
-            if(!interval) interval = this.model.get('defaultInterval');
+            //if(!interval) interval = this.model.get('defaultInterval');
+            
             // ES filters out documents with creation dates later than Jan. 1 in a year,
             // so add a <interval> to the max value
             max = d3.time[interval].offset(max, 1);

@@ -21,10 +21,10 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
             
             this.collection_selector = new CollectionSelectorView({ model: this.model });
             this.query_input = new QueryInputView({ model: this.model });
-            // this.timeslider = new TimeSliderView({
-            //     model: this.model,
-            //     date_facet: DATE_AGGREGATION
-            // });
+            this.timeslider = new TimeSliderView({
+                model: this.model,
+                date_facet: DATE_AGGREGATION
+            });
 
             // Initialize subviews
             this.results_list = new ResultsListView({ model: this.model });
@@ -41,7 +41,7 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
             this.collection_selector.setElement($('.collection-selector.' + this.name)).render();
             this.query_input.setElement($('.query-input.' + this.name)).render();
             //this.query_properties.setElement($('.query-properties.' + this.name)).render();
-            // this.timeslider.setElement($('.timeslider.' + this.name)).render().toggleVisibility();
+            this.timeslider.setElement($('.timeslider.' + this.name)).render();
             this.results_list.setElement($('.hits.' + this.name)).render();
             this.paginator.setElement($('.pagination.' + this.name)).render();
             this.facets.setElement($('.facets.' + this.name)).render();

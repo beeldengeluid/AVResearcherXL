@@ -149,17 +149,17 @@ COLLECTIONS_CONFIG = {
             'keywords': {
                 'name': 'Keywords',
                 'description': '',
-                'buckets_path': 'keyword.keyword.buckets',
+                'buckets_path': 'filtered.filtered_buckets.buckets',
                 'nested': {
                     'path': 'meta.categories'
                 },
                 'aggs': {
-                    'keyword': {
+                    'filtered': {
                         'filter': {
                             'term' : { 'key' : 'keyword' }
                         },
                         'aggs':{
-                            'keyword': {
+                            'filtered_buckets': {
                                 'terms': {
                                     'field': 'meta.categories.value.untouched',
                                     'size': 15

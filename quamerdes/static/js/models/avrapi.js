@@ -153,7 +153,10 @@ function($, _, Backbone, app){
                 'query': {
                     'constant_score': {
                         'filter': {
-                            'range': {}
+                            'range': {
+                                'execution': 'fielddata',
+                                '_cache': true
+                            }
                         }
                     }
                 },
@@ -170,7 +173,8 @@ function($, _, Backbone, app){
             this.http.post('search', [date_agg_query, global_date_agg_query], function(data){
                 self.set({
                     dateHistogram: data.responses[0].aggregations[DATE_AGGREGATION],
-                    globalDateHistogram: data.responses[1].aggregations[DATE_AGGREGATION]
+                    globalDateHistogram: data.responses[1].aggregations[DATE_AGGREGATION],
+                    interval: interval
                 });
             });
         },
@@ -205,21 +209,187 @@ function($, _, Backbone, app){
             });
         },
 
+        modifyQueryFilter: function(aggregation, value, add) {
+            var aggregation_config = COLLECTIONS_CONFIG[this.get('collection')].available_aggregations[aggregation];
+
+            // Get the currently active filters
+            var filters = this.get('filters');
+            
+            // Add filter defenitions to the filters object, if the filter
+            // defentions does not yet exist
+            if (!(aggregation in filters)) {
+                // Aggregation of terms
+                if ('terms' in aggregation_config) {
+                    filters[aggregation] = {
+                        filter_type: 'terms',
+                        field: aggregation_config.terms.field,
+                        values: []
+                    };
+                }
+                // Aggregation of dates
+                else if ('date_histogram' in aggregation_config) {
+                    filters[aggregation] = {
+                        filter_type: 'range',
+                        field: aggregation_config.date_histogram.field,
+                        values: {}
+                    };
+                }
+
+                // Aggregation of nested documents
+                else if ('nested' in aggregation_config){
+                    filters[aggregation] = {
+                        nested: true,
+                        path: aggregation_config.nested.path
+                    };
+
+                    // Additional filters that indicate which nested documents of 'path'
+                    // should be taken into consideration
+                    if ('filtered' in aggregation_config.aggs) {
+                        filters[aggregation].filters = aggregation_config.aggs.filtered.filter;
+        
+                        // Nested terms aggregation
+                        if ('terms' in aggregation_config.aggs.filtered.aggs.filtered_buckets) {
+                            filters[aggregation].filter_type = 'terms';
+                            filters[aggregation].field = aggregation_config.aggs.filtered.aggs.filtered_buckets.terms.field;
+                            filters[aggregation].values = [];
+                        }
+                        else if ('date_histogram' in aggregation_config.aggs.filtered.aggs.filtered_buckets) {
+                            filters[aggregation].filter_type = 'range';
+                            filters[aggregation].field = aggregation_config.date_histogram.field;
+                            filters[aggregation].values = {};
+                        }
+                    }
+                }
+            }
+
+            // Add or delete a facet value from the filter's values array
+            if (filters[aggregation].filter_type === 'terms') {
+                if (add) {
+                    filters[aggregation].values.push(value);
+                }
+                else {
+                    var index = filters[aggregation].values.indexOf(value);
+                    filters[aggregation].values.splice(index, 1);
+                    
+                    // Delete the complete filter if there are no values left to filter on
+                    if (filters[aggregation].values.length === 0) {
+                        delete filters[aggregation];
+                    }
+                }
+            }
+
+            else if(filters[aggregation].filter_type === 'range'){
+                if (add) {
+                    filters[aggregation].values.from = value[0];
+                    filters[aggregation].values.to = value[1];
+                }
+                else {
+                    delete filters[aggregation];
+                }
+            }
+
+            this.set('filters', filters);
+        },
+
         constructQueryPayload: function() {
-            var filtered = {
+            var filteredQuery = {
                 query: {
                     query_string: {
                         query: this.get('ftQuery'),
                         default_operator: 'AND',
                         fields: ['title', 'text']
                     }
-                }
+                },
+                filter: {}
             };
+
+
+            this.modifyQueryFilter('publication', 'De Telegraaf', true);
+            
+            var filters = this.get('filters');
+
+            // Only add the filter component to the query if at least one filter
+            // is enabled.
+            if (_.size(filters) > 0){
+                // Each facet is added as an AND filter
+                filteredQuery.filter.bool = {must: []};
+            }
+
+            _.each(filters, function(filter, aggregation_name) {
+                // Term based filtering on nested attributes
+                if (filter.nested && filter.filter_type === 'terms') {
+                    // Add a filter for each of the values
+                    _.each(filter.values, function(value) {
+                        var query_filter = {};
+                        query_filter.nested = {
+                            path: filter.path,
+                            filter: {
+                                bool: {
+                                    must: []
+                                }
+                            }
+                        };
+
+                        var term_filter = {term: {}};
+                        term_filter.term[filter.field] = value;
+                        query_filter.nested.filter.bool.must.push(term_filter);
+
+                        // Add additonal filters for nested docuent selection
+                        query_filter.nested.filter.bool.must.push(filter.filters);
+
+                        filteredQuery.filter.bool.must.push(query_filter);
+                    });
+                }
+
+                // Range based filtering on nested attributes
+                else if (filter.nested && filter.filter_type === 'range') {
+                    var query_filter = {};
+                    query_filter.nested = {
+                        path: filter.path,
+                        filter: {
+                            bool: {
+                                must: []
+                            }
+                        }
+                    };
+
+                    var range_filter = {};
+                    range_filter.range[filter.field] = {
+                        gte: filter.from,
+                        lte: filter.to
+                    };
+                    query_filter.nested.filter.bool.must.push(range_filter);
+
+                    // Add additonal filters for nested docuent selection
+                    query_filter.nested.filter.bool.must.push(filter.filters);
+
+                    filteredQuery.filter.bool.must.push(query_filter);
+                }
+                // Term based filtering
+                else if (filter.filter_type === 'terms') {
+                    var terms_filter = {
+                        terms: {execution: 'and'}
+                    };
+                    terms_filter.terms[filter.field] = filter.values;
+
+                    filteredQuery.filter.bool.must.push(terms_filter);
+                }
+                // Range based filtering
+                else if (filter.filter_type == 'range') {
+                    var range_filter = {};
+                    range_filter.range[filter.field] = {
+                        gte: filter.from,
+                        lte: filter.to
+                    };
+
+                    filteredQuery.filter.bool.must.push(range_filter);
+                }
+            });
 
             return {
                 index: this.get('collection'),
                 query: {
-                    filtered: filtered
+                    filtered: filteredQuery
                 },
                 aggs: this.get('enabledAggregations'),
                 fields: this.get('requiredFields'),
