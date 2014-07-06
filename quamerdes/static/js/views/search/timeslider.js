@@ -52,18 +52,24 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             var self = this;
 
             this.$el.html(_.template(timeSliderTemplate));
+
+            this.slider_lower_label = this.$el.find('.slider-lower-label');
+            this.slider_upper_label = this.$el.find('.slider-upper-label');
+
             this.timeslider = this.$el.find('.slider').slider({
                 range: true,
                 step: 1,
-                animate: 'slow',
+                //animate: 'slow',
                 start: function(event, ui){
                     // set start value for logging purposes
                     self.startValue = ui.value;
                 },
                 slide: function(event, ui){
-                    self.updateSliderLabels(ui.values[0], ui.values[1]);
+                    self.updateHandleLables(event, ui, self);
                 },
                 stop: function(event, ui){
+                    self.updateHandleLables(event, ui, self);
+
                     self.changeFilter(event, ui, self.date_facet_name);
                     app.vent.trigger('Logging:clicks', {
                         action: 'daterange_facet',
@@ -75,6 +81,30 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             });
 
             return this;
+        },
+
+        updateHandleLables: function(event, ui, self) {
+            var interval = self.model.get('interval');
+            
+            // Get the position of the moved handle to determine the
+            // position of the handle's label
+            var handle_left_px = parseFloat($(ui.handle).css('left'));
+            var handle_width_px = $(ui.handle).width();
+            var handle_center_px = handle_left_px + (handle_width_px / 2.0);
+
+            // Determine which handle is being moved and replace the text
+            if (ui.value === ui.values[0]) {
+                self.slider_lower_label.text(self.convertTime[interval].display(new Date(ui.value)));
+                
+                var label_width_px = self.slider_lower_label.width() / 2.0;
+                self.slider_lower_label.css('left', (handle_center_px - label_width_px) + 'px');
+            }
+            else {
+                self.slider_upper_label.text(self.convertTime[interval].display(new Date(ui.value)));
+
+                var label_width_px = self.slider_upper_label.width() / 2.0;
+                self.slider_upper_label.css('left', (handle_center_px - label_width_px) + 'px');
+            }
         },
 
         updateSliderLabels: function(min, max){
