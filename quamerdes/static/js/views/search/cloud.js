@@ -45,42 +45,25 @@ define([
             this.$el.find('div.cloud a.facet').tooltip({
                 placement: 'right'
             });
-
+            console.log(facet_values);
             return this;
         },
 
         filterOnFacet: function(e){
             e.preventDefault();
             var facet_value_el = $(e.target);
-            var model = facet_value_el.data('model');
             var facet = facet_value_el.data('facet');
             var value = facet_value_el.data('value');
 
-            var selected = facet_value_el.hasClass('selected');
-
-            app.vent.trigger('Logging:clicks', {
-                action: 'select_facet_value',
-                query_instance: model,
-                facet: facet,
-                facet_value: value,
-                value: selected ? false : true
-            });
-
-            if (!(this.faceted)){
-                this.faceted = true;
-            }
-
-            if(selected){
-                this.selectedFacets[facet].splice(
-                    this.selectedFacets[facet].indexOf(value), 1
-                );
-
-                this.model.modifyFacetFilter(facet, value, false);
-            }
-            else {
-                this.selectedFacets[facet].push(value);
-                this.model.modifyFacetFilter(facet, value, true);
-            }
+            // app.vent.trigger('Logging:clicks', {
+            //     action: 'select_facet_value',
+            //     query_instance: model,
+            //     facet: facet,
+            //     facet_value: value,
+            //     value: selected ? false : true
+            // });
+            console.log(facet_value_el.data());
+            this.model.modifyQueryFilter(facet, value, true);
         }
     });
 

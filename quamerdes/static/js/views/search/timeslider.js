@@ -15,6 +15,11 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
 
             this.date_facet_name = options.date_facet;
             this.model.on('change:dateHistogram', this.updateFacetValues, this);
+            this.model.on('change:interval', function() {
+                var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
+
+                this.updateSliderLabels(date_stats.min, date_stats.max);
+            }, this);
             
             app.vent.on('model:redraw:' + this.model.get('name'), function(){
                 var histogram = this.model.get('dateHistogram');
@@ -107,12 +112,10 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             }
         },
 
-        updateSliderLabels: function(min, max){
+        updateSliderLabels: function(min, max, interval){
             if (DEBUG) console.log('TimeSliderView:updateSliderLabels');
-            var interval = this.model.get('interval');
-            if(!interval) interval = 'year';
 
-            console.log(interval);
+            if(!interval) interval = this.model.get('interval');
 
             min = this.convertTime[interval].display(new Date(min));
             max = this.convertTime[interval].display(new Date(max));
@@ -125,16 +128,6 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             if (DEBUG) console.log('TimeSliderView:updateFacetValues');
 
             var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
-
-            // if(histogram.length < 1){
-            //     this.disabled = true;
-            //     return;
-            // }
-            // else {
-            //     if(this.disabled === true){
-            //         this.disabled = false;
-            //     }
-            // }
 
             this.min = date_stats.min;
             this.max = date_stats.max;

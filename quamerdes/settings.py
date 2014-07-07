@@ -103,17 +103,17 @@ COLLECTIONS_CONFIG = {
             'genres': {
                 'name': 'Genres',
                 'description': '',
-                'buckets_path': 'genre.genre.buckets',
+                'buckets_path': 'filtered.filtered_buckets.buckets',
                 'nested': {
                     'path': 'meta.categories'
                 },
                 'aggs': {
-                    'genre': {
+                    'filtered': {
                         'filter': {
                             'term' : { 'key' : 'genre' }
                         },
                         'aggs':{
-                            'genre': {
+                            'filtered_buckets': {
                                 'terms': {
                                     'field': 'meta.categories.value.untouched',
                                     'size': 15
@@ -126,17 +126,17 @@ COLLECTIONS_CONFIG = {
             'persons': {
                 'name': 'Persons',
                 'description': '',
-                'buckets_path': 'person.person.buckets',
+                'buckets_path': 'filtered.filtered_buckets.buckets',
                 'nested': {
                     'path': 'meta.categories'
                 },
                 'aggs': {
-                    'person': {
+                    'filtered': {
                         'filter': {
                             'term' : { 'key' : 'person' }
                         },
                         'aggs': {
-                            'person': {
+                            'filtered_buckets': {
                                 'terms': {
                                     'field': 'meta.categories.value.untouched',
                                     'size': 15

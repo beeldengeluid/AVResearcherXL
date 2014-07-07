@@ -2,7 +2,12 @@
     <ul>
         <% _.each(terms, function(term){ %>
             <li>
-                <a href="#" class="facet" data-facet="<%= facetName %>" data-value="<%= term[0] %>" style="font-size:<%= scale(term[1]) %>px;" title="<%= term[1] %> hits"><%= term[0] %></a>
+            <% if (term[2]) { %>
+              <span style="font-size:<%= scale(term[1]) %>px;" title="<%= term[1] %> hits"><%= term[0] %></span>
+
+            <% } else { %>
+              <a href="#" class="facet" data-facet="<%= facetName %>" data-value="<%= term[0] %>" style="font-size:<%= scale(term[1]) %>px;" title="<%= term[1] %> hits"><%= term[0] %></a>
+            <% } %>
             </li>
         <% }); %>
     </ul>

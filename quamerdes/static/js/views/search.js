@@ -10,10 +10,12 @@ define([
     'views/search/timeslider',
     'views/search/results_list',
     'views/search/paginator',
-    'views/search/facets'
+    'views/search/facets',
+    'views/search/filters'
 ],
 function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, QueryInputView,
-         QueryPropertiesView, TimeSliderView, ResultsListView, PaginatorView, FacetsView){
+         QueryPropertiesView, TimeSliderView, ResultsListView, PaginatorView, FacetsView,
+         FiltersView){
     var SearchView = Backbone.View.extend({
         initialize: function(options){
             this.constructor.__super__.initialize.apply(this, [options]);
@@ -31,6 +33,7 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
             this.query_properties = new QueryPropertiesView({ model: this.model });
             this.paginator = new PaginatorView({ model: this.model });
             this.facets = new FacetsView({ model: this.model });
+            this.filters = new FiltersView({ model: this.model });
         },
 
         render: function(){
@@ -45,6 +48,7 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
             this.results_list.setElement($('.hits.' + this.name)).render();
             this.paginator.setElement($('.pagination.' + this.name)).render();
             this.facets.setElement($('.facets.' + this.name)).render();
+            this.filters.setElement($('.filters.' + this.name)).render();
         }
     });
 

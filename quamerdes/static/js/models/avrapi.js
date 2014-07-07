@@ -215,8 +215,10 @@ function($, _, Backbone, app){
 
             var aggregation_config = COLLECTIONS_CONFIG[this.get('collection')].available_aggregations[aggregation];
 
-            // Get the currently active filters
-            var filters = this.get('filters');
+            // Get the currently active filters (we clone the contents of the filter
+            // attribute to force Backbone to trigger a change event when we call `this.set`),
+            // see http://stackoverflow.com/a/12390273/961381 for more info
+            var filters = _.clone(this.get('filters'));
             
             // Add filter defenitions to the filters object, if the filter
             // defentions does not yet exist
@@ -290,7 +292,7 @@ function($, _, Backbone, app){
                     delete filters[aggregation];
                 }
             }
-
+            console.log(filters);
             this.set('filters', filters);
             this.set('currentPayload', this.constructQueryPayload());
             this.http.post('search', this.get('currentPayload'), function(data){

@@ -30,6 +30,8 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, facetsTemplate){
 
         render: function() {
             if (DEBUG) console.log('FacetsView:render');
+
+            var self = this;
             
             var collection = this.model.get('collection');
             var tabs = {};
@@ -49,6 +51,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, facetsTemplate){
             }
 
             var facet_values = [];
+            var filters = this.model.get('filters');
             var aggregations = this.model.get('aggregations');
             if (aggregations && this.activeTab in aggregations) {
                 var buckets;
@@ -59,8 +62,15 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, facetsTemplate){
                     buckets = aggregations[this.activeTab].buckets;
                 }
 
-                  _.each(buckets, function(aggregation) {
-                    facet_values.push([aggregation.key, aggregation.doc_count]);
+
+                _.each(buckets, function(aggregation) {
+                    var active_filter = false;
+
+                    if (self.activeTab in filters && filters[self.activeTab].values.indexOf(aggregation.key) != -1) {
+                        active_filter = true;
+                    }
+
+                    facet_values.push([aggregation.key, aggregation.doc_count, active_filter]);
                 });
             }
 

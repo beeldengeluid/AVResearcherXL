@@ -170,7 +170,6 @@ body {
     background-image: url(../img/newspaper.png);
 }
 
-
 /* Change view buttons */
 .change-view {
     top: 0;
@@ -253,8 +252,8 @@ body {
     background-color: #d5d1cb;
     width: 49%;
     float: left;
-    z-index: 100;
     position: relative;
+    height: 57px;
 }
 
 .timeslider:last-child {
@@ -355,6 +354,57 @@ body {
     margin: 4px 0 4px 15px;
 }
 
+/* Filters */
+.filters {
+    background-color: #e8e6e3;
+    width: 49%;
+    float: left;
+    z-index: 100;
+    position: relative;
+    padding: 10px 10px 5px 10px;
+}
+
+.filters:last-child {
+    float: right;
+}
+
+.filters ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.filters ul li {
+    display: inline-block;
+    padding: 4px 6px;
+}
+
+.filters li span, .filters li a {
+    line-height: 17px;
+}
+
+.filters.q1 li {
+    background: #009fda;
+}
+
+.filters.q2 li {
+    background: #d91441;
+}
+
+.filters span {
+    float: left;
+    color: #fff;
+}
+
+.filters a.remove {
+    background: url(../img/close.png) center center no-repeat;
+    width: 12px;
+    height: 12px;
+    float: left;
+    margin: 0 0 0 3px;
+    padding: 8px;
+    cursor: pointer;
+}
 
 /* Facets */
 #facets-container {
