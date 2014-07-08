@@ -33,8 +33,9 @@ function(bootstrap, jqui, app, Router){
 
     Backbone.history.start();
 
-    // Directly show the login popup if the user is not authenticated
-    if(!(AUTHENTICATED_USER)){
+    // Directly show the login popup if user authentication is enabled
+    // and the user is not authenticated
+    if(!(AUTHENTICATED_USER) && !(LOGIN_DISABLED)){
         app.router.navigate('#login', {trigger: true});
     }
 });

@@ -5,6 +5,7 @@
     <li><a href="#help" data-name="help">Help</a></li>
 </ul>
 
+<% if (!(LOGIN_DISABLED)) { %>
 <ul class="pull-right user-menu">
     <li>
         <div class="dropdown">
@@ -20,3 +21,4 @@
         </div>
     </li>
 </ul>
+<% } %>
