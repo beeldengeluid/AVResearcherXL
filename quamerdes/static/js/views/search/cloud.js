@@ -42,7 +42,7 @@ define([
                 }));
             }
 
-            this.$el.find('div.cloud a.facet').tooltip({
+            this.$el.find('div.cloud a.facet, div.cloud span.facet').tooltip({
                 placement: 'right'
             });
 
