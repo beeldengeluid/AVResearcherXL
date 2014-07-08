@@ -100,6 +100,62 @@ function($, _, Backbone, app){
             }
         },
 
+        register: function(email, name, organization, password){
+            var post_data = {
+                email: email,
+                name: name,
+                organization: organization,
+                password: password
+            };
+
+            var self = this;
+
+            // On successful login, set the user details and trigger 'login_successful' event
+            this.http.post('register', post_data, function(data){
+                if(data.success){
+                    app.vent.trigger('AvrApiModel:registration_successful');
+                }
+                // Trigger 'login_failed' with the error
+                else {
+                    app.vent.trigger('AvrApiModel:registration_failed', data.errors);
+                }
+            });
+        },
+
+        login: function(email, password){
+            var post_data = {
+                email: email,
+                password: password
+            };
+
+            var self = this;
+            this.http.post('login', post_data, function(data){
+                // On successful login, set the user details and trigger 'login_successful' event
+                if(data.success){
+                    self.set('user', data.user);
+                    app.vent.trigger('AvrApiModel:login_successful');
+                }
+                // Trigger 'login_failed' with the error
+                else {
+                    app.vent.trigger('AvrApiModel:login_failed', data.errors);
+                }
+            });
+        },
+
+        logout: function(){
+            var self = this;
+            this.set('user', null);
+            this.http.get('logout', function(data){
+                console.log(data);
+            });
+        },
+
+        logUsage: function(events){
+            this.http.post('log_usage', events, function(data){
+                console.log(data);
+            });
+        },
+
         changeCollection: function(collection) {
             if (DEBUG) console.log('AvrApiModel:changeCollection', collection);
 

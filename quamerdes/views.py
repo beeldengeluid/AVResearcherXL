@@ -24,7 +24,7 @@ def index():
         'MINIMUM_CLOUD_FONTSIZE', 'MAXIMUM_CLOUD_FONTSIZE', 'BARCHART_BARS',
         'BARCHART_BAR_HEIGHT', 'HIT_HIGHLIGHT_FIELDS', 'HIT_HIGHLIGHT_FRAGMENTS',
         'HIT_HIGHLIGHT_FRAGMENT_SIZE', 'HELP_PAGE_CONTENT_URL', 'LOG_EVENTS',
-        'ABOUT_PAGE_CONTENT_URL', 'ENABLE_USAGE_LOGGING', 'DATE_STATS_AGGREGATION'    ]
+        'ABOUT_PAGE_CONTENT_URL', 'ENABLE_USAGE_LOGGING', 'DATE_STATS_AGGREGATION']
 
     settings = {}
     for setting in exposed_settings:
@@ -63,18 +63,17 @@ def verify_email(user_id, token):
     db.session.commit()
 
     # Send email to mailadres responsible for approving accounts
-    approve_url = '%savresearcher/approve_user/%s/%s' % (request.url_root,
-                                                         user.id,
-                                                         user.approval_token)
+    approve_url = '%s/approve_user/%s/%s' % (request.url_root, user.id,
+                                             user.approval_token)
 
     MESSAGES = current_app.config['MESSAGES']
 
     msg = Message(MESSAGES['email_approval_subject'],
                   sender=current_app.config['MAIL_DEFAULT_SENDER'],
-                  recipients=current_app.config['MAIL_ACCOUNT_APPROVAL_ADDRESS'])
+                  recipients=[current_app.config['MAIL_ACCOUNT_APPROVAL_ADDRESS']])
 
     msg.body = MESSAGES['email_approval_body'] % (user.name, user.organization,
-                                              user.email, approve_url)
+                                                  user.email, approve_url)
     mail.send(msg)
 
     messages = {
@@ -165,12 +164,12 @@ def register():
     db.session.commit()
 
     # Send account activation e-mail
-    verification_url = '%savresearcher/verify_email/%s/%s' % (request.url_root,
+    verification_url = '%s/verify_email/%s/%s' % (request.url_root,
                                                               user.id,
                                                               user.email_verification_token)
 
     msg = Message(MESSAGES['email_verification_subject'],
-                  sender=current_app.conf['MAIL_DEFAULT_SENDER'],
+                  sender=current_app.config['MAIL_DEFAULT_SENDER'],
                   recipients=[request.form['email']])
     msg.body = MESSAGES['email_verification_body']\
         % (request.form['name'], verification_url)

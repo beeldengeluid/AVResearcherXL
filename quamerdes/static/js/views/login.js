@@ -30,10 +30,10 @@ function($, _, Backbone, app, loginTemplate){
                 show: true
             });
 
-            var self = this;
-            this.$el.find('#loginmodal').on('shown', function(){
-                self.$el.find('input[name="email"]').focus();
-            });
+            // var self = this;
+            // this.$el.find('#loginmodal').on('shown', function(){
+            //     self.$el.find('input[name="email"]').focus();
+            // });
 
             return this;
         },

@@ -1,40 +1,20 @@
-<div id="registermodal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="registermodal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-body">
         <div class="logo">
-            <img src="static/img/logo_avresearcher_b.png" />
+            <img src="static/img/logo-b.png" />
         </div>
         <div id="userinput">
             <h1>Create Account</h1>
-            <div class="errors alert alert-error">
+            <div class="errors alert alert-warning" role="alert">
                 <ul></ul>
             </div>
             <form id="registrationform" class="form-horizontal">
-                <div class="control-group">
-                    <label class="control-label" for="email">Email</label>
-                    <div class="controls">
-                        <input type="text" name="email" id="email">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="name">Name</label>
-                    <div class="controls">
-                        <input type="text" name="name" id="name">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="organization">Organization</label>
-                    <div class="controls">
-                        <input type="text" name="organization" id="organization">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="password">Password</label>
-                    <div class="controls">
-                        <input type="password" name="password" id="password">
-                    </div>
-                </div>
+                <input type="text" name="email" id="email" class="form-control" placeholder="Email">
+                <input type="text" name="name" id="name" class="form-control" placeholder="Name">
+                <input type="text" name="organization" id="organization" class="form-control" placeholder="Organization">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Password">
 
-                <button class="btn btn-large btn-primary" type="submit">Create Account</button>
+                <button class="btn btn-large btn-primary btn-block" type="submit">Create Account</button>
             </form>
         </div>
         <div class="loading">

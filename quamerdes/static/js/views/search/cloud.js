@@ -45,7 +45,7 @@ define([
             this.$el.find('div.cloud a.facet').tooltip({
                 placement: 'right'
             });
-            console.log(facet_values);
+
             return this;
         },
 
