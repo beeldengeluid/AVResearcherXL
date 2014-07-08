@@ -32,7 +32,10 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
             this.results_list = new ResultsListView({ model: this.model });
             this.query_properties = new QueryPropertiesView({ model: this.model });
             this.paginator = new PaginatorView({ model: this.model });
-            this.facets = new FacetsView({ model: this.model });
+            this.facets = new FacetsView({
+                    model: this.model,
+                    name: this.options.name
+            });
             this.filters = new FiltersView({ model: this.model });
         },
 

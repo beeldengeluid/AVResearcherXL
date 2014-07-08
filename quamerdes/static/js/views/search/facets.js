@@ -21,7 +21,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, facetsTemplate){
 
             this.representation = 'cloud';
             this.cloud = new CloudView({model: this.model});
-            this.barchart = new BarChartView({model: this.model});
+            this.barchart = new BarChartView({model: this.model, name: this.options.name });
 
             this.model.on('change:collection', this.render, this);
             this.model.on('change:aggregations', this.updateFacetValues, this);

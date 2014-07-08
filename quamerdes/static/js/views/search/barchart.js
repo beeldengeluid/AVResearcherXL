@@ -11,17 +11,17 @@ function($, _, Backbone, d3, app, barchartTemplate){
         initialize: function(options){
             if (DEBUG) console.log('BarChartView:' + options.name + ':initialize');
 
-            var orient = (this.modelName === 'q1') ? 'right' : 'left';
+            var orient = (this.options.name === 'q1') ? 'right' : 'left';
             this.chart = {
                 x: d3.scale.linear(),
                 y: d3.scale.ordinal(),
                 xAxis: d3.svg.axis(),
                 yAxis: d3.svg.axis().orient(orient),
                 margin: {
-                    top: 20,
-                    right: 50,
-                    bottom: 20,
-                    left: 110
+                    top: 10,
+                    right: 40,
+                    bottom: 0,
+                    left: 130
                 },
                 barHeight: BARCHART_BAR_HEIGHT,
                 nrOfBars: BARCHART_BARS
@@ -39,7 +39,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
 
                 var svg = d3.select(this.el)
                     .append('svg')
-                    .attr('class', this.modelName + ' barchart');
+                    .attr('class', this.options.name + ' barchart');
 
                 var height = this.chart.barHeight * data.length;
                 heights.push(height); // Use to determine optimal height
@@ -53,7 +53,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
                 var innerContainer = svg.append('g');
 
                 // Make sure the barcharts are aligned correctly
-                if(this.modelName === 'q1'){
+                if(this.options.name === 'q1'){
                     var w = this.$el.find('svg').width() - width - this.chart.margin.left;
                     innerContainer.attr('transform', 'translate(' + w + ',' + this.chart.margin.top + ')');
                 } else {
@@ -79,7 +79,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
                             .append('g')
                             .append('rect')
                               // Return proper x value depending on the model
-                              .attr('x', function(){ return self.modelName === 'q1' ? 0 : -self.chart.margin.left; })
+                              .attr('x', function(){ return self.options.name === 'q1' ? 0 : -self.chart.margin.left; })
                               .attr('y', self.chart.y.rangeBand() / -2)
                               .attr('width', self.chart.margin.left)
                               .attr('height', self.chart.y.rangeBand())
@@ -96,7 +96,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
                     // .transition()
                     .call(this.chart.yAxis);
 
-                if(this.modelName === 'q1'){
+                if(this.options.name === 'q1'){
                     // Place labels on right side of q1
                     yAxisContainer.attr('transform', 'translate(' + width + ',0)');
                 }
@@ -111,14 +111,14 @@ function($, _, Backbone, d3, app, barchartTemplate){
                     .attr('opacity', 0)
                     .attr('x', function(d){
                         // Invert the bars for chart q1
-                        return self.modelName === 'q1' ? (width - self.chart.x(d[1])) : 0;
+                        return self.options.name === 'q1' ? (width - self.chart.x(d[1])) : 0;
                     })
                     .attr('width', function(d){
                         return self.chart.x(d[1]);
                     })
                     // use rangeBand to maintain bar separation
                     .attr('height', self.chart.y.rangeBand())
-                    .attr('class', self.modelName + ' bar ' + tab)
+                    .attr('class', self.options.name + ' bar ' + tab)
                     .append('title')
                     .text(function(d){ return d.term; });
 
@@ -136,7 +136,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
                 var dx = 3;
                 var textAnchor = 'start';
 
-                if(this.modelName === 'q1'){
+                if(this.options.name === 'q1'){
                     // Settings that are different for q1
                     xWidth = width;
                     dx = -3;

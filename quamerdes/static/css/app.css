@@ -172,7 +172,6 @@ body {
 .collection-selector {
     width: 49%;
     float: left;
-    z-index: 100;
     position: relative;
 }
 
@@ -270,7 +269,6 @@ body {
 .query-input {
     width: 49%;
     float: left;
-    z-index: 100;
     position: relative;
 }
 
@@ -415,7 +413,6 @@ body {
     background-color: #e8e6e3;
     width: 49%;
     float: left;
-    z-index: 100;
     position: relative;
     padding: 10px 10px 5px 10px;
 }
@@ -488,9 +485,8 @@ body {
     background-color: #fff;
     width: 49%;
     float: left;
-    z-index: 100;
     position: relative;
-    height: 200px; 
+    height: 255px; 
 }
 
 .facets:last-child {
@@ -518,7 +514,6 @@ body {
     margin: 0;
     border-bottom: 0 solid;
 }
-
 
 .facets .nav-tabs li {
     margin-bottom: 0;
@@ -559,6 +554,22 @@ body {
 
 .facets.q1 .cloud ul {
     text-align: right;
+}
+
+.facets svg.barchart .y.axis path, .facets svg.barchart .y.axis line {
+    display: none;
+}
+
+.facets.q1 svg.barchart rect {
+    fill: #009fda;
+}
+
+.facets.q2 svg.barchart rect {
+    fill: #e00034;
+}
+
+.facets svg.barchart g.axis g text {
+    font-size: 11px;
 }
 
 /* Timeseries */
@@ -628,7 +639,6 @@ body {
     background-color: #fff;
     width: 49%;
     float: left;
-    z-index: 100;
     position: relative;
 }
 
