@@ -11,9 +11,9 @@ import logging
 import random
 import os
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
-from quamerdes_new.models import User
+from quamerdes.models import User
 from quamerdes.views import bcrypt
-from quamerdes_new.extensions import db
+from quamerdes.extensions import db
 
 import zipfile
 import tarfile

@@ -12,10 +12,12 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import TransportError
 from elasticsearch.helpers import bulk
 
+from quamerdes import create_app
+from quamerdes.extensions import db
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
-logger = logging.getLogger('quamerdes')
+logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
 
 es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
@@ -25,6 +27,25 @@ es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 def cli():
     pass
 
+
+@cli.command()
+@click.option('--host', default='0.0.0.0',
+              help='Host to bind to, defaults to 0.0.0.0')
+@click.option('--port', default=5000,
+              help='Port of the development server, defaults to 5000')
+def runserver(host, port):
+    """Start a Flask development server"""
+    app = create_app()
+    app.run(host=host, port=port, use_reloader=True)
+
+
+@cli.command()
+def init_db():
+    """Creates all required database tables"""
+    app = create_app()
+
+    with app.app_context():
+        db.create_all()
 
 @cli.group()
 def elasticsearch():
@@ -118,6 +139,9 @@ def get_immix_items(archive_path):
             else:
                 yield doc_id, expression
 
+            # The tarfile module places all extracted files as TarInfo
+            # objects in the members list. We empty this list to prevent
+            # running out of memory.
             tar.members = []
 
 
