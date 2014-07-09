@@ -18,7 +18,9 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             this.model.on('change:interval', function() {
                 var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
 
-                this.updateSliderLabels(date_stats.min, date_stats.max);
+                if (this.model.get('interval')) {
+                    this.updateSliderLabels(date_stats.min, date_stats.max);
+                }
             }, this);
             
             app.vent.on('model:redraw:' + this.model.get('name'), function(){
