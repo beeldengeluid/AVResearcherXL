@@ -24,6 +24,8 @@ function($, _, Backbone, d3, app){
             _.each(this.options.models, function(model, name) {
                 model.on('change:aggregations',  self.determineInterval, self);
                 model.on('change:dateHistogram', self.updateTimeseries, self);
+                model.on('change:ftQuery', self.updateLegend, self);
+                model.on('change:totalHits', self.updateLegend, self);
             });
 
             app.vent.on('changeview:TimeseriesView', this.swithFrequency, this);
@@ -84,8 +86,33 @@ function($, _, Backbone, d3, app){
 
         render: function() {
             if (DEBUG) console.log('TimeSeriesView:render');
-            this.$el.html('<div class="graph"></div>');
+            this.$el.html('<div class="legend"></div><div class="graph"></div>');
+
+            this.legend = this.$el.find('.legend');
             this.chart_width = this.$el.width();
+        },
+
+        updateLegend: function(e) {
+            var self = this;
+
+            _.each(this.options.models, function(model, name) {
+                var legend_item = self.legend.find('.legend-item.' + name);
+
+                if (legend_item.length === 0) {
+                    self.legend.append('<div class="legend-item '+ name +'"></div>');
+                    legend_item = self.legend.find('.legend-item.' + name);
+                }
+
+                var query = model.get('ftQuery');
+                var count = model.get('totalHits');
+
+                if (query) {
+                    legend_item[0].innerHTML = '<div class="linecolor"></div>' + model.get('ftQuery') + ' <span class="count">(' + model.get('totalHits') + ')</span>';
+                }
+                else {
+                    legend_item[0].innerHTML = '';
+                }
+            });
         },
 
         updateTimeseries: function(e) {

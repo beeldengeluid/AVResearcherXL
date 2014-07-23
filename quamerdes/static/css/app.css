@@ -686,6 +686,41 @@ ul.dropdown li {
     margin-top: 10px;
 }
 
+
+.legend-item {
+    width: 49%;
+    float: left;
+    position: relative;
+    padding: 10px 0 10px 45px;
+}
+
+.legend-item:last-child {
+    float: right;
+}
+
+.legend-item .linecolor {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin: 2px 5px 0 0;
+}
+
+.legend-item.query1 .linecolor {
+    background: #009fdb;
+}
+
+.legend-item.query2 .linecolor {
+    background: #e00034;
+}
+
+.legend-item.query1 .count {
+    color: #009fdb;
+}
+
+.legend-item.query2 .count {
+    color: #e00034;
+}
+
 .hits {
     background-color: #fff;
     width: 49%;

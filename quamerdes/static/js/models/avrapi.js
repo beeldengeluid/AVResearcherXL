@@ -395,6 +395,7 @@ function($, _, Backbone, app){
             this.set('filters', filters);
             this.set('currentPayload', this.constructQueryPayload());
             this.http.post('search', this.get('currentPayload'), function(data){
+                console.log(data);
                 self.set({
                     hits: data.hits.hits,
                     aggregations: data.aggregations,
