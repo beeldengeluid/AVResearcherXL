@@ -1,0 +1,15 @@
+<a href="#" class="toggle-menu open" aria-label="Select fields">
+  <i class="fa fa-tags"></i><span class="caret"></span>
+</a>
+
+<ul class="dropdown">
+<% _.each(available_fields, function(field_config, field) { %>
+  <li>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" value="<%= field %>" <% if (enabled_fields.indexOf(field) !== -1){ %> checked="checked" <% } %>> <%= field_config.name %>
+      </label>
+    </div>
+  </li>
+<% }); %>
+</ul>

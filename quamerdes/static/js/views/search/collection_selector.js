@@ -12,6 +12,8 @@ function($, _, Backbone, app, collectionSelectorTemplate){
         },
 
         render: function(){
+            if (DEBUG) console.log('CollectionSelectorView:render');
+
             this.$el.html(_.template(collectionSelectorTemplate, {
                 enabledCollections: ENABLED_COLLECTIONS,
                 collections: COLLECTIONS_CONFIG

@@ -163,7 +163,40 @@ function($, _, Backbone, app){
 
             this.set({
                 collection: collection,
+                enabledSearchFields: _.keys(collection_config.available_search_fields),
                 enabledAggregations: this.getAggregationsConfig(collection)
+            });
+        },
+
+        changeEnabledSearchFields: function(field, add) {
+            var enabled_fields = this.get('enabledSearchFields');
+
+            var field_index = enabled_fields.indexOf(field);
+            if (add) {
+                // only add the field if it is not yet enabled
+                if (field_index == -1) {
+                    enabled_fields.push(field);
+                }
+            }
+            else {
+                // Only remove the field if it is in the list of enabled fields
+                if (field_index != -1) {
+                    enabled_fields.splice(field_index, 1);
+                }
+            }
+
+            this.set({ enabledSearchFields: enabled_fields });
+            this.set('currentPayload', this.constructQueryPayload());
+            
+            var self = this;
+            this.http.post('search', this.get('currentPayload'), function(data){
+                self.set({
+                    hits: data.hits.hits,
+                    aggregations: data.aggregations,
+                    totalHits: data.hits.total,
+                    queryTime: data.took,
+                    queryTimeMs: (data.took / 1000).toFixed(2)
+                });
             });
         },
 
@@ -348,7 +381,7 @@ function($, _, Backbone, app){
                     delete filters[aggregation];
                 }
             }
-            console.log(filters);
+
             this.set('filters', filters);
             this.set('currentPayload', this.constructQueryPayload());
             this.http.post('search', this.get('currentPayload'), function(data){
@@ -365,17 +398,70 @@ function($, _, Backbone, app){
         constructQueryPayload: function() {
             var filteredQuery = {
                 query: {
-                    query_string: {
-                        query: this.get('ftQuery'),
-                        default_operator: 'AND',
-                        fields: ['title', 'text']
+                    bool: {
+                        should: [],
+                        minimum_should_match: 1
                     }
+                    // query_string: {
+                    //     query: this.get('ftQuery'),
+                    //     default_operator: 'AND',
+                    //     fields: ['title', 'text']
+                    // }
                 },
                 filter: {}
             };
 
+            // Construct the filtered free text query based on the enabled search fields
+            var collection = this.get('collection');
+            var enabledFields = this.get('enabledSearchFields');
+            var ftQuery = this.get('ftQuery');
 
-            //this.modifyQueryFilter('publication', 'De Telegraaf', true);
+            var non_nested_fields = [];
+            var nested_fields = [];
+            _.each(enabledFields, function(field) {
+                var field_config = COLLECTIONS_CONFIG[collection].available_search_fields[field];
+                if ('nested' in field_config) {
+                    nested_fields.push(field_config);
+                } else {
+                    non_nested_fields.push(field_config);
+                }
+            });
+
+            console.log(non_nested_fields);
+
+            // First add non-nested fields as a single query_string query
+            if (non_nested_fields.length > 0) {
+                var qsq = {
+                    query_string: {
+                        fields: [],
+                        query: ftQuery,
+                        default_operator: 'AND'
+                    }
+                };
+
+                _.each(non_nested_fields, function(field_config) {
+                    Array.prototype.push.apply(qsq.query_string.fields, field_config.fields);
+                });
+
+                filteredQuery.query.bool.should.push(qsq);
+            }
+
+            // Add the fields of a nested document as a seperate 'should' to the bool
+            // query. Each nested field is added as a seperate 'should'.
+            _.each(nested_fields, function(field_config) {
+                filteredQuery.query.bool.should.push({
+                    nested: {
+                        path: field_config.nested,
+                        query: {
+                            query_string: {
+                                fields: field_config.fields,
+                                query: ftQuery,
+                                default_operator: 'AND'
+                            }
+                        }
+                    }
+                });
+            });
             
             var filters = this.get('filters');
 
@@ -460,7 +546,7 @@ function($, _, Backbone, app){
             console.log(filteredQuery);
 
             return {
-                index: this.get('collection'),
+                index: collection,
                 query: {
                     filtered: filteredQuery
                 },

@@ -177,6 +177,25 @@ COLLECTIONS_CONFIG = {
                     'size': 15
                 }
             }
+        },
+        'available_search_fields': {
+            'titles': {
+                'name': 'iMMix program titles',
+                'fields': ['titles', 'mainTitle']
+            },
+            'summaries': {
+                'name': 'iMMix program descriptions',
+                'fields': ['summaries', 'descriptions']
+            },
+            'subtitles': {
+                'name': 'TT888 subtitles',
+                'fields': ['subtitles']
+            }
+            # 'tweets': {
+            #     'name': 'Tweets',
+            #     'fields': ['tweetText'],
+            #     'nested': 'tweets'
+            # }
         }
     },
     'kb': {
@@ -217,6 +236,16 @@ COLLECTIONS_CONFIG = {
                     'field': 'meta.publication_name',
                     'size': 15
                 }
+            }
+        },
+        'available_search_fields': {
+           'title': {
+                'name': 'Article title',
+                'fields': ['title']
+            },
+            'text': {
+                'name': 'Article text',
+                'fields': ['text']
             }
         }
     }

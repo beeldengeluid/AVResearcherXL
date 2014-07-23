@@ -3,54 +3,25 @@ define([
     'underscore',
     'backbone',
     'app',
+    'views/search/fields',
     'text!../../../templates/search/query_input.html'
 ],
-function($, _, Backbone, app, queryInputTemplate){
+function($, _, Backbone, app, FieldsView, queryInputTemplate){
     var QueryInputView = Backbone.View.extend({
         events: {
             'submit': 'searchOnEnter',
-            'click i': 'changeSearchFields'
+            'focus input.query': 'focusOnInput',
+            'focusout input.query': 'focusOnInput',
+            'click .input-container': 'focus'
+        },
+
+        initialize: function(options){
+            this.fields = new FieldsView({ model: this.model });
         },
 
         render: function(){
-            this.$el.html(_.template(queryInputTemplate, {
-                searchFields: []
-            }));
-
-            this.$el.find('i').tooltip();
-        },
-
-        changeSearchFields: function(e){
-            var available_fields = AVAILABLE_SEARCH_FIELDS;
-            var checked_fields = [];
-
-            // Depending on the current state of the clicked icon, switch it
-            // to active or inactive
-            $(e.target).toggleClass('active');
-
-            app.vent.trigger('Logging:clicks', {
-                action: 'change_search_field',
-                modelName: this.model.get('name'),
-                field: $(e.target).data('field'),
-                value: $(e.target).hasClass('active')
-            });
-
-            this.$el.find('i.active').each(function(){
-                checked_fields.push($(this).data('field'));
-            });
-
-            // If none of the fields are checked, re-check them all, and use all
-            // fields for searching
-            if(checked_fields.length === 0){
-                if (DEBUG) console.log('QueryInputView:changeSearchFields User un-checked all fields, re-checking them');
-
-                var fields = this.$el.find('i').addClass('active');
-                fields.each(function(a){
-                    checked_fields.push($(this).data('field'));
-                });
-            }
-
-            this.model.changeSearchFields(checked_fields);
+            this.$el.html(_.template(queryInputTemplate));
+            this.fields.setElement(this.$el.find('.fields')).render();
         },
 
         searchOnEnter: function(e){
@@ -73,6 +44,22 @@ function($, _, Backbone, app, queryInputTemplate){
             }
 
             this.model.freeTextQuery(querystring);
+        },
+
+        focus: function(e) {
+            console.log(e);
+            this.$el.find('input.query').focus();
+        },
+
+        focusOnInput: function(e){
+            console.log(e);
+
+            if (e.type === 'focusin') {
+                this.$el.find('.input-container').addClass('focussed');
+            }
+            else {
+                this.$el.find('.input-container').removeClass('focussed');
+            }
         }
     });
 
