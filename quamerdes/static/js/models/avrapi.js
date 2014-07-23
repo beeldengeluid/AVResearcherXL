@@ -161,11 +161,21 @@ function($, _, Backbone, app){
 
             var collection_config = COLLECTIONS_CONFIG[collection];
 
+            // Set the collection, search fields and enabled aggregations,
+            // clear the current hits
             this.set({
                 collection: collection,
                 enabledSearchFields: _.keys(collection_config.available_search_fields),
-                enabledAggregations: this.getAggregationsConfig(collection)
+                enabledAggregations: this.getAggregationsConfig(collection),
+                hits: {}
             });
+
+            // Execute a new ft query to load results within the collection
+            // that was just selected
+            var qs = this.get('ftQuery');
+            if (qs) {
+                this.freeTextQuery(qs);
+            }
         },
 
         changeEnabledSearchFields: function(field, add) {
@@ -427,8 +437,6 @@ function($, _, Backbone, app){
                 }
             });
 
-            console.log(non_nested_fields);
-
             // First add non-nested fields as a single query_string query
             if (non_nested_fields.length > 0) {
                 var qsq = {
@@ -542,8 +550,6 @@ function($, _, Backbone, app){
                     filteredQuery.filter.bool.must.push(range_filter);
                 }
             });
-
-            console.log(filteredQuery);
 
             return {
                 index: collection,

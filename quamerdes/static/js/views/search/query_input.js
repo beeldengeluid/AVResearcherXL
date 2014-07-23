@@ -47,13 +47,10 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
         },
 
         focus: function(e) {
-            console.log(e);
             this.$el.find('input.query').focus();
         },
 
         focusOnInput: function(e){
-            console.log(e);
-
             if (e.type === 'focusin') {
                 this.$el.find('.input-container').addClass('focussed');
             }
