@@ -16,9 +16,23 @@ from quamerdes import create_app
 from quamerdes.extensions import db
 from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
+
+logging.getLogger('elasticsearch').setLevel(logging.INFO)
+logging.getLogger('urllib3').setLevel(logging.INFO)
+logging.getLogger('elasticsearch.trace').setLevel(logging.DEBUG)
+
+log_sh = logging.StreamHandler()
+log_sh.setLevel(logging.DEBUG)
+lg_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+log_sh.setFormatter(lg_formatter)
+
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
+logger.addHandler(log_sh)
+
+es_log = logging.getLogger('elasticsearch.trace')
+es_log.addHandler(log_sh)
+es_log.setLevel(logging.ERROR)
 
 es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 
@@ -46,6 +60,7 @@ def init_db():
 
     with app.app_context():
         db.create_all()
+
 
 @cli.group()
 def elasticsearch():
