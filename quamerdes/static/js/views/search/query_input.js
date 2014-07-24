@@ -12,7 +12,8 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
             'submit': 'searchOnEnter',
             'focus input.query': 'focusOnInput',
             'focusout input.query': 'focusOnInput',
-            'click .input-container': 'focus'
+            'click .input-container': 'focus',
+            'click .clear-query a': 'clearQuery'
         },
 
         initialize: function(options){
@@ -26,7 +27,7 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
 
         searchOnEnter: function(e){
             e.preventDefault();
-            var querystring = this.$('input').val().trim();
+            var querystring = this.$('input.query').val().trim();
 
             // Also log empty querystrings
             app.vent.trigger('Logging:clicks', {
@@ -57,6 +58,18 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
             else {
                 this.$el.find('.input-container').removeClass('focussed');
             }
+        },
+
+        clearQuery: function(e){
+            if (DEBUG) console.log('QueryInputView:clearQuery');
+
+            e.preventDefault();
+
+            // Perform a new query with an empty qs
+            this.model.freeTextQuery('');
+
+            // Clear the input text
+            this.$('input.query').val('');
         }
     });
 

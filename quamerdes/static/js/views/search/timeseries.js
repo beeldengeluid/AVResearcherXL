@@ -279,7 +279,7 @@ function($, _, Backbone, d3, app){
                         .attr('y', -60);
 
                     // Update the text of the y-axis label to include the correct interval name
-                    svg.select('text.label.y').text('Publications per ' + self.current_interval);
+                    svg.select('text.label.y').text('Hits per ' + self.current_interval);
 
                     // Update outer dimensions
                     svg.attr('width', width)

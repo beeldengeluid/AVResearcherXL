@@ -33,6 +33,8 @@ function($, _, Backbone, app, fieldsTemplate) {
         toggleMenu: function(e) {
             if (DEBUG) console.log('FieldsView:toggleMenu');
             
+            e.preventDefault();
+
             if (!this.menu.hasClass('open')) {
                 $('<div class="dropdown-backdrop"/>').insertAfter(this.$el).on('click', $.proxy(this.toggleMenu, this));
             }

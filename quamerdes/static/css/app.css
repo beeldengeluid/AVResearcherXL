@@ -311,10 +311,10 @@ body {
 }
 
 .query-input .fields {
-    float: left;
+    float: right;
 }
 
-.query-input .fields a {
+.query-input .fields a, .query-input .clear-query a {
     padding: 5px;
     line-height: 45px;
     color: #000;
@@ -339,7 +339,7 @@ ul.dropdown {
     margin: 0;
     padding: 0;
     top: 75%;
-    left: 50%;
+    right: 10px;
     border: 1px solid rgba(0,0,0,0.10);
     box-shadow: 0 3px 9px rgba(0,0,0,0.10);
 }
@@ -350,6 +350,10 @@ ul.dropdown.open {
 
 ul.dropdown li {
     padding: 0 8px;
+}
+
+.clear-query {
+    float: right;
 }
 
 /* Timeslider */
