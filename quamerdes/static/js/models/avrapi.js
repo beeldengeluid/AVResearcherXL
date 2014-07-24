@@ -21,6 +21,7 @@ function($, _, Backbone, app){
                 collection: null,
                 ftQuery: null,
                 filters: {},
+                sort: ['_score'],
                 currentPayload: {},
 
                 hits: {},
@@ -176,6 +177,21 @@ function($, _, Backbone, app){
             if (qs) {
                 this.freeTextQuery(qs);
             }
+        },
+
+        changeResultOrder: function(order) {
+            this.set({sort: [order]});
+
+            var payload = this.constructQueryPayload();
+
+            // Don't request aggregations, since we only have to display
+            // results in their new order
+            delete payload.aggs;
+
+            var self = this;
+            this.http.post('search', payload, function(data){
+                self.set({ hits: data.hits.hits });
+            });
         },
 
         changeEnabledSearchFields: function(field, add) {
@@ -559,6 +575,7 @@ function($, _, Backbone, app){
                 },
                 aggs: this.get('enabledAggregations'),
                 fields: this.get('requiredFields'),
+                sort: this.get('sort'),
                 size: this.get('hitsPerPage'),
                 from: this.get('startAtHit')
             };

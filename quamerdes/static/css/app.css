@@ -694,6 +694,23 @@ ul.dropdown li {
     margin-top: 10px;
 }
 
+#hits-container .change-view a.relevance {
+    width: 30px;
+    height: 20px;
+    background: url(../img/sort-relevance.png) center no-repeat;
+}
+
+#hits-container .change-view a.datetime-desc {
+    width: 30px;
+    height: 20px;
+    background: url(../img/sort-time-desc.png) center no-repeat;
+}
+
+#hits-container .change-view a.datetime-asc {
+    width: 30px;
+    height: 20px;
+    background: url(../img/sort-time-asc.png) center no-repeat;
+}
 
 .legend-item {
     width: 49%;

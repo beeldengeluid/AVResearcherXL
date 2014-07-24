@@ -18,6 +18,8 @@ function($, _, Backbone, app, resultsListTemplate){
 
             this.model.on('change:hits', this.render, this);
             this.model.on('change:hits', this.logResults, this);
+
+            app.vent.on('changeview:ResultsListView', this.changeSortOrder, this);
         },
 
         render: function(){
@@ -29,6 +31,21 @@ function($, _, Backbone, app, resultsListTemplate){
             }));
 
             return this;
+        },
+
+        changeSortOrder: function(order) {
+            var sort;
+            if (order == 'relevance') {
+                sort = '_score';
+            }
+            else if (order == 'datetime_desc') {
+                sort = {'date': 'desc'};
+            }
+            else {
+                sort = {'date': 'asc'};
+            }
+
+            this.model.changeResultOrder(sort);
         },
 
         logResults: function(){
