@@ -677,6 +677,10 @@ ul.dropdown li {
     fill: #e00034;
 }
 
+#timeseries text.label {
+    font-size: 12px;
+}
+
 /* Result lists (hits) */
 #hits-container {
     position: relative;

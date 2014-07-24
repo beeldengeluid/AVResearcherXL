@@ -198,9 +198,9 @@ function($, _, Backbone, d3, app){
         },
 
         chart: function(selection) {
-            var margin = { top: 10, right: 10, bottom: 30, left: 70 },
+            var margin = { top: 10, right: 10, bottom: 50, left: 70 },
                 width = 1100,
-                height = 275,
+                height = 340,
                 xScale = d3.time.scale(),
                 yScale = d3.scale.linear(),
                 xAxis = d3.svg.axis().scale(xScale).orient('bottom').tickSize(10, 0).tickPadding(10).ticks(13),
@@ -262,6 +262,25 @@ function($, _, Backbone, d3, app){
                     gEnter.append('g').attr('class', 'axis y');
                     gEnter.append('g').attr('class', 'lines');
 
+                    // Add axis labels
+                    gEnter.append('text')
+                        .attr('class', 'label x')
+                        .attr('text-anchor', 'middle')
+                        .attr('dy', '.65em')
+                        .attr('x', (width - margin.left - margin.right) / 2)
+                        .attr('y', yScale.range()[0] + 37)
+                        .text('Publication date');
+                    gEnter.append('text')
+                        .attr('class', 'label y')
+                        .attr('text-anchor', 'middle')
+                        .attr('dy', '.65em')
+                        .attr("transform", "rotate(-90)")
+                        .attr('x', -((height - margin.top - margin.bottom) / 2))
+                        .attr('y', -60);
+
+                    // Update the text of the y-axis label to include the correct interval name
+                    svg.select('text.label.y').text('Publications per ' + self.current_interval);
+
                     // Update outer dimensions
                     svg.attr('width', width)
                        .attr('height', height);
@@ -271,7 +290,7 @@ function($, _, Backbone, d3, app){
                         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
                     var line_group = svg.select('g.lines').selectAll('g.linegroup').data(data, function(d){ return d.name; });
-                    var line_greopEnter = line_group.enter().append('g')
+                    var line_groupEnter = line_group.enter().append('g')
                         .attr('class', function(d) { return 'linegroup ' + d.name; });
 
                     //var lines = line_group.selectAll('.line').data(data, function(d){ return d.name; });
