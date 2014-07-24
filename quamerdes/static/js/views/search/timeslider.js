@@ -18,6 +18,8 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             this.model.on('change:interval', function() {
                 var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
 
+                if (date_stats.count === 0) return;
+
                 if (this.model.get('interval')) {
                     this.updateSliderLabels(date_stats.min, date_stats.max);
                 }
@@ -131,6 +133,9 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
 
             var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
 
+            // Fixme: hide timeslider when there are zero hits
+            if (date_stats.count === 0) return;
+
             this.min = date_stats.min;
             this.max = date_stats.max;
 
@@ -168,8 +173,6 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             // Update the facet values and set the slider to min/max positions directly after
             // the user submits a new keyword query
             app.vent.once('QueryInput:input:' + this.model.get('name'), function(){
-                console.log('!!!!!!!!!!!');
-                //self.updateFacetValues();
                 self.model.on('change:dateHistogram', self.updateFacetValues, self);
             });
         },
