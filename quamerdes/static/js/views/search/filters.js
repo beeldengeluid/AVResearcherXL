@@ -12,6 +12,17 @@ function($, _, Backbone, app, filtersTemplate) {
         },
 
         initialize: function(options) {
+            // Only show the filters when there are hits to be displayed
+            this.model.on('change:totalHits', function() {
+                var hits = this.model.get('totalHits');
+                if (hits === 0) {
+                    this.$el.addClass('hidden');
+                }
+                else {
+                    this.$el.removeClass('hidden');
+                }
+            }, this);
+
             this.model.on('change:filters', this.render, this);
         },
 

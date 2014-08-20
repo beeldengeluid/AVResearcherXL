@@ -8,7 +8,6 @@ define([
 function($, _, Backbone, d3, app){
     var TimeseriesView = Backbone.View.extend({
         initialize: function() {
-            var self = this;
             this.ts_chart = this.chart();
             this.chart_width = 900;
             this.current_interval = null;
@@ -21,14 +20,31 @@ function($, _, Backbone, d3, app){
                 'day': d3.time.format('%A %B %e, %Y')
             };
 
+            var self = this;
             _.each(this.options.models, function(model, name) {
                 model.on('change:aggregations',  self.determineInterval, self);
                 model.on('change:dateHistogram', self.updateTimeseries, self);
                 model.on('change:ftQuery', self.updateLegend, self);
                 model.on('change:totalHits', self.updateLegend, self);
+                model.on('change:totalHits', self.graphVisibility, self);
             });
 
             app.vent.on('changeview:TimeseriesView', this.swithFrequency, this);
+        },
+
+        graphVisibility: function() {
+            var show = false;
+            _.each(this.options.models, function(model, name) {
+                if (model.get('totalHits') > 0) {
+                    show = true;
+                }
+            });
+
+            if (show) {
+                this.$el.removeClass('hidden');
+            } else {
+                this.$el.addClass('hidden');
+            }
         },
 
         determineInterval: function() {

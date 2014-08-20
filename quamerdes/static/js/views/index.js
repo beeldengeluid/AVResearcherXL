@@ -22,27 +22,29 @@ function($, _, Backbone, app, BaseView, SearchView, TimeseriesView, indexTemplat
             this.el = $(this.el);
             this.parent.append(this.el);
 
-            var query_model_1 = new AvrApiModel({ color: '#009fda', name: 'q1' });
+            this.query_model_1 = new AvrApiModel({ color: '#009fda', name: 'q1' });
             this.search_view_1 = new SearchView({
                 name: 'q1',
-                model: query_model_1
+                model: this.query_model_1
             });
 
-            var query_model_2 = new AvrApiModel({ color: '#e00034', name: 'q2' });
+            this.query_model_2 = new AvrApiModel({ color: '#e00034', name: 'q2' });
             this.search_view_2 = new SearchView({
                 name: 'q2',
-                model: query_model_2
+                model: this.query_model_2
             });
 
             this.timeseries_view = new TimeseriesView({
                 models: {
-                    query1: query_model_1,
-                    query2: query_model_2
+                    query1: this.query_model_1,
+                    query2: this.query_model_2
                 },
                 // Element to use for width
                 widthElement: '#timeseries',
                 height: 280
             });
+
+            this.query_model_1.on('change:totalHits', this.changeViewVisibility, this);
         },
 
         render: function(){
@@ -55,6 +57,14 @@ function($, _, Backbone, app, BaseView, SearchView, TimeseriesView, indexTemplat
             this.timeseries_view.setElement(this.$el.find('#timeseries')).render();
 
             return this;
+        },
+
+        changeViewVisibility: function() {
+            if (this.query_model_1.get('totalHits') > 0 ||  this.query_model_2.get('totalHits') > 0) {
+                this.$el.find('.change-view').removeClass('hidden');
+            } else {
+                this.$el.find('.change-view').addClass('hidden');
+            }
         },
 
         changeViewClick: function(e) {

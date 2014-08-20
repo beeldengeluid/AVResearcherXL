@@ -19,6 +19,17 @@ function($, _, Backbone, app, resultsListTemplate){
             this.model.on('change:hits', this.render, this);
             this.model.on('change:hits', this.logResults, this);
 
+            // Only show the results when there are hits to be displayed
+            this.model.on('change:totalHits', function() {
+                var hits = this.model.get('totalHits');
+                if (hits === 0) {
+                    this.$el.addClass('hidden');
+                }
+                else {
+                    this.$el.removeClass('hidden');
+                }
+            }, this);
+
             app.vent.on('changeview:ResultsListView', this.changeSortOrder, this);
         },
 

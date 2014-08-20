@@ -14,6 +14,18 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             app.vent.once('QueryInput:input', this.toggleVisibility, this);
 
             this.date_facet_name = options.date_facet;
+
+            // Only show the slider when there are hits to be displayed
+            this.model.on('change:totalHits', function() {
+                var hits = this.model.get('totalHits');
+                if (hits === 0) {
+                    this.$el.addClass('hidden');
+                }
+                else {
+                    this.$el.removeClass('hidden');
+                }
+            }, this);
+
             this.model.on('change:dateHistogram', this.updateFacetValues, this);
             this.model.on('change:interval', function() {
                 var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
