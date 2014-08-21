@@ -3,8 +3,8 @@
     <li>
         <%
           var title;
-          if ('highlight' in hit && 'titles' in hit.highlight) {
-            title = hit.highlight.titles[0];
+          if ('highlight' in hit && 'title' in hit.highlight) {
+            title = hit.highlight.title[0];
           } else {
             title = hit.fields.title;
           }
