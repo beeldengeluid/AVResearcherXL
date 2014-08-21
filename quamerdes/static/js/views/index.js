@@ -45,6 +45,7 @@ function($, _, Backbone, app, BaseView, SearchView, TimeseriesView, indexTemplat
             });
 
             this.query_model_1.on('change:totalHits', this.changeViewVisibility, this);
+            this.query_model_2.on('change:totalHits', this.changeViewVisibility, this);
         },
 
         render: function(){
