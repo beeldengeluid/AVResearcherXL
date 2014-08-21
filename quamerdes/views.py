@@ -20,11 +20,13 @@ R_EMAIL = re.compile(r'^.+@[^.].*\.[a-z]{2,10}$', re.IGNORECASE)
 def index():
     exposed_settings = [
         'DEBUG', 'HITS_PER_PAGE', 'ALLOWED_INTERVALS', 'DATE_AGGREGATION',
-        'COLLECTIONS_CONFIG', 'ENABLED_COLLECTIONS', 'REQUIRED_FIELDS',
-        'MINIMUM_CLOUD_FONTSIZE', 'MAXIMUM_CLOUD_FONTSIZE', 'BARCHART_BARS',
-        'BARCHART_BAR_HEIGHT', 'HIT_HIGHLIGHT_FIELDS', 'HIT_HIGHLIGHT_FRAGMENTS',
+        'COLLECTIONS_CONFIG', 'ENABLED_COLLECTIONS', 'MINIMUM_CLOUD_FONTSIZE',
+        'MAXIMUM_CLOUD_FONTSIZE', 'BARCHART_BARS', 'BARCHART_BAR_HEIGHT',
+        'HIT_HIGHLIGHT_FIELDS', 'HIT_HIGHLIGHT_FRAGMENTS',
         'HIT_HIGHLIGHT_FRAGMENT_SIZE', 'HELP_PAGE_CONTENT_URL', 'LOG_EVENTS',
-        'ABOUT_PAGE_CONTENT_URL', 'ENABLE_USAGE_LOGGING', 'DATE_STATS_AGGREGATION']
+        'ABOUT_PAGE_CONTENT_URL', 'ENABLE_USAGE_LOGGING',
+        'DATE_STATS_AGGREGATION'
+    ]
 
     settings = {}
     for setting in exposed_settings:
@@ -250,6 +252,7 @@ def logout():
 @login_required
 def search():
     payload = json.loads(request.form['payload'])
+
     if type(payload) is dict:
         index = current_app.config['COLLECTIONS_CONFIG'].get(payload.pop('index'))['index_name']
         results = current_app.es_search.search(index=index, body=payload)
@@ -270,9 +273,7 @@ def count():
     payload = json.loads(request.form['payload'])
     indices = payload.get('indices', ','.join(current_app.config['ES_ALL_INDICES']))
     query = payload.get('query')
-    if not query:
-        # Return error here
-        print 'No query provided'
+
     results = current_app.es_search.count(index=indices, body=query)
 
     return jsonify(results)

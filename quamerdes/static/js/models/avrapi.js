@@ -10,8 +10,7 @@ function($, _, Backbone, app){
             return {
                 enabledFacets: [],
                 enabledSearchFields: [],
-                enabledSearchHitFields: [],
-                requiredFields: REQUIRED_FIELDS,
+                requiredFields: [],
                 hitsPerPage: HITS_PER_PAGE,
                 startAtHit: 0,
                 currentPage: 1,
@@ -162,10 +161,11 @@ function($, _, Backbone, app){
 
             var collection_config = COLLECTIONS_CONFIG[collection];
 
-            // Set the collection, search fields and enabled aggregations,
+            // Set the collection, (search) fields and enabled aggregations,
             // clear the current hits
             this.set({
                 collection: collection,
+                requiredFields: collection_config.required_fields,
                 enabledSearchFields: _.keys(collection_config.available_search_fields),
                 enabledAggregations: this.getAggregationsConfig(collection),
                 hits: {}
@@ -568,11 +568,23 @@ function($, _, Backbone, app){
                 }
             });
 
+            var highlight = {
+                fields: {}
+            };
+
+            _.each(enabledFields, function(field) {
+                highlight.fields[field] = {
+                    fragment_size: 150,
+                    number_of_fragments: 1
+                };
+            });
+
             return {
                 index: collection,
                 query: {
                     filtered: filteredQuery
                 },
+                highlight: highlight,
                 aggs: this.get('enabledAggregations'),
                 fields: this.get('requiredFields'),
                 sort: this.get('sort'),

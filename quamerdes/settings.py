@@ -81,9 +81,10 @@ COLLECTIONS_CONFIG = {
         'name': 'iMMix metadata',
         'index_name': 'quamerdes_immix',
         'enabled_facets': ['keywords', 'channels', 'persons', 'genres'],
+        'required_fields': ['title', 'date'],
         'available_aggregations': {
             'dates_stats': {
-                'stats' : { 'field' : 'date' }
+                'stats': {'field': 'date'}
             },
             'dates': {
                 'date_histogram': {
@@ -110,9 +111,9 @@ COLLECTIONS_CONFIG = {
                 'aggs': {
                     'filtered': {
                         'filter': {
-                            'term' : { 'key' : 'genre' }
+                            'term': {'key': 'genre'}
                         },
-                        'aggs':{
+                        'aggs': {
                             'filtered_buckets': {
                                 'terms': {
                                     'field': 'meta.categories.value.untouched',
@@ -133,7 +134,7 @@ COLLECTIONS_CONFIG = {
                 'aggs': {
                     'filtered': {
                         'filter': {
-                            'term' : { 'key' : 'person' }
+                            'term': {'key': 'person'}
                         },
                         'aggs': {
                             'filtered_buckets': {
@@ -156,7 +157,7 @@ COLLECTIONS_CONFIG = {
                 'aggs': {
                     'filtered': {
                         'filter': {
-                            'term' : { 'key' : 'keyword' }
+                            'term': {'key': 'keyword'}
                         },
                         'aggs':{
                             'filtered_buckets': {
@@ -202,9 +203,10 @@ COLLECTIONS_CONFIG = {
         'name': 'KB kranten',
         'index_name': 'quamerdes_kb',
         'enabled_facets': ['publication', 'article_type'],
+        'required_fields': ['title', 'data', 'meta.publication_name'],
         'available_aggregations': {
             'dates_stats': {
-                'stats' : { 'field' : 'date' }
+                'stats': {'field': 'date'}
             },
             'dates': {
                 'date_histogram': {
@@ -239,7 +241,7 @@ COLLECTIONS_CONFIG = {
             }
         },
         'available_search_fields': {
-           'title': {
+            'title': {
                 'name': 'Article title',
                 'fields': ['title']
             },
@@ -255,8 +257,6 @@ ENABLED_COLLECTIONS = ['immix', 'kb']
 
 HITS_PER_PAGE = 5
 ALLOWED_INTERVALS = ['year', 'month', 'week', 'day']
-
-REQUIRED_FIELDS = ['title', 'source', 'date']
 
 # The facet that is used for the date range slider
 DATE_AGGREGATION = 'dates'
