@@ -1,0 +1,23 @@
+<ul>
+<% _.each(hits, function(hit){ %>
+    <li>
+        <%
+          var title;
+          if ('highlight' in hit && 'titles' in hit.highlight) {
+            title = hit.highlight.titles[0];
+          } else {
+            title = hit.fields.title;
+          }
+        %>
+        <h2><a href="<%= hit.fields.source %>" target="_blank"><%= title %></a></h2>
+        <% if ('highlight' in hit && 'text' in hit.highlight){ %>
+          <div class="snippet"><%= hit.highlight.text[0] %></div>
+        <% } %>
+        <%
+            var format = d3.time.format('%a %b %-e, %Y');
+            var date = format(new Date(hit.fields.date));
+        %>
+        <div class="date"><%= date %></div>
+    </li>
+<% }); %>
+</ul>

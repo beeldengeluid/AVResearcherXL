@@ -3,18 +3,22 @@ define([
     'underscore',
     'backbone',
     'app',
-    'text!../../../templates/search/results_list.html'
+    'text!../../../templates/search/results_list.html',
+    'text!../../../templates/search/results_list_immix.html',
+    'text!../../../templates/search/results_list_kb.html'
 ],
-function($, _, Backbone, app, resultsListTemplate){
+function($, _, Backbone, app, resultsListTemplate, resultsListImmixTemplate,
+         resultsListKbTemplate){
     var ResultsListView = Backbone.View.extend({
         events: {
             'click li a': 'logClick'
         },
 
         initialize: function(){
-            // Control visibility on init. Element is shown on first query.
-            this.is_visible = true;
-            //app.vent.once('QueryInput:input', this.toggleVisibility, this);
+            this.templates = {
+                'immix': resultsListImmixTemplate,
+                'kb': resultsListKbTemplate
+            };
 
             this.model.on('change:hits', this.render, this);
             this.model.on('change:hits', this.logResults, this);
@@ -37,7 +41,7 @@ function($, _, Backbone, app, resultsListTemplate){
             if (DEBUG) console.log('ResultsListView:render');
 
             this.$el.find('li').remove();
-            this.$el.html(_.template(resultsListTemplate, {
+            this.$el.html(_.template(this.templates[this.model.get('collection')], {
                 hits: this.model.get('hits')
             }));
 
@@ -74,21 +78,6 @@ function($, _, Backbone, app, resultsListTemplate){
                 action: 'view_document',
                 docID: docID
             });
-        },
-
-        toggleVisibility: function(){
-            if (DEBUG) console.log('ResultsListView:toggleVisibility');
-
-            if(this.is_visible){
-                this.$el.parent().hide();
-                this.is_visible = false;
-            }
-            else {
-                this.$el.parent().show();
-                this.is_visible = true;
-            }
-
-            return this;
         }
     });
 

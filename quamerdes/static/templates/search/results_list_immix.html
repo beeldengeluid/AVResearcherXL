@@ -1,0 +1,29 @@
+<ul>
+<% _.each(hits, function(hit){ %>
+    <li>
+        <%
+          var title;
+          if ('highlight' in hit && 'titles' in hit.highlight) {
+            title = hit.highlight.titles[0];
+          } else {
+            title = hit.fields.title;
+          }
+        %>
+        <h2><a href="http://in.beeldengeluid.nl/collectie/#/details/expressie/<%= hit.fields['meta.expressieID'] %>/false/true" target="_blank"><%= title %></a></h2>
+        <% if ('highlight' in hit && 'subtitles' in hit.highlight){ %>
+          <div class="snippet"><%= hit.highlight.subtitles[0] %></div>
+        <% } %>
+        <% if ('highlight' in hit && 'descriptions' in hit.highlight){ %>
+          <div class="snippet"><%= hit.highlight.descriptions[0] %></div>
+        <% } %>
+        <% if ('highlight' in hit && 'summaries' in hit.highlight){ %>
+          <div class="snippet"><%= hit.highlight.summaries[0] %></div>
+        <% } %>
+        <%
+            var format = d3.time.format('%a %b %-e, %Y at %H:%M');
+            var date = format(new Date(hit.fields.date));
+        %>
+        <div class="date"><%= date %></div>
+    </li>
+<% }); %>
+</ul>

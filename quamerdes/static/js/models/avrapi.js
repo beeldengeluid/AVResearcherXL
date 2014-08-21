@@ -568,10 +568,7 @@ function($, _, Backbone, app){
                 }
             });
 
-            var highlight = {
-                fields: {}
-            };
-
+            var highlight = {fields: {}};
             _.each(enabledFields, function(field) {
                 highlight.fields[field] = {
                     fragment_size: 150,

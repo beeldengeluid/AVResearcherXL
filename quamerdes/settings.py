@@ -81,7 +81,7 @@ COLLECTIONS_CONFIG = {
         'name': 'iMMix metadata',
         'index_name': 'quamerdes_immix',
         'enabled_facets': ['keywords', 'channels', 'persons', 'genres'],
-        'required_fields': ['title', 'date'],
+        'required_fields': ['title', 'date', 'meta.expressieID'],
         'available_aggregations': {
             'dates_stats': {
                 'stats': {'field': 'date'}
@@ -203,7 +203,7 @@ COLLECTIONS_CONFIG = {
         'name': 'KB kranten',
         'index_name': 'quamerdes_kb',
         'enabled_facets': ['publication', 'article_type'],
-        'required_fields': ['title', 'data', 'meta.publication_name'],
+        'required_fields': ['title', 'date', 'meta.publication_name', 'source'],
         'available_aggregations': {
             'dates_stats': {
                 'stats': {'field': 'date'}
