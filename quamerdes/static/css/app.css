@@ -469,7 +469,7 @@ ul.dropdown li {
     width: 49%;
     float: left;
     position: relative;
-    padding: 10px 10px 5px 10px;
+    padding: 0 10px;
 }
 
 .filters:last-child {
@@ -485,6 +485,7 @@ ul.dropdown li {
 .filters ul li {
     display: inline-block;
     padding: 4px 6px;
+    margin: 8px 0 4px 0;
 }
 
 .filters li span, .filters li a {
