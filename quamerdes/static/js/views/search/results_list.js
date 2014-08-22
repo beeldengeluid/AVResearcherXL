@@ -3,12 +3,10 @@ define([
     'underscore',
     'backbone',
     'app',
-    'text!../../../templates/search/results_list.html',
     'text!../../../templates/search/results_list_immix.html',
     'text!../../../templates/search/results_list_kb.html'
 ],
-function($, _, Backbone, app, resultsListTemplate, resultsListImmixTemplate,
-         resultsListKbTemplate){
+function($, _, Backbone, app, resultsListImmixTemplate, resultsListKbTemplate){
     var ResultsListView = Backbone.View.extend({
         events: {
             'click li a': 'logClick'
