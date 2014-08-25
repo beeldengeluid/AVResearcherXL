@@ -609,7 +609,7 @@ ul.dropdown li {
 }
 
 .facets.q1 .cloud ul {
-    text-align: right;
+    text-align: center;
 }
 
 .facets svg.barchart .y.axis path, .facets svg.barchart .y.axis line {
