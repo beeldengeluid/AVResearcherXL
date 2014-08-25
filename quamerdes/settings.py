@@ -242,11 +242,11 @@ COLLECTIONS_CONFIG = {
         },
         'available_search_fields': {
             'title': {
-                'name': 'Article title',
+                'name': 'KB article title',
                 'fields': ['title']
             },
             'text': {
-                'name': 'Article text',
+                'name': 'KB article text',
                 'fields': ['text']
             }
         }
