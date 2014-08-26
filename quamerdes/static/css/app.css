@@ -164,6 +164,28 @@ body {
     border-bottom-color: #000 !important;
 }
 
+/* Affix for query related divs (collection selection, query string,
+slider and active filters) */
+#qaffix {
+    position: absolute;
+    width: 100%;
+    top: 54px;
+}
+
+#qaffix.affix {
+    z-index: 1000;
+    width: 100%;
+    top: 0;
+    position: fixed;
+}
+
+#qaffix_spacer {
+    top: 0;
+    margin-top: 106px;
+    height: 54px;
+    width: 100%;
+}
+
 /* Collection selection */
 #collection-selector-container {
     background: #808080;

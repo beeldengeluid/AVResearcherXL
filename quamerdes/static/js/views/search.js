@@ -52,6 +52,8 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
             this.paginator.setElement($('.pagination.' + this.name)).render();
             this.facets.setElement($('.facets.' + this.name)).render();
             this.filters.setElement($('.filters.' + this.name)).render();
+
+            $('#qaffix').affix({offset: {top: 54}});
         }
     });
 
