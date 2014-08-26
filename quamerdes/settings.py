@@ -81,7 +81,8 @@ COLLECTIONS_CONFIG = {
         'name': 'iMMix metadata',
         'index_name': 'quamerdes_immix',
         'enabled_facets': ['keywords', 'channels', 'persons', 'genres'],
-        'required_fields': ['title', 'date', 'meta.expressieID'],
+        'required_fields': ['title', 'date', 'meta.expressieID',
+                            'meta.broadcasters', 'meta.titles'],
         'available_aggregations': {
             'dates_stats': {
                 'stats': {'field': 'date'}

@@ -777,8 +777,16 @@ ul.dropdown li {
 .hits h2 {
     font-size: 22px;
     margin-top: 0;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+.hits h3 {
+    font-size: 15px;
+    margin-top: 0;
     margin-bottom: 15px;
     font-weight: normal;
+    color: #7a7a7a;
 }
 
 .hits em {
