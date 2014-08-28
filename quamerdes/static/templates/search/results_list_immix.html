@@ -26,7 +26,7 @@
           <div class="snippet"><%= hit.highlight.summaries[0] %></div>
         <% } %>
         <%
-            var format = d3.time.format('%a %b %-e, %Y at %H:%M');
+            var format = d3.time.format('%a %b %-e, %Y');
             var date = format(new Date(hit.fields.date));
         %>
         <div class="date"><%= date %></div>
