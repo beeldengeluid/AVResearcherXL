@@ -180,6 +180,7 @@ COLLECTIONS_CONFIG = {
                 }
             }
         },
+        'enabled_search_fields': ['titles', 'summaries', 'subtitles'],
         'available_search_fields': {
             'titles': {
                 'name': 'iMMix program titles',
@@ -192,7 +193,7 @@ COLLECTIONS_CONFIG = {
             'subtitles': {
                 'name': 'TT888 subtitles',
                 'fields': ['subtitles']
-            }
+            },
             # 'tweets': {
             #     'name': 'Tweets',
             #     'fields': ['tweetText'],
@@ -241,6 +242,7 @@ COLLECTIONS_CONFIG = {
                 }
             }
         },
+        'enabled_search_fields': ['title', 'text'],
         'available_search_fields': {
             'title': {
                 'name': 'KB article title',

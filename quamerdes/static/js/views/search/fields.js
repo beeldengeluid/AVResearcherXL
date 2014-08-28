@@ -22,8 +22,9 @@ function($, _, Backbone, app, fieldsTemplate) {
             var collection = this.model.get('collection');
 
             this.$el.html(_.template(fieldsTemplate, {
-                enabled_fields: this.model.get('enabledSearchFields'),
-                available_fields: COLLECTIONS_CONFIG[collection].available_search_fields
+                selected_fields: this.model.get('enabledSearchFields'),
+                available_fields: COLLECTIONS_CONFIG[collection].available_search_fields,
+                enabled_fields: COLLECTIONS_CONFIG[collection].enabled_search_fields
             }));
 
             this.menu = this.$el.find('.dropdown');

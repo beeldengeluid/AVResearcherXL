@@ -3,11 +3,11 @@
 </a>
 
 <ul class="dropdown">
-<% _.each(available_fields, function(field_config, field) { %>
+<% _.each(enabled_fields, function(field) { %>
   <li>
     <div class="checkbox">
       <label>
-        <input type="checkbox" value="<%= field %>" <% if (enabled_fields.indexOf(field) !== -1){ %> checked="checked" <% } %>> <%= field_config.name %>
+        <input type="checkbox" value="<%= field %>" <% if (selected_fields.indexOf(field) !== -1){ %> checked="checked" <% } %>> <%= available_fields[field].name %>
       </label>
     </div>
   </li>
