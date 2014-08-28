@@ -332,8 +332,16 @@ slider and active filters) */
     border: 1px solid #e00034;
 }
 
-.query-input .fields {
+.query-input .buttons {
     float: right;
+}
+
+.query-input .fields {
+    float: left;
+}
+
+.query-input .clear-query {
+    float: left;
 }
 
 .query-input .fields a, .query-input .clear-query a {
