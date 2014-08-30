@@ -41,8 +41,9 @@ def tokenize_consumer(socket_addr, tokenized_items_path):
         tokens = list(tokenize(data['text']))
 
         if tokens:
-            filename = os.path.split(data['filename'])[-1]
-            filename = os.path.join(tokenized_items_path, str(dir_c), filename)
+            filename = os.path.split(data['filename'])[-1][:-5]
+            filename = os.path.join(tokenized_items_path, str(dir_c),
+                                    '%s.txt' % filename)
 
             # Open the file, and create the directory if it doesn't exist
             try:
