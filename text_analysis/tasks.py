@@ -1,0 +1,63 @@
+import os
+from glob import iglob
+import json
+
+import zmq
+
+from tokenizer import tokenize
+
+
+def tokenize_producer(socket_addr, items_path):
+    context = zmq.Context()
+
+    zmq_socket = context.socket(zmq.PUSH)
+    zmq_socket.setsockopt(zmq.SNDHWM, 1000)
+    zmq_socket.bind(socket_addr)
+
+    for item in iglob(items_path):
+        print item
+        with open(item, 'r') as item_f:
+            try:
+                text = json.load(item_f)['text']
+            except ValueError:
+                continue
+
+        zmq_socket.send_json({'filename': item, 'text': text})
+
+
+def tokenize_consumer(socket_addr, tokenized_items_path):
+    context = zmq.Context()
+
+    consumer_receiver = context.socket(zmq.PULL)
+    consumer_receiver.connect(socket_addr)
+
+    # File and directory counters used to partition the files in multiple
+    # sub-directories
+    file_c = 0
+    dir_c = 0
+
+    while True:
+        data = consumer_receiver.recv_json()
+        tokens = list(tokenize(data['text']))
+
+        if tokens:
+            filename = os.path.split(data['filename'])[-1]
+            filename = os.path.join(tokenized_items_path, str(dir_c), filename)
+
+            # Open the file, and create the directory if it doesn't exist
+            try:
+                doc = open(filename, 'w')
+            except IOError:
+                os.mkdir(os.path.join(tokenized_items_path, str(dir_c)))
+                doc = open(filename, 'w')
+
+            # Each line stores a single token
+            for token in tokens:
+                doc.write('%s\n' % token.encode('utf-8'))
+
+            doc.close()
+
+            # Update the file and document counts
+            file_c += 1
+            if file_c % 10000 == 0:
+                dir_c += 1

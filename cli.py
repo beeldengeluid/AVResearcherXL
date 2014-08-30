@@ -5,7 +5,7 @@ import os
 import re
 import tarfile
 from datetime import datetime
-from glob import glob
+from glob import glob, iglob
 
 import click
 from elasticsearch import Elasticsearch
@@ -99,7 +99,7 @@ def es_create_indexes(mapping_dir, mapping_prefix):
     The default prefix of a mapping in 'mapping_dir' is 'mapping_'.
     """
     r_index_name = re.compile(r"%s(.*)\.json$" % mapping_prefix)
-    for mapping_file_path in glob(os.path.join(mapping_dir, '%s*' %mapping_prefix)):
+    for mapping_file_path in glob(os.path.join(mapping_dir, '%s*' % mapping_prefix)):
         index_name = r_index_name.findall(mapping_file_path)[0]
 
         click.echo('Creating ES index %s' % index_name)
@@ -202,6 +202,18 @@ def get_kb_items(archive_path):
                    yield doc_id, article
 
             tar.members = []
+
+@cli.command()
+@click.argument('role', type=click.Choice(['producer', 'consumer']))
+@click.argument('file_path')
+@click.option('--socket_addr', default='tcp://127.0.0.1:5557')
+def text_analysis(role, file_path, socket_addr):
+    from text_analysis import tasks
+
+    if role == 'producer':
+        tasks.tokenize_producer(socket_addr, file_path)
+    else:
+        tasks.tokenize_consumer(socket_addr, file_path)
 
 
 def es_format_index_actions(index_name, doc_type, item_iterable):
