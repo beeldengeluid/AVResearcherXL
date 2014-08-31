@@ -199,21 +199,35 @@ def get_kb_items(archive_path):
                                 % (doc_id, min_date.isoformat()))
                     yield None
                 else:
-                   yield doc_id, article
+                    yield doc_id, article
 
             tar.members = []
 
-@cli.command()
+
+@cli.group()
+def analyze_text():
+    pass
+
+@analyze_text.command()
 @click.argument('role', type=click.Choice(['producer', 'consumer']))
 @click.argument('file_path')
 @click.option('--socket_addr', default='tcp://127.0.0.1:5557')
-def text_analysis(role, file_path, socket_addr):
+def tokenize(role, file_path, socket_addr):
     from text_analysis import tasks
 
     if role == 'producer':
         tasks.tokenize_producer(socket_addr, file_path)
     else:
         tasks.tokenize_consumer(socket_addr, file_path)
+
+
+@analyze_text.command()
+@click.argument('analyzed_items_path')
+@click.argument('dictionary_path')
+def create_dictionary(analyzed_items_path, dictionary_path):
+    from text_analysis import tasks
+
+    tasks.create_dictionary(analyzed_items_path, dictionary_path)
 
 
 def es_format_index_actions(index_name, doc_type, item_iterable):

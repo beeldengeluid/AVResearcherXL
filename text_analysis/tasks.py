@@ -3,6 +3,7 @@ from glob import iglob
 import json
 
 import zmq
+from gensim.corpora.dictionary import Dictionary
 
 from tokenizer import tokenize
 
@@ -62,3 +63,42 @@ def tokenize_consumer(socket_addr, tokenized_items_path):
             file_c += 1
             if file_c % 10000 == 0:
                 dir_c += 1
+
+
+def create_dictionary(analyzed_items_path):
+    dictionary = Dictionary()
+
+    for doc in iglob(analyzed_items_path):
+        tokens = []
+        with open(doc, 'r') as f:
+            for token in f:
+                tokens.append(token[:-2].decode('utf-8'))
+
+        dictionary.doc2bow(tokens, allow_update=True)
+
+    return dictionary
+
+
+def iter_docs(analyzed_items_path, progress_cnt=1000):
+    docno = 0
+    for doc in iglob(directory):
+        print doc
+        tokens = []
+        with open(doc, 'r') as f:
+            for token in f:
+                tokens.append(token[:-1].decode('utf-8'))
+
+        docno += 1
+        if docno % progress_cnt == 0:
+            print docno
+
+        yield tokens
+
+
+def create_dictionary(analyzed_items_path, dictionary_path=None):
+    dictionary = Dictionary(iter_docs(analyzed_items_path))
+
+    if dictionary_path:
+        dictionary.save(dictionary_path)
+
+    return dictionary
