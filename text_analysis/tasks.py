@@ -81,7 +81,7 @@ def create_dictionary(analyzed_items_path):
 
 def iter_docs(analyzed_items_path, progress_cnt=1000):
     docno = 0
-    for doc in iglob(directory):
+    for doc in iglob(analyzed_items_path):
         print doc
         tokens = []
         with open(doc, 'r') as f:
