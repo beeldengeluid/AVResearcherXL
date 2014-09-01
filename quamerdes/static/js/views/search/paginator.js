@@ -40,17 +40,6 @@ function($, _, Backbone, app, paginatorTemplate){
             var total_pages = this.pageCount();
             var page_links = [];
 
-            // Immidiatly render the pagination if there is only one page
-            if(total_pages === 1){
-                this.$el.html(_.template(paginatorTemplate, {
-                    currentPage: this.model.get('currentPage'),
-                    totalPages: total_pages,
-                    pages: page_links
-                }));
-
-                return;
-            }
-
             // The max. number of links to display before and after
             // the currently active page
             var max_links = 3;
