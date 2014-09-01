@@ -826,7 +826,14 @@ ul.dropdown li {
 
 .hits .date {
     margin-top: 15px;
+}
+
+.hits.q1 .date {
     color: #28aee0;
+}
+
+.hits.q2 .date {
+    color: #e31746;
 }
 
 /* Pagination */
