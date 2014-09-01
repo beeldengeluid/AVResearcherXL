@@ -3,7 +3,7 @@ import uuid
 import json
 
 from flask import (Blueprint, current_app, render_template, abort, request,
-                   jsonify)
+                   jsonify, url_for)
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from flask.ext.mail import Message
 
@@ -54,7 +54,7 @@ def index():
 def verify_email(user_id, token):
     """When visited with a valid `user_id` and `token` combination,
     the user's mailaddress is marked as 'verified'. The person
-    responsible for approving accounts will recieve an email about the
+    responsible for approving accounts will receive an email about the
     new registration with a link to approve the account."""
     user = db.session.query(User)\
         .filter_by(id=user_id, email_verification_token=token).first()
@@ -63,14 +63,14 @@ def verify_email(user_id, token):
     if not user:
         abort(401)
 
-    # Mark mailaddress as verified
+    # Mark mail address as verified
     user.email_verified = True
     db.session.add(user)
     db.session.commit()
 
-    # Send email to mailadres responsible for approving accounts
-    approve_url = '%s/approve_user/%s/%s' % (request.url_root, user.id,
-                                             user.approval_token)
+    # Send email to mail address responsible for approving accounts
+    approve_url = url_for('.approve_user', user_id=user.id,
+                          token=user.approval_token, _external=True)
 
     MESSAGES = current_app.config['MESSAGES']
 
@@ -80,7 +80,7 @@ def verify_email(user_id, token):
 
     msg.body = MESSAGES['email_approval_body'] % (user.name, user.organization,
                                                   user.email, approve_url)
-    mail.send(msg)
+    #mail.send(msg)
 
     messages = {
         'email_verified_title': MESSAGES['email_verified_title'] % user.name,
@@ -170,9 +170,9 @@ def register():
     db.session.commit()
 
     # Send account activation e-mail
-    verification_url = '%s/verify_email/%s/%s' % (request.url_root,
-                                                              user.id,
-                                                              user.email_verification_token)
+    verification_url = url_for('.verify_email', user_id=user.id,
+                               token=user.email_verification_token,
+                               _external=True)
 
     msg = Message(MESSAGES['email_verification_subject'],
                   sender=current_app.config['MAIL_DEFAULT_SENDER'],
