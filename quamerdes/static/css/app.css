@@ -137,25 +137,12 @@ body {
     width: 286px;
 }
 
-#menu-container ul.main-menu {
-    float: left;
-    list-style: none;
-    padding: 0;
-    margin: 0 0 0 50px;
-}
-
-#menu-container ul.user-menu {
-    margin: 0 10px 0 0;
-    list-style: none;
-    padding: 0;
-}
-
 #menu-container  ul.main-menu > li {
     float: left;
 }
 
-#menu-container  ul.main-menu > li a,
-#menu-container  ul.user-menu > li .dropdown > a {
+#menu-container  ul.main-menu > li > a,
+#menu-container ul.main-menu div.dropdown > a {
     display: block;
     height: 54px;
     padding: 0 30px;
@@ -168,13 +155,27 @@ body {
     cursor: pointer;
 }
 
-#menu-container  ul.main-menu > li a:hover,
-#menu-container  ul.user-menu > li .dropdown > a:hover {
+#menu-container ul.main-menu > li a:hover {
     background-color: #fff;
     color: #000;
 }
 
-#menu-container  ul.main-menu > li a.active {
+#menu-container ul.main-menu .dropdown-menu {
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 0;
+    box-shadow: 0 3px 9px rgba(0,0,0,0.10);
+}
+
+#menu-container ul.main-menu .icon-user {
+    width: 13px;
+    height: 19px;
+    background: url(../img/user.png) no-repeat;
+    float: left;
+    margin-top: 17px;
+    margin-right: 5px;
+}
+
+#menu-container ul.main-menu > li a.active {
     color: #000;
     background-color: #fce300;
     background-image: -moz-linear-gradient(top, #F5D700, #F0D800);
@@ -183,17 +184,6 @@ body {
     background-image: -o-linear-gradient(top, #F5D700, #F0D800);
     background-image: linear-gradient(to bottom, #F5D700, #F0D800);
     background-repeat: repeat-x;
-}
-
-#menu-container  ul.user-menu span.caret {
-    border-top-color: #fff !important;
-    border-bottom-color: #fff !important;
-    margin-top: 20px;
-}
-
-#menu-container  ul.user-menu > li:hover span.caret {
-    border-top-color: #000 !important;
-    border-bottom-color: #000 !important;
 }
 
 /* Affix for query related divs (collection selection, query string,

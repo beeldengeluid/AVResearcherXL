@@ -10,9 +10,9 @@ function($, _, Backbone, app, menuTemplate){
         parent: $('#menu-container'),
         id: 'menu',
         className: 'nav-inner',
-        events: {
-            'click li a': 'logPageSwitch'
-        },
+//        events: {
+//            'click li a': 'logPageSwitch'
+//        },
 
         initialize: function(options){
             var self = this;

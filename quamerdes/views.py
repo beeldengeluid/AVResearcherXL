@@ -35,6 +35,7 @@ def index():
     # Check if user authentication is disabled
     login_disabled = current_app.config.get('LOGIN_DISABLED', False)
 
+    settings['LOGIN_DISABLED'] = login_disabled
     if not login_disabled and current_user.is_authenticated():
         settings['AUTHENTICATED_USER'] = True
         settings['USER'] = {
@@ -43,7 +44,6 @@ def index():
             'email': current_user.email
         }
     else:
-        settings['LOGIN_DISABLED'] = login_disabled
         settings['AUTHENTICATED_USER'] = False
         settings['USER'] = None
 
