@@ -208,7 +208,7 @@ slider and active filters) */
 
 #qaffix_spacer {
     top: 0;
-    margin-top: 106px;
+    margin-top: 49px;
     height: 54px;
     width: 100%;
 }
@@ -315,6 +315,10 @@ slider and active filters) */
     background: #D5D1CB;
 }
 
+#qaffix.affix {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
 .query-input {
     width: 49%;
     float: left;
@@ -328,7 +332,7 @@ slider and active filters) */
 .query-input .input-container {
     background: #fff url(../img/search.png) no-repeat 13px center;
     height: 45px;
-    border: 1px solid #fff;
+    border-bottom: 1px solid #fff;
     padding: 0 15px 0 45px;
     width: 100%;
     -webkit-transition : border 250ms ease-out; 
@@ -352,11 +356,11 @@ slider and active filters) */
 }
 
 .query-input.q1 .input-container.focussed {
-    border: 1px solid #009fda;
+    border-bottom-color: #009fda;
 }
 
 .query-input.q2 .input-container.focussed {
-    border: 1px solid #e00034;
+    border-bottom-color:#e00034;
 }
 
 .query-input .buttons {
