@@ -385,6 +385,12 @@ slider and active filters) */
     font-size: 12px;
 }
 
+.query-input .loading {
+    display: none;
+    float: left;
+    margin: 10px 10px 0 0;
+}
+
 ul.dropdown {
     display: none;
     position: absolute;

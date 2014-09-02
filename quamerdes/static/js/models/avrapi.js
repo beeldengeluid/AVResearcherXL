@@ -32,7 +32,10 @@ function($, _, Backbone, app){
                 dateHistogram: null,
                 globalDateHistogram: null,
 
-                user: USER
+                user: USER,
+
+                pendingRequests: [],
+                loading: false
             };
         },
 
@@ -54,50 +57,64 @@ function($, _, Backbone, app){
             });
         },
 
-        http: {
-            get: function(url, data, callback){
-                url = ['api', url].join('/');
+        http_get: function(url, data, callback){
+            url = ['api', url].join('/');
 
-                //if (DEBUG) console.log('AvrApiModel:http:post', url, payload);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    data: data,
-                    dataType: 'json',
-                    cache: true,
-                    success: callback,
-                    error: function(xhr, status, error){
-                        console.log(xhr);
-                        console.log(status);
-                        console.log(error);
-                    }
-                });
-            },
-            post: function(url, data, callback){
-                if($.inArray(url, ['search', 'count']) !== -1){
-                    data = {'payload': JSON.stringify(data)};
+            if (DEBUG) console.log('AvrApiModel:http:post', url, payload);
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: data,
+                dataType: 'json',
+                cache: true,
+                success: callback,
+                error: function(xhr, status, error){
+                    console.log(xhr);
+                    console.log(status);
+                    console.log(error);
                 }
-                else if(url === 'log_usage'){
-                    data = {'events': JSON.stringify(data)};
-                }
+            });
+        },
 
-                url = ['api', url].join('/');
 
-                if (DEBUG) console.log('AvrApiModel:http:post', url, data);
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json',
-                    cache: true,
-                    success: callback,
-                    error: function(xhr, status, error){
-                        console.log(xhr);
-                        console.log(status);
-                        console.log(error);
-                    }
-                });
+        http_post: function(url, data, callback){
+            if($.inArray(url, ['search', 'count']) !== -1){
+                data = {'payload': JSON.stringify(data)};
             }
+            else if(url === 'log_usage'){
+                data = {'events': JSON.stringify(data)};
+            }
+
+            url = ['api', url].join('/');
+
+            if (DEBUG) console.log('AvrApiModel:http:post', url, data);
+
+            var self = this;
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                cache: true,
+                success: callback,
+                beforeSend: function(jqXHR) {
+                    self.set('loading', true);
+                    self.get('pendingRequests').push(jqXHR);
+                },
+                complete: function(jqXHR) {
+                    var pending_reqs = self.get('pendingRequests');
+                    pending_reqs.splice(pending_reqs.indexOf(jqXHR), 1);
+
+                    if (pending_reqs.length === 0) {
+                        self.set('loading', false);
+                    }
+                },
+                error: function(xhr, status, error){
+                    console.log(xhr);
+                    console.log(status);
+                    console.log(error);
+                }
+            });
         },
 
         register: function(email, name, organization, password){
@@ -111,7 +128,7 @@ function($, _, Backbone, app){
             var self = this;
 
             // On successful login, set the user details and trigger 'login_successful' event
-            this.http.post('register', post_data, function(data){
+            this.http_post('register', post_data, function(data){
                 if(data.success){
                     app.vent.trigger('AvrApiModel:registration_successful');
                 }
@@ -129,7 +146,7 @@ function($, _, Backbone, app){
             };
 
             var self = this;
-            this.http.post('login', post_data, function(data){
+            this.http_post('login', post_data, function(data){
                 // On successful login, set the user details and trigger 'login_successful' event
                 if(data.success){
                     self.set('user', data.user);
@@ -145,13 +162,13 @@ function($, _, Backbone, app){
         logout: function(){
             var self = this;
             this.set('user', null);
-            this.http.get('logout', function(data){
+            this.http_get('logout', function(data){
                 console.log(data);
             });
         },
 
         logUsage: function(events){
-            this.http.post('log_usage', events, function(data){
+            this.http_post('log_usage', events, function(data){
                 console.log(data);
             });
         },
@@ -189,7 +206,7 @@ function($, _, Backbone, app){
             delete payload.aggs;
 
             var self = this;
-            this.http.post('search', payload, function(data){
+            this.http_post('search', payload, function(data){
                 self.set({ hits: data.hits.hits });
             });
         },
@@ -215,7 +232,7 @@ function($, _, Backbone, app){
             this.set('currentPayload', this.constructQueryPayload());
             
             var self = this;
-            this.http.post('search', this.get('currentPayload'), function(data){
+            this.http_post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
                     aggregations: data.aggregations,
@@ -285,7 +302,7 @@ function($, _, Backbone, app){
             global_date_agg_query.aggs[DATE_AGGREGATION] = _.clone(collection_config.available_aggregations[DATE_AGGREGATION]);
             global_date_agg_query.aggs[DATE_AGGREGATION].date_histogram.interval = interval;
 
-            this.http.post('search', [date_agg_query, global_date_agg_query], function(data){
+            this.http_post('search', [date_agg_query, global_date_agg_query], function(data){
                 self.set({
                     dateHistogram: data.responses[0].aggregations[DATE_AGGREGATION],
                     globalDateHistogram: data.responses[1].aggregations[DATE_AGGREGATION],
@@ -313,7 +330,7 @@ function($, _, Backbone, app){
             });
 
             this.set('currentPayload', this.constructQueryPayload());
-            this.http.post('search', this.get('currentPayload'), function(data){
+            this.http_post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
                     aggregations: data.aggregations,
@@ -410,7 +427,7 @@ function($, _, Backbone, app){
 
             this.set('filters', filters);
             this.set('currentPayload', this.constructQueryPayload());
-            this.http.post('search', this.get('currentPayload'), function(data){
+            this.http_post('search', this.get('currentPayload'), function(data){
                 console.log(data);
                 self.set({
                     hits: data.hits.hits,
@@ -604,7 +621,7 @@ function($, _, Backbone, app){
             // size of the response.
             delete payload.aggregations;
 
-            this.http.post('search', payload, function(data){
+            this.http_post('search', payload, function(data){
                 self.set({
                     hits: data.hits.hits,
                     queryTime: data.took,
@@ -728,7 +745,7 @@ function($, _, Backbone, app){
             var self = this;
 
             // On successful login, set the user details and trigger 'login_successful' event
-            this.http.post('register', post_data, function(data){
+            this.http_post('register', post_data, function(data){
                 if(data.success){
                     app.vent.trigger('AvrApiModel:registration_successful');
                 }
@@ -746,7 +763,7 @@ function($, _, Backbone, app){
             };
 
             var self = this;
-            this.http.post('login', post_data, function(data){
+            this.http_post('login', post_data, function(data){
                 // On successful login, set the user details and trigger 'login_successful' event
                 if(data.success){
                     self.set('user', data.user);
@@ -762,13 +779,13 @@ function($, _, Backbone, app){
         logout: function(){
             var self = this;
             this.set('user', null);
-            this.http.get('logout', function(data){
+            this.http_get('logout', function(data){
                 console.log(data);
             });
         },
 
         logUsage: function(events){
-            this.http.post('log_usage', events, function(data){
+            this.http_post('log_usage', events, function(data){
                 console.log(data);
             });
         },
@@ -988,7 +1005,7 @@ function($, _, Backbone, app){
             this.set('enabledSearchFields', field_definitions);
             this.set('currentPayload', this.constructQueryPayload());
 
-            this.http.post('search', this.get('currentPayload'), function(data){
+            this.http_post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
                     facets: data.facets,
@@ -1016,7 +1033,7 @@ function($, _, Backbone, app){
             });
 
             this.set('currentPayload', this.constructQueryPayload());
-            this.http.post('search', this.get('currentPayload'), function(data){
+            this.http_post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
                     facets: data.facets,
@@ -1097,7 +1114,7 @@ function($, _, Backbone, app){
 
             this.set('filters', filters);
             this.set('currentPayload', this.constructQueryPayload());
-            this.http.post('search', this.get('currentPayload'), function(data){
+            this.http_post('search', this.get('currentPayload'), function(data){
                 self.set({
                     hits: data.hits.hits,
                     facets: data.facets,
@@ -1131,7 +1148,7 @@ function($, _, Backbone, app){
                 }
             };
 
-            this.http.post('search', payload, function(data){
+            this.http_post('search', payload, function(data){
                 callback(data);
             });
         },
@@ -1156,7 +1173,7 @@ function($, _, Backbone, app){
                 }
             };
 
-            this.http.post('search', payload, function(data){
+            this.http_post('search', payload, function(data){
                 var facets = self.get('facets');
                 facets.broadcast_start_date = data.facets.broadcast_start_date;
 
@@ -1181,7 +1198,7 @@ function($, _, Backbone, app){
             // expensive on the ES side, and reduces the size of the response.
             delete payload.facets;
 
-            this.http.post('search', payload, function(data){
+            this.http_post('search', payload, function(data){
                 self.set({
                     hits: data.hits.hits,
                     queryTime: data.took,
@@ -1193,7 +1210,7 @@ function($, _, Backbone, app){
         /* Get the total number of documents that are currently in the index */
         getTotalDocCount: function(){
             var self = this;
-            this.http.post('count', {'query': {'match_all': {}}}, function(data){
+            this.http_post('count', {'query': {'match_all': {}}}, function(data){
                 self.set('totalDocs', data.count);
             });
         },
@@ -1222,7 +1239,7 @@ function($, _, Backbone, app){
                 },
                 "size": 0
             };
-            this.http.post('search', query, function(data){
+            this.http_post('search', query, function(data){
                 self.set({
                     firstBroadcastDate: new Date(data.facets.min_max_broadcast_start_date.min),
                     lastBroadcastDate: new Date(data.facets.min_max_broadcast_start_date.max)
@@ -1256,7 +1273,7 @@ function($, _, Backbone, app){
               "size": 0
             };
 
-            this.http.post('search', query, function(data){
+            this.http_post('search', query, function(data){
                 self.set('docsWithTweetsCount', data.hits.total);
             });
         },
@@ -1279,7 +1296,7 @@ function($, _, Backbone, app){
                 "size": 0
             };
 
-            this.http.post('search', query, function(data){
+            this.http_post('search', query, function(data){
                 self.set('docsWithSubtitleCount', data.hits.total);
             });
         }

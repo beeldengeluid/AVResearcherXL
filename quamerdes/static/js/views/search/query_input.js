@@ -18,6 +18,8 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
 
         initialize: function(options){
             this.fields = new FieldsView({ model: this.model });
+
+            this.model.on('change:loading', this.toggleLoadingIndicator, this);;
         },
 
         render: function(){
@@ -70,6 +72,14 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
 
             // Clear the input text
             this.$('input.query').val('');
+        },
+
+        toggleLoadingIndicator: function() {
+            if (this.model.get('loading')) {
+                this.$el.find('.loading').show();
+            } else {
+                this.$el.find('.loading').hide();
+            }
         }
     });
 
