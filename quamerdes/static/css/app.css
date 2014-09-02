@@ -137,7 +137,13 @@ body {
     width: 286px;
 }
 
-#menu-container  ul.main-menu > li {
+#menu-container ul.main-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#menu-container ul.main-menu > li {
     float: left;
 }
 
@@ -155,15 +161,11 @@ body {
     cursor: pointer;
 }
 
-#menu-container ul.main-menu > li a:hover {
-    background-color: #fff;
-    color: #000;
-}
-
 #menu-container ul.main-menu .dropdown-menu {
     border: 1px solid rgba(0,0,0,0.10);
     border-radius: 0;
     box-shadow: 0 3px 9px rgba(0,0,0,0.10);
+    list-style: none;
 }
 
 #menu-container ul.main-menu .icon-user {
@@ -175,15 +177,18 @@ body {
     margin-right: 5px;
 }
 
-#menu-container ul.main-menu > li a.active {
-    color: #000;
-    background-color: #fce300;
-    background-image: -moz-linear-gradient(top, #F5D700, #F0D800);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#F5D700), to(#F0D800));
-    background-image: -webkit-linear-gradient(top, #F5D700, #F0D800);
-    background-image: -o-linear-gradient(top, #F5D700, #F0D800);
-    background-image: linear-gradient(to bottom, #F5D700, #F0D800);
-    background-repeat: repeat-x;
+#menu-container ul.main-menu a[data-name="about"] {
+    margin-top: 17px;
+    width: 15px;
+    height: 19px;
+    background: url(../img/info.png) no-repeat center;
+}
+
+#menu-container ul.main-menu a[data-name="help"] {
+    margin-top: 17px;
+    width: 15px;
+    height: 19px;
+    background: url(../img/help.png) no-repeat center;
 }
 
 /* Affix for query related divs (collection selection, query string,
