@@ -271,10 +271,11 @@ def search():
 @login_required
 def count():
     payload = json.loads(request.form['payload'])
-    indices = payload.get('indices', ','.join(current_app.config['ES_ALL_INDICES']))
+
+    index = current_app.config['COLLECTIONS_CONFIG'].get(payload.pop('index'))['index_name']
     query = payload.get('query')
 
-    results = current_app.es_search.count(index=indices, body=query)
+    results = current_app.es_search.count(index=index, body=query)
 
     return jsonify(results)
 

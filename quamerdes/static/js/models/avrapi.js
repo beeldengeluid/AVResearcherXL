@@ -35,7 +35,9 @@ function($, _, Backbone, app){
                 user: USER,
 
                 pendingRequests: [],
-                loading: false
+                loading: false,
+
+                stats: {}
             };
         },
 
@@ -627,6 +629,112 @@ function($, _, Backbone, app){
                     queryTime: data.took,
                     queryTimeMs: (data.took / 1000).toFixed(2)
                 });
+            });
+        },
+
+        /* Get the total number of documents that are currently in the index */
+        getTotalDocCount: function(collection){
+            var self = this;
+
+            var payload = {
+                index: collection,
+                query: {query: {match_all: {}}}
+            };
+
+            this.http_post('count', payload, function(data){
+                var stats = _.clone(self.get('stats'));
+
+                if (!_.has(stats, collection)) {
+                    stats[collection] = {};
+                }
+
+                stats[collection].total_docs = data.count;
+                self.set('stats', stats);
+
+                console.log(self.get('stats'));
+            });
+        },
+
+        /* Get the date of the first and last item in the index */
+        getFirstLastDocDates: function(collection){
+            var self = this;
+
+            var payload = {
+                index: collection,
+                query: {
+                    match_all: {}
+                },
+                aggs: {
+                    publication_date_stats: {
+                        stats: {field: 'date'}
+                    }
+                },
+                size: 0
+            };
+
+            this.http_post('search', payload, function(data){
+                var stats = _.clone(self.get('stats'));
+
+                if (!_.has(stats, collection)) {
+                    stats[collection] = {};
+                }
+
+                stats[collection].publication_date_stats = data.aggregations.publication_date_stats;
+                self.set('stats', stats);
+            });
+        },
+
+        getImmixDocsWithSubtitleCount: function() {
+            var self = this;
+
+            var query = {
+                index: 'immix',
+                query: {
+                    query: {
+                        filtered: {
+                            query: {match_all: {}},
+                            filter: {
+                                exists: {field: 'meta.subtitles'
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            this.http_post('count', query, function(data) {
+                var stats = _.clone(self.get('stats'));
+
+                if (!_.has(stats, 'immix')) {
+                    stats['immix'] = {};
+                }
+
+                stats['immix'].docs_with_subtitles = data.count;
+                self.set('stats', stats);
+            });
+        },
+
+        getKbDocsByTypeCount: function() {
+            var self = this;
+
+            var payload = {
+                index: 'kb',
+                query: {match_all: {}},
+                aggs: {
+                    article_types: {terms: {field: 'meta.article_type'}}
+                },
+                size: 0
+            };
+
+            this.http_post('search', payload, function(data) {
+                var stats = _.clone(self.get('stats'));
+
+                if (!_.has(stats, 'kb')) {
+                    stats['kb'] = {};
+                }
+
+                stats['kb'].docs_by_type_count = data.aggregations.article_types.buckets;
+                self.set('stats', stats);
             });
         }
     });
