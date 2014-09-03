@@ -20,6 +20,8 @@ function($, _, Backbone, d3, app){
                 'day': d3.time.format('%A %B %e, %Y')
             };
 
+            this.y_axis_percentage_format = d3.format('.2%');
+
             var self = this;
             _.each(this.options.models, function(model, name) {
                 model.on('change:aggregations',  self.determineInterval, self);
@@ -266,7 +268,7 @@ function($, _, Backbone, d3, app){
                     else if (self.current_frequency == 'relative') {
                         yAxis
                             .tickSize(-width + margin.left + margin.right, 0)
-                            .tickFormat(function(tick){ return tick * 100 + '%'; });
+                            .tickFormat(function(tick){ return self.y_axis_percentage_format(tick); });
                     }
 
                     // Select SVG element, if it exists
@@ -292,7 +294,7 @@ function($, _, Backbone, d3, app){
                         .attr('dy', '.65em')
                         .attr("transform", "rotate(-90)")
                         .attr('x', -((height - margin.top - margin.bottom) / 2))
-                        .attr('y', -60);
+                        .attr('y', -65);
 
                     // Update the text of the y-axis label to include the correct interval name
                     svg.select('text.label.y').text('Hits per ' + self.current_interval);
