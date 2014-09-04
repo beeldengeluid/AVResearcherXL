@@ -16,14 +16,18 @@
         %>
         <h2><a href="http://in.beeldengeluid.nl/collectie/#/details/expressie/<%= hit.fields['meta.expressieID'] %>/false/true" target="_blank"><%= title %></a></h2>
         <h3><%= program %><% if ('meta.broadcasters' in hit.fields) { %> (<%= hit.fields['meta.broadcasters'].join(', ') %>)<% } %></h3>
+        <% if ('highlight' in hit && ('descriptions' in hit.highlight || 'summaries' in hit.highlight)){ %>
+          <h4>Program description</h4>
+          <% if('descriptions' in hit.highlight) { %>
+            <div class="snippet"><%= hit.highlight.descriptions[0] %></div>
+          <% } %>
+          <% if ('summaries' in hit.highlight) { %>
+            <div class="snippet"><%= hit.highlight.summaries[0] %></div>
+          <% } %>
+        <% } %>
         <% if ('highlight' in hit && 'subtitles' in hit.highlight){ %>
+          <h4>Subtitles</h4>
           <div class="snippet"><%= hit.highlight.subtitles[0] %></div>
-        <% } %>
-        <% if ('highlight' in hit && 'descriptions' in hit.highlight){ %>
-          <div class="snippet"><%= hit.highlight.descriptions[0] %></div>
-        <% } %>
-        <% if ('highlight' in hit && 'summaries' in hit.highlight){ %>
-          <div class="snippet"><%= hit.highlight.summaries[0] %></div>
         <% } %>
         <%
             var format = d3.time.format('%a %b %-e, %Y');

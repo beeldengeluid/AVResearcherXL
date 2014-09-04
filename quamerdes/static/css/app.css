@@ -853,7 +853,13 @@ ul.dropdown li {
     margin-top: 0;
     margin-bottom: 15px;
     font-weight: normal;
-    color: #7a7a7a;
+    color: #6b6b6b;
+}
+
+.hits h4 {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #a4a4a4;
 }
 
 .hits em {

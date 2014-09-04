@@ -587,7 +587,8 @@ function($, _, Backbone, app){
             _.each(enabledFields, function(field) {
                 highlight.fields[field] = {
                     fragment_size: 150,
-                    number_of_fragments: 1
+                    number_of_fragments: 1,
+                    no_match_size: 150
                 };
             });
 
