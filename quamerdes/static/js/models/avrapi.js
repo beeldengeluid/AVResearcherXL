@@ -62,7 +62,7 @@ function($, _, Backbone, app){
         http_get: function(url, data, callback){
             url = ['api', url].join('/');
 
-            if (DEBUG) console.log('AvrApiModel:http:post', url, payload);
+            if (DEBUG) console.log('AvrApiModel:http:post', url, data);
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -162,8 +162,7 @@ function($, _, Backbone, app){
         logout: function(){
             if (DEBUG) console.log('AvrApiModel:logout');
 
-            var self = this;
-            this.http_get('logout', function(data){
+            this.http_get('logout', '', function(data){
                 this.set('user', null);
             });
         },

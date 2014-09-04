@@ -2,7 +2,7 @@ DEBUG = False
 
 SECRET_KEY = ''
 
-# URL of the ElasticSearch instance that contains the AVResearcher
+# URL of the ElasticSearch instance that contains the AVResearcherXL
 # broadcasts index
 ES_SEARCH_HOST = 'localhost'
 ES_SEARCH_PORT = 9200
@@ -26,8 +26,8 @@ MAIL_USE_SSL = False
 MAIL_USERNAME = None
 MAIL_PASSWORD = None
 
-MAIL_DEFAULT_SENDER = ('AVResearcher', 'no-reply@avresearcher.org')
-MAIL_REGISTRATION_SUBJECT = 'Thanks for creating an AVResearcher account'
+MAIL_DEFAULT_SENDER = ('AVResearcherXL', 'no-reply@avresearcher.org')
+MAIL_REGISTRATION_SUBJECT = 'Thanks for creating an AVResearcherXL account'
 MAIL_ACCOUNT_APPROVAL_ADDRESS = ''
 
 
@@ -39,34 +39,34 @@ MESSAGES = {
     'missing_password': 'Please enter your password',
     'account_already_exists': 'There already exists an account with this email'
                               ' address',
-    'email_verification_subject': 'Thanks for creating an AVResearcher account',
+    'email_verification_subject': 'Thanks for creating an AVResearcherXL account',
     'email_verification_body': 'Dear %s,\n\nThank you for creating an '
-                               'AVResearcher account.\n\nTo verify your email '
+                               'AVResearcherXL account.\n\nTo verify your email '
                                'address, please click the following link:'
                                ' %s. After verification, a member of the '
-                               'AVResearcher team will grant you access to the'
-                               ' AVResearcher application. You will be notified'
+                               'AVResearcherXL team will grant you access to the'
+                               ' AVResearcherXL application. You will be notified'
                                ' by email as soon as your account is approved.'
-                               '\n\nRegards,\nThe AVResearcher team',
-    'email_approval_subject': '[AVResearcher] New user registration',
-    'email_approval_body': 'The following user registered a new AVResearcher '
+                               '\n\nRegards,\nThe AVResearcherXL team',
+    'email_approval_subject': '[AVResearcherXL] New user registration',
+    'email_approval_body': 'The following user registered a new AVResearcherXL '
                            'account:\n\nName: %s\nOrganization: %s\nEmail '
                            'address: %s\n\nClick the following link to approve '
                            'this registration and grant the user access to the '
                            'application: %s',
-    'email_approved_subject': 'Your AVResearcher account is approved',
-    'email_approved_body': 'Dear %s,\n\nYour AVResearcher account is approved '
-                           'and activated.\n\nTo start using the AVResearcher '
-                           'visit: %s\n\nRegards,\nThe AVResearcher team',
+    'email_approved_subject': 'Your AVResearcherXL account is approved',
+    'email_approved_body': 'Dear %s,\n\nYour AVResearcherXL account is approved '
+                           'and activated.\n\nTo start using the AVResearcherXL '
+                           'visit: %s\n\nRegards,\nThe AVResearcherXL team',
     'invalid_email_or_password': 'Incorrect email or password',
     'email_not_verified': 'You did not yet verifiy your email address. Please '
                           'click the link in the email you recieved.',
     'account_not_approved': 'Your account first needs to be approved by a '
-                            'member of the AVResearcher team. You will recieve'
+                            'member of the AVResearcherXL team. You will recieve'
                             ' an email as soon as permission is granted to use '
                             'the application.',
     'email_verified_title': 'Hi %s, thanks for verifying your mail address',
-    'email_verified_content': 'A member of the AVResearcher team will review '
+    'email_verified_content': 'A member of the AVResearcherXL team will review '
                               'your application. You will be notified by '
                               'email as soon as your account is approved.',
     'user_approved_title': '%s can now login to the application',
