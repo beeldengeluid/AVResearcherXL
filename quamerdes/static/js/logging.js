@@ -21,7 +21,6 @@ function($, _, Backbone, app){
                 if(events.length > 0){
                     self.buffer.length = 0;
                     self.model.logUsage(events);
-                    console.log(events);
                 }
             }, 5000);
         },
