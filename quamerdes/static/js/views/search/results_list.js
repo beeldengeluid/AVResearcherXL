@@ -74,6 +74,7 @@ function($, _, Backbone, app, resultsListImmixTemplate, resultsListKbTemplate){
             var docID = e.target.dataset.id;
             app.vent.trigger('Logging:clicks', {
                 action: 'view_document',
+                modelName: this.model.get('name'),
                 docID: docID
             });
         }

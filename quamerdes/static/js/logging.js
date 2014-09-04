@@ -14,8 +14,8 @@ function($, _, Backbone, app){
                 app.vent.on('Logging:' + event_type, self.logEvent, self);
             });
 
-            // Check the buffer every n miliseconds to see if we can send some
-            // log events to ES
+            // Check the buffer every n milliseconds to see if we can send
+            // some log events to ES
             setInterval(function(){
                 var events = self.buffer.slice();
                 if(events.length > 0){

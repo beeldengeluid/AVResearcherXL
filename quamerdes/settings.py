@@ -8,8 +8,6 @@ ES_SEARCH_HOST = 'localhost'
 ES_SEARCH_PORT = 9200
 ES_SEARCH_URL_PREFIX = ''
 
-ES_SEARCH_INDEX = 'avresearcher'
-
 # URL of the ElasticSearch instance used to store usage logs (clicks,
 # queries, etc.)
 ES_LOG_HOST = ES_SEARCH_HOST
@@ -287,15 +285,15 @@ HIT_HIGHLIGHT_FRAGMENTS = 1
 ENABLE_USAGE_LOGGING = True
 
 # Determine which events will be logged
-# clicks actions:
-#  submit_query: User submits a new query. Log querystring and modelName.
-#  change_search_field: User adds or removes one of the collections from the search. Log modelName, the collection, and whether it has been activated or not
-#  daterange_facet: User uses timeslider. Log from date in ms, to date in ms, and the model name
-#  change_facet_tab: User switches tabs in facetsview. Log source and target tab
-#  view_document: User clicks on a single document in result list. Log document id and model name
-#  page_switch: User switches between home, about and querysyntax page. Log source and target page.
-# results actions:
-#  results: A result list is rendered. Log the visible doc_ids and model name.
+# 'clicks' actions:
+#  - 'submit_query': User submits a new query. Log querystring and modelName.
+#  - 'change_search_field': User adds or removes one of the collections from the search. Log modelName, the collection, and whether it has been activated or not
+#  - 'daterange_facet': User uses timeslider. Log from date in ms, to date in ms, and the model name
+#  - 'change_facet_tab': User switches tabs in facetsview. Log source and target tab
+#  - 'view_document': User clicks on a single document in result list. Log document id and model name
+#  - 'page_switch': User switches between home, about and querysyntax page. Log source and target page.
+# 'results' actions:
+#  - 'results': A result list is rendered. Log the visible doc_ids and model name.
 LOG_EVENTS = ['clicks', 'results']
 
 # The URL to the JSON file that contains the (textual) information

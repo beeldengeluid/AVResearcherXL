@@ -111,6 +111,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, facetsTemplate){
             if (DEBUG) console.log('FacetsView:switchTab Switch to \"' + targetTab + '\"');
             
             app.vent.trigger('Logging:clicks', {
+                modelName: this.model.get('name'),
                 action: 'change_facet_tab',
                 fromTab: this.activeTab,
                 toTab: targetTab

@@ -51,12 +51,21 @@ function($, _, Backbone, app, fieldsTemplate) {
 
             var checkbox = $(e.target);
 
+            var checked = false;
             if (checkbox.is(':checked')) {
                 this.model.changeEnabledSearchFields(checkbox.val(), true);
+                checked = true;
             }
             else {
                 this.model.changeEnabledSearchFields(checkbox.val(), false);
             }
+
+            app.vent.trigger('Logging:clicks', {
+                action: 'change_search_field',
+                field: checkbox.val(),
+                modelName: this.model.get('name'),
+                checked: checked
+            });
         }
     });
 

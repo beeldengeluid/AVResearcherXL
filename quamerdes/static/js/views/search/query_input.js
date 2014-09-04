@@ -35,6 +35,7 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
             app.vent.trigger('Logging:clicks', {
                 action: 'submit_query',
                 modelName: this.model.get('name'),
+                collection: this.model.get('collection'),
                 querystring: querystring
             });
 
