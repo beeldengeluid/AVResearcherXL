@@ -440,6 +440,15 @@ ul.dropdown li {
     padding: 0 20px;
 }
 
+.no-results {
+    position: absolute;
+    top: -65px;
+    width: 80%;
+    margin: 0 10%;
+    display: none;
+    border-radius: 0;
+}
+
 .slider {
     margin: 20px 0 5px 0;
 }
