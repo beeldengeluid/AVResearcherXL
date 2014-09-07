@@ -1,6 +1,7 @@
 import os
 from glob import iglob
 import json
+import tarfile
 
 import zmq
 from gensim.corpora.dictionary import Dictionary
@@ -9,6 +10,8 @@ from tokenizer import tokenize
 
 
 def tokenize_producer(socket_addr, items_path):
+    """Sends the file's name and text as JSON for each file
+    in ``items_path``"""
     context = zmq.Context()
 
     zmq_socket = context.socket(zmq.PUSH)
@@ -27,6 +30,8 @@ def tokenize_producer(socket_addr, items_path):
 
 
 def tokenize_consumer(socket_addr, tokenized_items_path):
+    """For each recieved item, tokenizes the text and stores the tokens
+    in a file on disk (one line per token)"""
     context = zmq.Context()
 
     consumer_receiver = context.socket(zmq.PULL)
@@ -65,24 +70,9 @@ def tokenize_consumer(socket_addr, tokenized_items_path):
                 dir_c += 1
 
 
-def create_dictionary(analyzed_items_path):
-    dictionary = Dictionary()
-
-    for doc in iglob(analyzed_items_path):
-        tokens = []
-        with open(doc, 'r') as f:
-            for token in f:
-                tokens.append(token[:-2].decode('utf-8'))
-
-        dictionary.doc2bow(tokens, allow_update=True)
-
-    return dictionary
-
-
 def iter_docs(analyzed_items_path, progress_cnt=1000):
     docno = 0
     for doc in iglob(analyzed_items_path):
-        print doc
         tokens = []
         with open(doc, 'r') as f:
             for token in f:
@@ -102,3 +92,60 @@ def create_dictionary(analyzed_items_path, dictionary_path=None):
         dictionary.save(dictionary_path)
 
     return dictionary
+
+
+def merge_dictionaries(dictionaries_path, merged_dictionary_path=None):
+    dict_paths = list(iglob(dictionaries_path))
+
+    final_dictionary = Dictionary.load(dict_paths[0])
+
+    for dict_path in dict_paths[1:]:
+        dictionary = Dictionary.load(dict_path)
+
+        final_dictionary.merge_with(dictionary)
+
+    if merged_dictionary_path:
+        final_dictionary.save(merged_dictionary_path)
+
+    return final_dictionary
+
+
+def prune_dictionary(src_dictionary_path, dest_dictionary_path=None,
+                     no_below=None, no_above=None, keep_n=None):
+    dictionary = Dictionary.load(src_dictionary_path)
+    dictionary.filter_extremes(no_below=no_below, no_above=no_above,
+                               keep_n=keep_n)
+
+    if dest_dictionary_path:
+        dictionary.save(dest_dictionary_path)
+
+    return dictionary
+
+
+class Corpus(object):
+    def __init__(self, analyzed_items_path, dictionary_path):
+        self.dictionary = Dictionary.load(dictionary_path)
+        self.analyzed_items_path = analyzed_items_path
+
+    def get_analyzed_items(self):
+        for tarred_item_file in self.analyzed_items_path:
+            with tarfile.open(tarred_item_file, 'r:gz') as tar:
+                for f_item in tar:
+                    item = tar.extractfile(f_item)
+
+                    tokens = []
+                    for token in item:
+                        tokens.append(token[:-1].decode('utf-8'))
+
+                    yield tokens
+
+                    tar.members = []
+
+
+    def __iter__(self):
+        pass
+
+
+
+def create_corpus():
+    pass

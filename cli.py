@@ -150,7 +150,7 @@ def get_immix_items(archive_path):
             # Skip items that don't include a date
             if not expression['date']:
                 logger.warn('Skipping iMMix item %s, unknown date' % doc_id)
-                yield None
+                continue
             else:
                 yield doc_id, expression
 
@@ -208,6 +208,7 @@ def get_kb_items(archive_path):
 def analyze_text():
     pass
 
+
 @analyze_text.command()
 @click.argument('role', type=click.Choice(['producer', 'consumer']))
 @click.argument('file_path')
@@ -227,7 +228,30 @@ def tokenize(role, file_path, socket_addr):
 def create_dictionary(analyzed_items_path, dictionary_path):
     from text_analysis import tasks
 
-    tasks.create_dictionary(analyzed_items_path, dictionary_path)
+    print tasks.create_dictionary(analyzed_items_path, dictionary_path)
+
+
+@analyze_text.command()
+@click.argument('dictionaries_path')
+@click.argument('merged_dictionary_path')
+def merge_dictionaries(dictionaries_path, merged_dictionary_path):
+    from text_analysis import tasks
+
+    print tasks.merge_dictionaries(dictionaries_path, merged_dictionary_path)
+
+
+@analyze_text.command()
+@click.argument('src_dictionary_path')
+@click.argument('dest_dictionary_path')
+@click.option('--no_below', default=None, type=click.INT)
+@click.option('--no_above', default=None, type=click.FLOAT)
+@click.option('--keep_n', default=None, type=click.INT)
+def prune_dictionary(src_dictionary_path, dest_dictionary_path, no_below,
+                     no_above, keep_n):
+    from text_analysis import tasks
+
+    print tasks.prune_dictionary(src_dictionary_path, dest_dictionary_path,
+                                 no_above, no_below, keep_n)
 
 
 def es_format_index_actions(index_name, doc_type, item_iterable):
