@@ -251,7 +251,7 @@ def prune_dictionary(src_dictionary_path, dest_dictionary_path, no_below,
     from text_analysis import tasks
 
     print tasks.prune_dictionary(src_dictionary_path, dest_dictionary_path,
-                                 no_above, no_below, keep_n)
+                                 no_below, no_above, keep_n)
 
 
 def es_format_index_actions(index_name, doc_type, item_iterable):
