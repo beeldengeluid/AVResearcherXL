@@ -183,7 +183,7 @@ class Corpus(object):
             self.analyzed_items_path = None
 
         if corpus_path:
-            self.corpus = MmCorpus.load(corpus_path)
+            self.corpus = MmCorpus(corpus_path)
         else:
             self.corpus = None
 
@@ -207,7 +207,7 @@ class Corpus(object):
                         tokens.append(token[:-1].decode('utf-8'))
 
                     if doc2bow:
-                        yield self.dictionary.doc2bow(tokens)
+                        yield f_item.name, self.dictionary.doc2bow(tokens)
                     else:
                         yield tokens
 
@@ -226,3 +226,32 @@ class Corpus(object):
         model.save(model_path)
 
         return model
+
+    def get_descriptive_terms(self, top_n):
+        for item_name, doc_bow in self.get_analyzed_items(doc2bow=True):
+            top_n_tokens = sorted(self.tfidf_model[doc_bow],
+                key=lambda token: token[1], reverse=True)[:top_n]
+
+            tokens = []
+            for token_id, score in top_n_tokens:
+                tokens.append(self.dictionary[token_id])
+
+            yield item_name, tokens
+
+    def descriptive_terms_es_actions(self, index, field_name, top_n_terms=10):
+        for item_name, tokens in self.get_descriptive_terms(top_n_terms):
+            doc_id = item_name.split('/')[-1].split('.')[0]
+            if doc_id[0] == '_':
+                doc_id = doc_id[1:]
+
+            yield {
+                '_op_type': 'update',
+                '_index': 'index',
+                '_type': 'item',
+                '_id': doc_id,
+                'doc': {
+                    'meta': {
+                        field_name: tokens
+                    }
+                }
+            }
