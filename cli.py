@@ -292,8 +292,9 @@ def index_descriptive_terms(analyzed_items_path, dictionary_path, corpus_path,
     corpus = tasks.Corpus(analyzed_items_path, dictionary_path, corpus_path,
                           model_path)
 
-    for item in corpus.descriptive_terms_es_actions(index, field, top_n_terms):
-        print item
+    es_update_actions = corpus.descriptive_terms_es_actions(index, field,
+                                                            top_n_terms)
+    bulk(es, actions=es_update_actions, chunk_size=1000)
 
 
 def es_format_index_actions(index_name, doc_type, item_iterable):

@@ -151,6 +151,10 @@
             "subtitles": {
               "type": "string"
             },
+            "subtitles_descriptive_terms": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
             "summaries": {
               "type": "string"
             },
