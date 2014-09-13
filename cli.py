@@ -212,12 +212,13 @@ def analyze_text():
 @analyze_text.command()
 @click.argument('role', type=click.Choice(['producer', 'consumer']))
 @click.argument('file_path')
+@click.argument('text_extractor')
 @click.option('--socket_addr', default='tcp://127.0.0.1:5557')
-def tokenize(role, file_path, socket_addr):
+def tokenize(role, file_path, socket_addr, text_extractor):
     from text_analysis import tasks
 
     if role == 'producer':
-        tasks.tokenize_producer(socket_addr, file_path)
+        tasks.tokenize_producer(socket_addr, file_path, text_extractor)
     else:
         tasks.tokenize_consumer(socket_addr, file_path)
 

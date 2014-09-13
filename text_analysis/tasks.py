@@ -9,9 +9,31 @@ from gensim.corpora.dictionary import Dictionary
 from tokenizer import tokenize
 
 
-def tokenize_producer(socket_addr, items_path):
+def extract_kb_text(item):
+    if 'text' in item and item['text']:
+        return item['text']
+
+    return None
+
+
+def extract_immix_subtitles(item):
+    if 'meta' in item and 'subtitles' in item['meta']\
+            and item['meta']['subtitles']:
+        return item['meta']['subtitles']
+    else:
+        return None
+
+
+def tokenize_producer(socket_addr, items_path, text_extractor):
     """Sends the file's name and text as JSON for each file
     in ``items_path``"""
+    if text_extractor == 'kb_text':
+        text_extractor = extract_kb_text
+    elif text_extractor == 'immix_subtitles':
+        text_extractor = extract_immix_subtitles
+    else:
+        raise ValueError('Unknown text extractor (\'%s\')' % text_extractor)
+
     context = zmq.Context()
 
     zmq_socket = context.socket(zmq.PUSH)
@@ -22,9 +44,12 @@ def tokenize_producer(socket_addr, items_path):
         print item
         with open(item, 'r') as item_f:
             try:
-                text = json.load(item_f)['text']
+                text = text_extractor(json.load(item_f))
             except ValueError:
                 continue
+
+        if not text:
+            continue
 
         zmq_socket.send_json({'filename': item, 'text': text})
 

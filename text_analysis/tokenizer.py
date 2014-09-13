@@ -3,7 +3,6 @@ import re
 from pattern.nl import parse
 
 
-
 # The part-of-speech tags we are interested in
 POS_TAGS = re.compile("(NN|NNS|NNP|NNPS|VB|VBD|VBG|VBN|VBP|VBZ|"
                       "JJ|JJR|JJS|RB|RBR|RBS)")
@@ -30,6 +29,7 @@ def tokenize(text, min_lemma=3, max_lemma=30, allowed_pos_tags=POS_TAGS,
     parsed = parse(text, lemmata=True, collapse=False)
     for sentence in parsed:
         for token, tag, _, _, lemma in sentence:
-            if 3 <= len(lemma) <= 30 and lemma and allowed_pos_tags.match(tag):
-                if allowed_lemma_chars.match(lemma):
-                    yield lemma
+            if min_lemma <= len(lemma) <= max_lemma \
+                    and allowed_pos_tags.match(tag)\
+                    and allowed_lemma_chars.match(lemma):
+                yield lemma
