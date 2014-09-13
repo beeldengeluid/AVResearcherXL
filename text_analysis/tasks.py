@@ -5,6 +5,7 @@ import tarfile
 
 import zmq
 from gensim.corpora.dictionary import Dictionary
+from gensim.corpora import MmCorpus
 
 from tokenizer import tokenize
 
@@ -127,19 +128,34 @@ class Corpus(object):
         self.dictionary = Dictionary.load(dictionary_path)
         self.analyzed_items_path = analyzed_items_path
 
-    def get_analyzed_items(self):
-        for tarred_item_file in self.analyzed_items_path:
+    def get_analyzed_items(self, doc2bow=False, progress_cnt=10000):
+        docno = 0
+        for tarred_item_file in iglob(self.analyzed_items_path):
             with tarfile.open(tarred_item_file, 'r:gz') as tar:
                 for f_item in tar:
+                    if not f_item.isfile():
+                        continue
+
                     item = tar.extractfile(f_item)
 
                     tokens = []
                     for token in item:
                         tokens.append(token[:-1].decode('utf-8'))
 
-                    yield tokens
+                    if doc2bow:
+                        yield self.dictionary.doc2bow(tokens)
+                    else:
+                        yield tokens
+
+                    docno += 1
+                    if docno % progress_cnt == 0:
+                        print docno
 
                     tar.members = []
+
+    def construct_corpus(self, corpus_path):
+        return MmCorpus.serialize(corpus_path,
+                                  self.get_analyzed_items(doc2bow=True))
 
 
     def __iter__(self):
