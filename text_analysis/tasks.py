@@ -51,7 +51,7 @@ def tokenize_producer(socket_addr, items_path, text_extractor):
     elif text_extractor == 'immix_subtitles':
         text_extractor = extract_immix_subtitles
     elif text_extractor == 'immix_summaries':
-        text_extractor extract_immix_summaries
+        text_extractor = extract_immix_summaries
     else:
         raise ValueError('Unknown text extractor (\'%s\')' % text_extractor)
 
@@ -173,7 +173,7 @@ class Corpus(object):
         self.dictionary = Dictionary.load(dictionary_path)
         self.analyzed_items_path = analyzed_items_path
 
-    def get_analyzed_items(self, doc2bow=False, progress_cnt=10000):
+    def get_analyzed_items(self, doc2bow=False, progress_cnt=5000):
         docno = 0
         for tarred_item_file in iglob(self.analyzed_items_path):
             with tarfile.open(tarred_item_file, 'r:gz') as tar:
@@ -201,12 +201,3 @@ class Corpus(object):
     def construct_corpus(self, corpus_path):
         return MmCorpus.serialize(corpus_path,
                                   self.get_analyzed_items(doc2bow=True))
-
-
-    def __iter__(self):
-        pass
-
-
-
-def create_corpus():
-    pass

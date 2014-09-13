@@ -255,6 +255,17 @@ def prune_dictionary(src_dictionary_path, dest_dictionary_path, no_below,
                                  no_below, no_above, keep_n)
 
 
+@analyze_text.command()
+@click.argument('analyzed_items_path')
+@click.argument('dictionary_path')
+@click.argument('corpus_path')
+def construct_corpus(analyzed_items_path, dictionary_path, corpus_path):
+    from text_analysis import tasks
+
+    corpus = tasks.Corpus(analyzed_items_path, dictionary_path)
+    corpus.construct_corpus(corpus_path)
+
+
 def es_format_index_actions(index_name, doc_type, item_iterable):
     for item in item_iterable:
         if not item:
