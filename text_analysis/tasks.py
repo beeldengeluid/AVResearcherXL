@@ -6,6 +6,7 @@ import tarfile
 import zmq
 from gensim.corpora.dictionary import Dictionary
 from gensim.corpora import MmCorpus
+from gensim.models.tfidfmodel import TfidfModel
 
 from tokenizer import tokenize
 
@@ -173,6 +174,9 @@ class Corpus(object):
         self.dictionary = Dictionary.load(dictionary_path)
         self.analyzed_items_path = analyzed_items_path
 
+        self.corpus = None
+        self.model = None
+
     def get_analyzed_items(self, doc2bow=False, progress_cnt=5000):
         docno = 0
         for tarred_item_file in iglob(self.analyzed_items_path):
@@ -201,3 +205,17 @@ class Corpus(object):
     def construct_corpus(self, corpus_path):
         return MmCorpus.serialize(corpus_path,
                                   self.get_analyzed_items(doc2bow=True))
+
+    def open_corpus(self, corpus_path):
+        self.corpus = MmCorpus.load(corpus_path)
+
+        return self.corpus
+
+    def construct_tfidf_model(self, corpus_path, model_path):
+        if not self.corpus:
+            self.open_corpus(corpus_path)
+
+        model = TfidfModel(self.corpus)
+        model.save(model_path)
+
+        return model
