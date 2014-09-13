@@ -246,7 +246,7 @@ class Corpus(object):
 
             yield {
                 '_op_type': 'update',
-                '_index': 'index',
+                '_index': index,
                 '_type': 'item',
                 '_id': doc_id,
                 'doc': {

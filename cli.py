@@ -277,6 +277,25 @@ def construct_tfidf_model(corpus_path, model_path):
     corpus.construct_tfidf_model(model_path)
 
 
+@analyze_text.command()
+@click.argument('analyzed_items_path')
+@click.argument('dictionary_path')
+@click.argument('corpus_path')
+@click.argument('model_path')
+@click.argument('index')
+@click.argument('field')
+@click.argument('top_n_terms', type=click.INT)
+def index_descriptive_terms(analyzed_items_path, dictionary_path, corpus_path,
+                            model_path, index, field, top_n_terms):
+    from text_analysis import tasks
+
+    corpus = tasks.Corpus(analyzed_items_path, dictionary_path, corpus_path,
+                          model_path)
+
+    for item in corpus.descriptive_terms_es_actions(index, field, top_n_terms):
+        print item
+
+
 def es_format_index_actions(index_name, doc_type, item_iterable):
     for item in item_iterable:
         if not item:
