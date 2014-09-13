@@ -170,12 +170,27 @@ def prune_dictionary(src_dictionary_path, dest_dictionary_path=None,
 
 
 class Corpus(object):
-    def __init__(self, analyzed_items_path, dictionary_path):
-        self.dictionary = Dictionary.load(dictionary_path)
-        self.analyzed_items_path = analyzed_items_path
+    def __init__(self, analyzed_items_path=None, dictionary_path=None,
+                 corpus_path=None, tfidf_model_path=None):
+        if dictionary_path:
+            self.dictionary = Dictionary.load(dictionary_path)
+        else:
+            self.dictionary = None
 
-        self.corpus = None
-        self.model = None
+        if analyzed_items_path:
+            self.analyzed_items_path = analyzed_items_path
+        else:
+            self.analyzed_items_path = None
+
+        if corpus_path:
+            self.corpus = MmCorpus.load(corpus_path)
+        else:
+            self.corpus = None
+
+        if tfidf_model_path:
+            self.tfidf_model = TfidfModel.load(tfidf_model_path)
+        else:
+            self.tfidf_model = None
 
     def get_analyzed_items(self, doc2bow=False, progress_cnt=5000):
         docno = 0
@@ -206,15 +221,7 @@ class Corpus(object):
         return MmCorpus.serialize(corpus_path,
                                   self.get_analyzed_items(doc2bow=True))
 
-    def open_corpus(self, corpus_path):
-        self.corpus = MmCorpus.load(corpus_path)
-
-        return self.corpus
-
-    def construct_tfidf_model(self, corpus_path, model_path):
-        if not self.corpus:
-            self.open_corpus(corpus_path)
-
+    def construct_tfidf_model(self, model_path):
         model = TfidfModel(self.corpus)
         model.save(model_path)
 

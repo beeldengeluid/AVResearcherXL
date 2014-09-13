@@ -262,7 +262,8 @@ def prune_dictionary(src_dictionary_path, dest_dictionary_path, no_below,
 def construct_corpus(analyzed_items_path, dictionary_path, corpus_path):
     from text_analysis import tasks
 
-    corpus = tasks.Corpus(analyzed_items_path, dictionary_path)
+    corpus = tasks.Corpus(analyzed_items_path=analyzed_items_path,
+                          dictionary_path=dictionary_path)
     corpus.construct_corpus(corpus_path)
 
 
@@ -272,8 +273,8 @@ def construct_corpus(analyzed_items_path, dictionary_path, corpus_path):
 def construct_tfidf_model(corpus_path, model_path):
     from text_analysis import tasks
 
-    corpus = tasks.Corpus(None, None)
-    corpus.construct_tfidf_model(corpus_path, model_path)
+    corpus = tasks.Corpus(corpus_path=corpus_path)
+    corpus.construct_tfidf_model(model_path)
 
 
 def es_format_index_actions(index_name, doc_type, item_iterable):
