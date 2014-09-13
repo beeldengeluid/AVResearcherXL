@@ -20,8 +20,26 @@ def extract_immix_subtitles(item):
     if 'meta' in item and 'subtitles' in item['meta']\
             and item['meta']['subtitles']:
         return item['meta']['subtitles']
-    else:
+
+    return None
+
+
+def extract_immix_summaries(item):
+    text = ''
+
+    if 'meta' not in item:
         return None
+
+    if 'descriptions' in item['meta'] and item['meta']['descriptions']:
+        text += u' '.join(item['meta']['descriptions'])
+
+    if 'summaries' in item['meta'] and item['meta']['summaries']:
+        text += u' '.join(item['meta']['summaries'])
+
+    if text:
+        return text
+
+    return None
 
 
 def tokenize_producer(socket_addr, items_path, text_extractor):
@@ -31,6 +49,8 @@ def tokenize_producer(socket_addr, items_path, text_extractor):
         text_extractor = extract_kb_text
     elif text_extractor == 'immix_subtitles':
         text_extractor = extract_immix_subtitles
+    elif text_extractor == 'immix_summaries':
+        text_extractor extract_immix_summaries
     else:
         raise ValueError('Unknown text extractor (\'%s\')' % text_extractor)
 
