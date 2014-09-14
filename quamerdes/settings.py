@@ -78,8 +78,8 @@ COLLECTIONS_CONFIG = {
     'immix': {
         'name': 'iMMix metadata',
         'index_name': 'quamerdes_immix',
-        'enabled_facets': ['keywords', 'channels', 'persons', 'genres',
-                           'descriptive_terms_subs'],
+        'enabled_facets': ['descriptive_terms_subs', 'keywords', 'channels',
+                           'persons', 'genres'],
         'required_fields': ['title', 'date', 'meta.expressieID',
                             'meta.broadcasters', 'meta.titles'],
         'available_aggregations': {
@@ -179,7 +179,7 @@ COLLECTIONS_CONFIG = {
                 }
             },
             'descriptive_terms_subs': {
-                'name': 'Subtitles (desc. terms)',
+                'name': 'Words',
                 'description': '',
                 'terms': {
                     'field': 'meta.subtitles_descriptive_terms',
