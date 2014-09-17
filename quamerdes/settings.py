@@ -148,7 +148,7 @@ COLLECTIONS_CONFIG = {
                 }
             },
             'keywords': {
-                'name': 'Keywords',
+                'name': 'Tags',
                 'description': '',
                 'buckets_path': 'filtered.filtered_buckets.buckets',
                 'nested': {
