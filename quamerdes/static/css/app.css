@@ -434,7 +434,7 @@ ul.dropdown li {
     width: 49%;
     float: left;
     position: relative;
-    height: 57px;
+    height: 64px;
 }
 
 .timeslider:last-child {
@@ -455,7 +455,7 @@ ul.dropdown li {
 }
 
 .slider {
-    margin: 20px 0 5px 0;
+    margin: 30px 0 5px 0;
 }
 
 .slider.ui-slider {
@@ -542,6 +542,11 @@ ul.dropdown li {
     color: #000;
     white-space: nowrap;
     margin: 4px 0 4px 15px;
+}
+
+.timeslider .slider-lower-label, .timeslider .slider-lower-val {
+    position: absolute;
+    top: 0px;
 }
 
 /* Filters */
