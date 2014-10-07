@@ -43,6 +43,11 @@ body {
 .modal .logo {
     text-align: center;
     margin-bottom: 10px;
+    width: 360px;
+}
+
+.modal .logo img {
+    width: 100%;
 }
 
 .modal .loading {
@@ -133,8 +138,8 @@ body {
 
 #logo a {
     background: url(../img/logo.png);
-    height: 41px;
-    width: 331px;
+    height: 40px;
+    width: 374px;
 }
 
 #menu-container ul.main-menu {
