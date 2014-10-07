@@ -84,7 +84,7 @@ function($, _, Backbone, d3, app){
                 
                 // Select the current interval size if the estimated number of
                 // buckets fit in the current graph
-                if (n_intervals <= 800) {
+                if (n_intervals <= 650) {
                     selected_interval_size = interval[0];
                 } else {
                     // Stop iterating when we found the right interval
