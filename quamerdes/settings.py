@@ -211,7 +211,7 @@ COLLECTIONS_CONFIG = {
     'kb': {
         'name': 'KB kranten',
         'index_name': 'quamerdes_kb',
-        'enabled_facets': ['publication', 'article_type'],
+        'enabled_facets': ['descriptive_terms_text', 'publication', 'article_type'],
         'required_fields': ['title', 'date', 'meta.publication_name', 'source'],
         'available_aggregations': {
             'dates_stats': {
@@ -246,6 +246,14 @@ COLLECTIONS_CONFIG = {
                 'terms': {
                     'field': 'meta.publication_name',
                     'size': 15
+                }
+            },
+            'descriptive_terms_text': {
+                'name': 'Words',
+                'description': '',
+                'terms': {
+                    'field': 'meta.text_descriptive_terms',
+                    'size': 30
                 }
             }
         },
