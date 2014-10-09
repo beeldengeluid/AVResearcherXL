@@ -98,6 +98,9 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
 
         updateHandleLablesText: function() {
             var interval = this.model.get('interval');
+            if (!interval) {
+                return;
+            }
 
             this.slider_lower_label.text(this.convertTime[interval].display(new Date(this.timeslider.slider('values', 0))));
 
