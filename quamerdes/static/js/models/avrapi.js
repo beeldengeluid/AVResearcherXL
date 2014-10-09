@@ -310,6 +310,18 @@ function($, _, Backbone, app){
             });
         },
 
+        modalSearch: function(fromPubDate, toPubDate) {
+            if (DEBUG) console.log('AvrApiModel:modalSearch');
+
+            var self = this;
+
+            this.set({
+                enabledFacets: []
+            });
+
+            this.modifyQueryFilter(DATE_AGGREGATION, [fromPubDate, toPubDate], true);
+        },
+
         // Execute a new query based on an ft query string and the default
         // query properties defined in the config
         freeTextQuery: function(querystring){

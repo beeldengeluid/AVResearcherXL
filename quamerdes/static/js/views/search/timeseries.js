@@ -3,9 +3,10 @@ define([
     'underscore',
     'backbone',
     'd3',
-    'app'
+    'app',
+    'views/search/results_modal'
 ],
-function($, _, Backbone, d3, app){
+function($, _, Backbone, d3, app, ResultsModal){
     var TimeseriesView = Backbone.View.extend({
         initialize: function() {
             this.ts_chart = this.chart();
@@ -174,7 +175,8 @@ function($, _, Backbone, d3, app){
                             y: 0,
                             total: 0,
                             found: 0,
-                            rel: 0
+                            rel: 0,
+                            model: name
                         };
 
                         if (date in histograms[name].global_date_histogram) {
@@ -352,15 +354,30 @@ function($, _, Backbone, d3, app){
                       .append('circle')
                         .attr('opacity', 0)
                         .attr('data-original-title', tooltipData)
+                        .attr('data-has-hits', function(d){
+                            if (d.found > 0) {
+                                return 'true';
+                            } else {
+                                return 'false';
+                            }
+                        })
                         .on('mouseover', function(d){
                             d3.select(this).transition()
                                 .ease('quad-in-out')
-                                .attr('r', 5);
+                                .attr('r', 6);
                         })
                         .on('mouseout', function(){
                             d3.select(this).transition()
                                 .ease('quad-in-out')
                                 .attr('r', 2.4);
+                        })
+                        .on('click', function(d) {
+                            if (d.found > 0) {
+                                new ResultsModal({
+                                    currentQueryAttrs: self.options.models[d.model].attributes,
+                                    bucketStartDate: d.x
+                                });
+                            }
                         })
                       .transition()
                         .attr('r', 2.4)
