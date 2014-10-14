@@ -5,7 +5,7 @@ define([
     'app',
     'text!../../templates/help.html'
 ],
-function($, _, Backbone, app, querySyntaxTemplate){
+function($, _, Backbone, app, helpTemplate){
     var QuerySyntaxView = Backbone.View.extend({
         parent: $('#main'),
         id: 'help',
@@ -18,12 +18,12 @@ function($, _, Backbone, app, querySyntaxTemplate){
         render: function(){
             var self = this;
             if(DEBUG) console.log('QuerySyntaxView:render');
-            this.$el.html(_.template(querySyntaxTemplate));
+            this.$el.html(_.template(helpTemplate));
 
             // Get the about JSON document
-            $.get(HELP_PAGE_CONTENT_URL, function(data){
-                self.renderHelpText(data);
-            });
+//            $.get(HELP_PAGE_CONTENT_URL, function(data){
+//                self.renderHelpText(data);
+//            });
 
             return this;
         },

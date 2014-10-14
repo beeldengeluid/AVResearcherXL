@@ -1059,3 +1059,25 @@ ul.dropdown li {
 .pagination ul li:first-child {
     border-left: none;
 }
+
+/* Help page */
+#help .subject {
+    background: #ffffff;
+    margin: 20px 0;
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+
+#help .subject h2 {
+    margin-top: 0;
+}
+
+#help #query_syntax {
+    background: #ffffff;
+    margin: 20px 0;
+    padding-top: 15px;
+}
+
+#help .subject img.icon {
+    padding-top: 8px;
+}
