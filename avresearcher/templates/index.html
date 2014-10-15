@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AVResearcher XL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/css/font-awesome.min.css" rel="stylesheet">
+    <link href="static/css/app.css" rel="stylesheet">
+
+    <script type="text/javascript" charset="utf-8">
+    {% for setting_key, setting_val in settings.items() %}
+        {{ setting_key }} = {{ setting_val|tojson|safe }};
+    {% endfor %}
+    </script>
+
+   <script data-main="static/js/main" src="static/js/lib/require.min.js"></script>
+</head>
+<body>
+    <div id="menu-container" class="main-nav"></div>
+    <div id="searchinput-container" class="container"></div>
+    <div id="main"></div>
+</body>
+</html>

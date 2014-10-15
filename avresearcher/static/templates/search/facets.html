@@ -1,0 +1,22 @@
+<div class="tabbable">
+    <div class="nav">
+        <ul class="nav nav-tabs">
+        <% _.each(tabs, function(tab, tab_id){ %>
+            <% if(tab_id == active_tab){ %>
+                <li class="active"><a href="#" class="nav-tab" data-target="<%= tab_id %>"><%= tab.name %></a></li>
+            <% } else { %>
+                <li><a href="#" class="nav-tab" data-target="<%= tab_id %>"><%= tab.name %></a></li>
+            <% } %>
+        <% }); %>
+        </ul>
+    </div>
+    <div class="tab-content">
+    <% _.each(tabs, function(tab, tab_id){ %>
+        <% if(tab_id == active_tab){ %>
+            <div class="tab-pane active tab-<%= tab_id %>" data-name="<%= tab_id %>"></div>
+        <% } else { %>
+            <div class="tab-pane tab-<%= tab_id %>" data-name="<%= tab_id %>"></div>
+        <% } %>
+    <% }); %>
+    </div>
+</div>

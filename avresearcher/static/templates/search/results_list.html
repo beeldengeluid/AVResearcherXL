@@ -1,0 +1,12 @@
+<ul>
+<% _.each(hits, function(hit){ %>
+    <li>
+        <h2><a href="<%= hit.fields.source %>" target="_blank"><%= hit.fields.title %></a></h2>
+        <%
+            var format = d3.time.format('%a %b %-e, %Y at %H:%M');
+            var date = format(new Date(hit.fields.date));
+        %>
+        <div class="date"><%= date %></div>
+    </li>
+<% }); %>
+</ul>

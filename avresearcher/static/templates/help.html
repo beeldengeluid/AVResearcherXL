@@ -1,0 +1,370 @@
+<div class="container">
+<div class="row">
+  <div class="col-md-12">
+    <h1>Help</h1>
+  </div>
+  <div class="col-md-12">
+    <p>AVResearcherXL is a comparative interface, consisting of two identical
+      search boxes, in red and in blue. Result sets obtained with each side of
+      the interface can be compared by means of word clouds, histograms, and a
+      timeline. The language of the majority of data is Dutch.</p>
+  </div>
+</div>
+<div class="col-md-7">
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Collections</h2>
+    </div>
+    <div class="col-md-12">
+      <p>The tool contains two collections:</p>
+
+      <div class="col-md-1">
+        <img class="icon" src="/static/img/tv_blue.png">
+      </div>
+      <div class="col-md-11">
+        <p>The catalogue iMMix of the Netherlands Institute for Sound and
+          Vision: the television and radio catalogue of public broadcasters
+          from 1900 until November 2013. The iMMix collection exists of
+          programme descriptions. From 2010 onwards, some tv programme
+          descriptions are enriched with subtitles and tweets about the tv
+          programmes. Moreover, for a few radio broadcasts, we also generated
+          speech recognition files (early February 2012 until January
+          2014).</p>
+      </div>
+      <div class="col-md-1">
+        <img class="icon" src="/static/img/newspaper_blue.png">
+      </div>
+      <div class="col-md-11">
+        <p>A selection of the catalogue of Dutch newspaper articles of KB Royal
+          Archive of the Netherlands: De Telegraaf (1900-1994), Leeuwarder
+          Courant (1900-1995), De Tijd-De Maasbode (1959-1969), De Waarheid
+          (1940-1990), Nieuwsblad van Friesland (1901-1994) and Limburger
+          Koerier (1920-1975).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Search</h2>
+    </div>
+    <div class="col-md-12">
+      <p>In the search box you can enter your query, i.e. any word or word
+        combination (in Dutch). The interface will retrieve all documents that
+        contain this word or word combination. The default setting for word
+        combinations is AND. For instance, when typing Poolse migrant, the
+        interface searches for every document that contains both words. See
+        table at the right for an overview of all possible search strings (OR,
+        NOT, etc). Stopwords such as ‘de’, ‘een’ etc are removed from the
+        index.
+      </p>
+
+      <p>
+        Your search can be specified by indicating in which field (<i
+              class="fa fa-tags"></i>) of the document you want to search. For
+        iMMix, the fields are:
+      <ul>
+        <li>iMMix program titles: title of radio or television programme.
+          Often, they have more than one title (title of programme, title of
+          episode etc). In that case, the interface searches in both titles.
+        </li>
+        <li>iMMix program descriptions: extensive description provided by
+          professional annotators
+        </li>
+        <li>iMMix T888: subtitles for the hearing impaired, sparsely from 1982
+          onwards, more from 2006 onwards and structural from 13 november 2012
+          onwards
+        </li>
+        <li>iMMix tweets: collection of tweets about Dutch television
+          programmes, 2012 until 2013. Tweets are collected on the basis of a
+          ‘media list’: hashtags of television programmes and channels such as
+          #DWDD or #NOS
+        </li>
+      </ul>
+      </p>
+      <p>
+        For KB, the fields are:
+      <ul>
+        <li>title: title of the article</li>
+        <li>text: text of article</li>
+      </ul>
+      </p>
+
+      <p>To clear all results, use the cross (<i class="fa fa-times"></i>) in
+        the right corner of the search box.</p>
+    </div>
+  </div>
+
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Time slider</h2>
+    </div>
+    <div class="col-md-12">
+      <p>Below the search box, there is a time slider. The time slider displays
+        the range of broadcasting date, resp. publication date of all documents
+        that match your query. The left date indicates the first document; the
+        right date the most recent one. The time sliders can be moved/narrowed
+        down.</p>
+    </div>
+  </div>
+
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Word clouds</h2>
+    </div>
+    <div class="col-md-12">
+      <p>AVResearcherXL provides visualizations to support exploration of your
+        query. It contains: word clouds, barcharts and a timeline. The word
+        clouds, barcharts and the timeline are calculated by means of so-called
+        ‘facets’. A facet is a characteristic of a certain collection. Each
+        collection has different facets.</p>
+
+      <p>
+        The facets of iMMix are:
+      <ol>
+        <li>word: most descriptive terms generated by algorithms</li>
+        <li>tag: keywords provided by the annotators of the iMMix catalogue
+        </li>
+        <li>channel: broadcasters</li>
+        <li>people: persons provided by the annotators of the iMMix catalogue
+        </li>
+        <li>genre: genres provided by the annotators of the iMMix catalogue
+        </li>
+      </ol>
+      </p>
+      <p>
+        The facets of KB are:
+      <ol>
+        <li>word: most descriptive terms generated by algorithms</li>
+        <li>source: title of the newspaper</li>
+        <li>type: article, advertisement, family announcement, illustration
+        </li>
+      </ol>
+      </p>
+      <p>The ‘most descriptive terms’ are generated as follows: all punctuation
+        marks are removed, all capital letters are removed (which means that
+        differences in meaning between words with capital and without capital
+        are also erased). It displays the most unique words for each document.
+        This method implies that words which contain spelling-mistakes (such as
+        OCR-mistakes in the newspaper scans or speech-recognition mistakes in
+        the subtitles) will often be considered as unique for the document and,
+        hence, might appear in the word cloud.</p>
+
+      <p>The word cloud also functions as filter for your query. Once you
+        select a term in the wordcloud, the term will be added to your query.
+        For example if you select NOS in the word cloud of the facet ‘channel’,
+        the interface shows only the radio and television broadcasts of the
+        channel NOS. Excluding a term from the word cloud can be done by means
+        of boolean operators in the search box. For instance when typing Pools
+        -voetbal -wielrennen, the interface will search for documents that
+        contain the word Pools, but exclude the words voetbal and
+        wielrennen.</p>
+    </div>
+  </div>
+
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Bar charts</h2>
+    </div>
+    <div class="col-md-12">
+      <p>The bar charts contain the same information as the word clouds, but in
+        bars. They rank the highest frequencies per hit, from high to low
+        numbers, hence enabling to compare the left and right query in a more
+        structured way. In contrast to the word clouds, words in the bar charts
+        are not clickable, neither function as filters.</p>
+    </div>
+  </div>
+
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Time line</h2>
+    </div>
+    <div class="col-md-12">
+      <p>The timeline visualizes the amount of documents which contains your
+        query. The blue line visualizes the frequency of the left query, and
+        the red line this of the right query. “1” means one document (=one
+        television programme or one newspaper article). In order to understand
+        how the time line is generated, mouse-overs indicate what the numbers
+        mean.</p>
+
+      <p>When clicking on a ‘dot’, you can view the result list of the selected
+        year/month/week/day in a pop-up window. </p>
+
+      <p>There is no equal distribution of television, radio broadcasts and
+        newspapers over time. In the 1950s, 1960s and 1970s, a lot of
+        television and radio programme information is missing, too. Since the
+        number of television programmes and newspaper varies over time, we
+        implemented a normalization option for the timeline (<img
+                src="/static/img/relative_s.png">). These relative frequencies
+        (percentages) are calculated by dividing the number of documents with
+        hits by the total number of documents within one year (or week, day,
+        depending of the ‘bucket’). The normalization helps to compare result
+        lists of different collections and different selected fields.</p>
+    </div>
+  </div>
+
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Results list</h2>
+    </div>
+    <div class="col-md-12">
+      <p>The result lists show all documents that match your query. To paginate
+        the documents, you can click on the page numbers at the bottom of the
+        webpage.</p>
+
+      <p>A first sorting option is relevancy (<img
+              src="/static/img/sort-relevance_s.png">). Relevancy is calculated
+        according to standard information retrieval techniques and algorithms.
+        An other sort option for the result list is date, ascending (<img
+                src="/static/img/sort-time-asc_s.png">) or descending (<img
+                src="/static/img/sort-time-desc_s.png">).</p>
+
+      <p>For each document, snippets of the selected fields are displayed for
+        the iMMix-collection. For the KB-collection, we do not show any
+        snippets as newspaper texts are protected by copyrights of the
+        journalist(s) who wrote the article. The documents open within the
+        respective search systems of Sound and Vision (in.beeldengeluid.nl) and
+        KB’s Delpher (delpher.nl), that contain all relevant information and
+        -for the KB- also a scan of the original newspaper article. The website
+        in.beeldengeluid.nl does not contain the full text subtitles due to
+        copyright restrictions.</p>
+    </div>
+  </div>
+
+  <div class="row subject">
+    <div class="col-md-12">
+      <h2>Future developments</h2>
+    </div>
+    <div class="col-md-12">
+      <p>AVResearcherXL is a prototype and is continuously under development.
+        If you have any suggestions for improvement or feedback, please contact
+        Eva Baaren (<a href="mailto:ebaaren@beeldengeluid.nl">ebaaren@beeldengeluid.nl</a>).
+      </p>
+
+      <p>
+        We have already some ideas for extensions, such as:
+      <ul>
+        <li>integration with an overarching user management system, enabling to
+          track search history, bookmark, export and save results
+        </li>
+        <li>additional and removable search boxes</li>
+        <li>adding more collections, e.g. radio broadcasts</li>
+        <li>icons instead of text for fields</li>
+        <li>link to portal Academia.nl, providing access to streamed video
+          material
+        </li>
+        <li>more precise facets for iMMix (e.g. radio is now determined by a
+          mention of #radio in the title; iMMix contains movies, which are not
+          filterable with the current interface)
+        </li>
+        <li>automatic updates of data through ‘live’ connection with iMMix and
+          KB
+        </li>
+        <li>highlight queries in iMMix-catalogue and KB</li>
+        <li>add more facets KB collection: persons, events etc</li>
+        <li>add more subtitles</li>
+      </ul>
+      </p>
+    </div>
+  </div>
+</div>
+<div id="query_syntax" class="col-md-5">
+  <table class="table table-hover table-condensed table-striped">
+    <thead>
+    <tr>
+      <th>Query</th>
+      <th>Find documents</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td class="operator">oorlog vrede</td>
+      <td>Containing both "oorlog" and "vrede". AND is the default operator.
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">oorlog OR vrede</td>
+      <td>Containing "oorlog" or "vrede".</td>
+    </tr>
+    <tr>
+      <td class="operator">oorlog +vrede</td>
+      <td>That <i>must</i> contain "vrede", and <i>may</i> contain oorlog.</td>
+    </tr>
+    <tr>
+      <td class="operator">oorlog -vrede</td>
+      <td>Containing "oorlog", but not "vrede"</td>
+    </tr>
+    <tr>
+      <td class="operator">(oorlog OR vrede) AND iran</td>
+      <td>Grouping is supported as well. Finds documents that contain either
+        "oorlog" or "vrede", in combination with "iran".
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">"oorlog en vrede"</td>
+      <td>Containing the exact phrase "oorlog en vrede".</td>
+    </tr>
+    <tr>
+      <td class="operator">"oorlog vrede"~3</td>
+      <td>Search for the terms "oorlog" and "vrede" occuring within 3 words of
+        eachother in a document.
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">oorlog^4 vrede</td>
+      <td>The relevance of a document is determined based on terms found in
+        that document. Using the "^"-symbol enables the user to boost the
+        importance of a term with a factor, and thereby influence the scoring
+        algorithm. In this example, "oorlog" is considered 4 times as important
+        as "vrede"
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">"vast en zeker"^4 "zeker en vast"</td>
+      <td>Phrase queries can be boosted as well. The phrase "vast en zeker" is
+        considered more important in scoring than "zeker en vast".
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">te?t</td>
+      <td>Perform a single character wildcard search. Matches on terms with the
+        single charachter replaced, such as "test" or "tent". Prefix wildcards
+        are supported.
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">oorl*</td>
+      <td>Performs a multiple character wildcard search. Finds documents
+        containing terms with the prefix "oorl". Matches on "oorlog", but also
+        on "oorlogsjaar".
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">*rlog</td>
+      <td>Performs a multiple character wildcard search. Finds documents
+        containing terms with the suffix "rlog". Matches on "oorlog", but also
+        on "grondoorlog".
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">maximum~</td>
+      <td>Performs a fuzzy search using the <a
+              href="http://en.wikipedia.org/wiki/Levenshtein_distance"
+              target="_blank">Levenshtein (edit distance) algorithm</a>.
+        Matches up to 50 terms, ranked on how many characters in the query have
+        to be replaced. Matches "maximum", and "Máxima".
+      </td>
+    </tr>
+    <tr>
+      <td class="operator">maximum~0.8</td>
+      <td>The "fuzziness" of a fuzzy query can be controlled by an optional
+        parameter. The parameter has a value between 0 and 1 with a value
+        closer to 1 only terms with a higher similarity will be matched. The
+        default value is 0.5.
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</div>
