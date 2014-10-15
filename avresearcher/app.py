@@ -3,7 +3,7 @@ from elasticsearch import Elasticsearch
 
 from .views import views
 from .models import User
-from .extensions import mail, db, bcrypt, login_manager
+from .extensions import mail, db, bcrypt, sentry, login_manager
 
 
 DEFAULT_BLUEPRINTS = (
@@ -23,6 +23,9 @@ def create_app(package_name='avresearcher', settings_override=None):
 
     app.config.from_object('avresearcher.settings')
     app.config.from_object(settings_override)
+
+    if app.config['DEBUG'] and app.config['SENTRY_DSN']:
+        sentry.init_app(app)
 
     db.init_app(app)
     bcrypt.init_app(app)

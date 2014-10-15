@@ -1,321 +1,314 @@
 #!/usr/bin/env python
-
-from flask.ext.script import Server, Manager, Command, Option, prompt, prompt_pass
-from quamerdes import app
-from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import NotFoundError
-from elasticsearch.helpers import bulk
-import glob
-import json
 import logging
-import random
+import json
 import os
-from quamerdes.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
-from quamerdes.models import User
-from quamerdes.views import bcrypt
-from quamerdes.extensions import db
-
-import zipfile
+import re
 import tarfile
-import cStringIO
+from datetime import datetime
+from glob import glob, iglob
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
-logger = logging.getLogger('QuaMeRDES-management')
+import click
+from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import TransportError
+from elasticsearch.helpers import bulk
+
+from avresearcher import create_app
+from avresearcher.extensions import db
+from avresearcher.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
+
+
+logging.getLogger('elasticsearch').setLevel(logging.INFO)
+logging.getLogger('urllib3').setLevel(logging.INFO)
+logging.getLogger('elasticsearch.trace').setLevel(logging.DEBUG)
+
+log_sh = logging.StreamHandler()
+log_sh.setLevel(logging.DEBUG)
+lg_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+log_sh.setFormatter(lg_formatter)
+
+logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
+logger.addHandler(log_sh)
+
+es_log = logging.getLogger('elasticsearch.trace')
+es_log.addHandler(log_sh)
+es_log.setLevel(logging.ERROR)
+
+es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
 
 
-def getAVRDoc(line):
-    line = line.strip()
-    if not line.startswith('[') and not line.startswith(']'):
-        if line.startswith(','):
-            line = line[1:]
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.option('--host', default='0.0.0.0',
+              help='Host to bind to, defaults to 0.0.0.0')
+@click.option('--port', default=5000,
+              help='Port of the development server, defaults to 5000')
+def runserver(host, port):
+    """Start a Flask development server"""
+    app = create_app()
+    app.run(host=host, port=port, use_reloader=True)
+
+
+@cli.command()
+def init_db():
+    """Creates all required database tables"""
+    app = create_app()
+
+    with app.app_context():
+        db.create_all()
+
+
+@cli.group()
+def elasticsearch():
+    pass
+
+
+@elasticsearch.command('put_template')
+@click.argument('templ_file', type=click.File('rb'))
+@click.argument('templ_name', default='avresearcher')
+def es_put_template(templ_file, templ_name):
+    """Upload template"""
+    result = es.indices.put_template(name=templ_name, body=json.load(templ_file))
+
+    if result['acknowledged']:
+        click.echo('Added template %s' % templ_name)
+
+
+@elasticsearch.command('delete_template')
+@click.argument('templ_name', default='avresearcher')
+def es_delete_template(templ_name):
+    """Delete template"""
+    result = es.indices.delete_template(name=templ_name)
+
+    if result['acknowledged']:
+        click.echo('Removed template %s' % templ_name)
+
+
+@elasticsearch.command('create_indexes')
+@click.argument('mapping_dir', type=click.Path(exists=True, file_okay=False,
+                                               resolve_path=True))
+@click.option('--mapping_prefix', default='mapping_',
+              help='The prefix of the mapping files (default)')
+def es_create_indexes(mapping_dir, mapping_prefix):
+    """Create indexes for all mappings in a directory
+
+    The default prefix of a mapping in 'mapping_dir' is 'mapping_'.
+    """
+    r_index_name = re.compile(r"%s(.*)\.json$" % mapping_prefix)
+    for mapping_file_path in glob(os.path.join(mapping_dir, '%s*' % mapping_prefix)):
+        index_name = r_index_name.findall(mapping_file_path)[0]
+
+        click.echo('Creating ES index %s' % index_name)
+
+        mapping_file = open(mapping_file_path, 'rb')
+        mapping = json.load(mapping_file)
+        mapping_file.close()
+
         try:
-            doc = json.loads(line)
-        except ValueError:
-            print line
+            es.indices.create(index=index_name, body=mapping)
+        except TransportError as e:
+            click.echo('Creation of ES index %s failed: %s' % (index_name, e))
+
+
+@elasticsearch.command('index_collection')
+@click.argument('name')
+@click.argument('files', nargs=-1, type=click.Path(exists=True, resolve_path=True))
+def es_index_collection(name, files):
+    """Index a given collection
+
+    NAME corresponds to the name of the Elasticsearch index, FILES should
+    be one ore more files that contain the collection data.
+
+    \b
+    Currently NAME can take the following values:
+    - avresearcher_immix
+    - avresearcher_kb
+    """
+    if name == 'avresearcher_immix':
+        item_getter = get_immix_items
+    elif name == 'avresearcher_kb':
+        item_getter = get_kb_items
+    else:
+        pass
+
+    for f in files:
+        actions = es_format_index_actions(name, 'item', item_getter(f))
+        bulk(es, actions=actions)
+
+
+def get_immix_items(archive_path):
+    with tarfile.open(archive_path, 'r:gz') as tar:
+        for immix_file in tar:
+            f = tar.extractfile(immix_file)
+            expression = json.load(f)
+            doc_id = immix_file.name.split('/')[-1].split('.')[0].lstrip('_')
+
+            # Skip items that don't include a date
+            if not expression['date']:
+                logger.warn('Skipping iMMix item %s, unknown date' % doc_id)
+                continue
+            else:
+                yield doc_id, expression
+
+            # The tarfile module places all extracted files as TarInfo
+            # objects in the members list. We empty this list to prevent
+            # running out of memory.
+            tar.members = []
+
+
+def get_kb_items(archive_path):
+    min_date = datetime.strptime('1900-01-01', '%Y-%m-%d')
+    publication_name = re.findall(r'.*\/(.*)\.tar.gz$', archive_path)[0]
+
+    publications = {
+        'de-tijd-de-maasbode': 'De Tijd / de Maasbode',
+        'de-telegraaf': 'De Telegraaf',
+        'nieuwsblad-van-het-noorden': 'Nieuwsblad van het Noorden',
+        'leeuwarder-courant': 'Leeuwarder Courant',
+        'de-waarheid': 'De Waarheid',
+        'nieuwsblad-van-friesland-hepkemas-courant': 'Nieuwsblad van Friesland',
+        'limburger-koerier-provinciaal-dagblad': 'Limburger koerier',
+        'de-volkskrant': 'De Volkskrant',
+        'de-tijd-de-maasbode': 'De Tijd De Maasbode'
+    }
+
+    publication_name = publications[publication_name]
+
+    with tarfile.open(archive_path, 'r:gz') as tar:
+        for kb_file in tar:
+            f = tar.extractfile(kb_file)
+            doc_id = kb_file.name.split('/')[-1].split('.')[0]
+
+            logger.debug('Processing doc %s' % doc_id)
+
+            article = json.load(f)
+            article['meta'] = article.pop('_meta')
+            article['meta']['publication_name'] = publication_name
+
+            if not article['date']:
+                logger.warn('Skipping KB item %s, unknown date' % doc_id)
+                yield None
+            else:
+                article_date = datetime.strptime(article['date'], '%Y-%m-%d')
+                if article_date < min_date:
+                    logger.warn('Skipping KB item %s, date before %s'
+                                % (doc_id, min_date.isoformat()))
+                    yield None
+                else:
+                    yield doc_id, article
+
+            tar.members = []
+
+
+@cli.group()
+def analyze_text():
+    pass
+
+
+@analyze_text.command()
+@click.argument('role', type=click.Choice(['producer', 'consumer']))
+@click.argument('file_path')
+@click.argument('text_extractor')
+@click.option('--socket_addr', default='tcp://127.0.0.1:5557')
+def tokenize(role, file_path, socket_addr, text_extractor):
+    from text_analysis import tasks
+
+    if role == 'producer':
+        tasks.tokenize_producer(socket_addr, file_path, text_extractor)
+    else:
+        tasks.tokenize_consumer(socket_addr, file_path)
+
+
+@analyze_text.command()
+@click.argument('analyzed_items_path')
+@click.argument('dictionary_path')
+def create_dictionary(analyzed_items_path, dictionary_path):
+    from text_analysis import tasks
+
+    print tasks.create_dictionary(analyzed_items_path, dictionary_path)
+
+
+@analyze_text.command()
+@click.argument('dictionaries_path')
+@click.argument('merged_dictionary_path')
+def merge_dictionaries(dictionaries_path, merged_dictionary_path):
+    from text_analysis import tasks
+
+    print tasks.merge_dictionaries(dictionaries_path, merged_dictionary_path)
+
+
+@analyze_text.command()
+@click.argument('src_dictionary_path')
+@click.argument('dest_dictionary_path')
+@click.option('--no_below', default=None, type=click.INT)
+@click.option('--no_above', default=None, type=click.FLOAT)
+@click.option('--keep_n', default=None, type=click.INT)
+def prune_dictionary(src_dictionary_path, dest_dictionary_path, no_below,
+                     no_above, keep_n):
+    from text_analysis import tasks
+
+    print tasks.prune_dictionary(src_dictionary_path, dest_dictionary_path,
+                                 no_below, no_above, keep_n)
+
+
+@analyze_text.command()
+@click.argument('analyzed_items_path')
+@click.argument('dictionary_path')
+@click.argument('corpus_path')
+def construct_corpus(analyzed_items_path, dictionary_path, corpus_path):
+    from text_analysis import tasks
+
+    corpus = tasks.Corpus(analyzed_items_path=analyzed_items_path,
+                          dictionary_path=dictionary_path)
+    corpus.construct_corpus(corpus_path)
+
+
+@analyze_text.command()
+@click.argument('corpus_path')
+@click.argument('model_path')
+def construct_tfidf_model(corpus_path, model_path):
+    from text_analysis import tasks
+
+    corpus = tasks.Corpus(corpus_path=corpus_path)
+    corpus.construct_tfidf_model(model_path)
+
+
+@analyze_text.command()
+@click.argument('analyzed_items_path')
+@click.argument('dictionary_path')
+@click.argument('corpus_path')
+@click.argument('model_path')
+@click.argument('index')
+@click.argument('field')
+@click.argument('top_n_terms', type=click.INT)
+def index_descriptive_terms(analyzed_items_path, dictionary_path, corpus_path,
+                            model_path, index, field, top_n_terms):
+    from text_analysis import tasks
+
+    corpus = tasks.Corpus(analyzed_items_path, dictionary_path, corpus_path,
+                          model_path)
+
+    es_update_actions = corpus.descriptive_terms_es_actions(index, field,
+                                                            top_n_terms)
+    bulk(es, actions=es_update_actions, chunk_size=1000)
+
+
+def es_format_index_actions(index_name, doc_type, item_iterable):
+    for item in item_iterable:
+        if not item:
+            pass
         else:
-            return doc
-    return None
-
-
-def serialize_quamerdes(data, archive):
-    doc_id = data['meta'].get('record_identifier')
-    data = json.dumps(data)
-
-    info = tarfile.TarInfo('immix/%s.json' % doc_id)
-    info.size = len(data)
-
-    archive.addfile(info, cStringIO.StringIO(data))
-    logger.debug('Adding %s to archive' % doc_id)
-
-
-class LoadAVRDataToES(Command):
-
-    """
-    Load some test data
-    """
-    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
-
-    def run(self):
-        with open('mappings/avresearcher_mapping.json', 'rb') as f:
-            mapping = json.load(f)
-            self.es.indices.create('avresearcher', body=mapping)
-
-        with zipfile.ZipFile('dumps/avresearcher.json.zip', 'rb') as f:
-            docs = []
-            i = 0
-            for line in f:
-                doc = getAVRDoc(line)
-                if doc:
-                    doc.pop('_score')
-                    docs.append(doc)
-                    i += 1
-
-                # Send 500 docs to ES
-                if len(docs) % 500 == 0:
-                    logging.info('Index documents')
-                    bulk(self.es, docs, stats_only=True)
-                    docs = []
-
-                if i > 2500:
-                    break
-
-            # Last docs
-            bulk(self.es, docs, stats_only=True)
-
-
-class TransformAVRData(Command):
-
-    """
-    Transform AVResearcher expressions to QuaMeRDES documents.
-    """
-
-    def get_options(self):
-        return (
-            Option('-d', '--dump', default='dumps/avresearcher.json',
-                   dest='avrdump', ),
-        )
-
-    def run(self, avrdump, datadir='/Users/bart/Desktop/quamerdes'):
-        archive = tarfile.open(os.path.join(datadir, 'immix.tar.gz'), 'w:gz')
-        with open(avrdump, 'rb') as f:
-            i = 0
-            for line in f:
-                doc = getAVRDoc(line)
-                if doc:
-                    source = doc.get('_source', {})
-
-                    data = {
-                        'title': source.get('mainTitle', None),
-                        'source': 'http://zoeken.beeldengeluid.nl/internet/in'
-                                  'dex.aspx?chapterid=1164&contentid=7&verity'
-                                  'ID=%s@expressies' % doc.get('_id')
-                    }
-
-                    broadcastdates = sorted(source.get('broadcastDates', []),
-                                            key=lambda d: d['start'])
-
-                    if broadcastdates:
-                        data['date'] = broadcastdates[0]['start']
-                    else:
-                        data['date'] = None
-
-                    data['text'] = u' '.join([u' '.join(source.get(field, u'')).replace('\n', ' ')
-                                             for field in ['titles', 'mainTitle', 'summaries', 'descriptions']])
-                    data['meta'] = {
-                        'broadcasters': source.get('broadcasters', []),
-                        'broadcastdates': broadcastdates,
-                        'descriptions': source.get('descriptions', []),
-                        'expressieID': source.get('expressieId'),
-                        # Not entirely sure what this is; maybe the date the
-                        # expression was added to iMMix?
-                        'immixDate': source.get('immixDate'),
-                        'levelTitles': [{
-                            'title': title,
-                            'level': level
-                        } for level, title in source.get(
-                            'levelTitles', {}).items()],
-                        'mainTitle': source.get('mainTitle'),
-                        'realisatieID': source.get('realisatieId'),
-                        'reeksID': source.get('reeksId'),
-                        'subtitles': source.get('subtitles', []),
-                        'summaries': source.get('summaries', []),
-                        'titles': source.get('titles', []),
-                        'werkID': source.get('werkID'),
-                        'record_identifier': doc.get('_id')
-                    }
-
-                    for category in source.get('categories', []):
-                        key = category.get('categoryKey')
-                        value = category.get('categoryValue')
-                        if key not in data['meta']:
-                            data['meta'][key] = [value]
-                        else:
-                            data['meta'][key].append(value)
-
-                    for role in source.get('roles', []):
-                        key = role.get('roleKey')
-                        value = role.get('roleValue')
-                        if key not in data['meta']:
-                            data['meta'][key] = [value]
-                        else:
-                            data['meta'][key].append(value)
-
-                    serialize_quamerdes(data, archive)
-
-                i += 1
-                if i % 1000 == 0:
-                    print 'Processed', i, 'documents'
-        archive.close()
-
-
-class LoadSampleKB(Command):
-
-    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
-
-    def run(self, datadir='/vagrant/data', sample_size=10000):
-        with tarfile.open(os.path.join(datadir, 'leeuwarder-courant.tar.gz'), 'r:gz') as t:
-            s = 0
-            for member in t:
-                if s == sample_size:
-                    break
-                logger.debug('Extracting %s' % member.name)
-                f = t.extractfile(member)
-
-                logger.debug('Loaded %s' % member.name)
-                article = json.load(f)
-                # Yuck
-                article['meta'] = article.pop('_meta')
-
-                logger.info('Indexing KB article %s' % member.name)
-                self.es.create(index='quamerdes_kb1', doc_type='item',
-                               body=article, id=member.name.split('/')[-1].split('.')[0])
-
-                s += 1
-
-
-class LoadSampleImmix(Command):
-
-    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
-
-    def run(self, datadir='/vagrant/data/', sample_size=10000):
-        with tarfile.open(os.path.join(datadir, 'immix.tar.gz'), 'r:gz') as t:
-            s = 0
-            for member in t:
-                if s == sample_size:
-                    break
-                logger.debug('Extracting %s' % member.name)
-                f = t.extractfile(member)
-
-                logger.debug('Loaded %s' % member.name)
-                expression = json.load(f)
-
-                logger.info('Indexing iMMix document %s' % member.name)
-                self.es.create(index='quamerdes_immix1', doc_type='item',
-                               body=expression, id=member.name.split('/')[-1].split('.')[0])
-                s += 1
-
-
-class CreateAliases(Command):
-
-    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
-
-    def run(self):
-        self.es.indices.put_alias(index='quamerdes_kb1', name='quamerdes_kb')
-        self.es.indices.put_alias(index='quamerdes_immix1', name='quamerdes_immix')
-
-
-class PutSettingsAndMappings(Command):
-
-    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
-    indices = ['quamerdes_kb', 'quamerdes_immix']
-
-    def run(self):
-        with open('mappings/quamerdes_template.json', 'rb') as f:
-            quamerdes_template = json.load(f)
-
-        self.es.indices.put_template(name='quamerdes', body=quamerdes_template)
-
-        for index in self.indices:
-            with open('mappings/%s.json' % index, 'rb') as f:
-                mapping = json.load(f)
-            logger.info('Creating %s' % index)
-            self.es.indices.create(index='%s1' % index, body=mapping)
-
-
-class DeleteIndices(Command):
-
-    es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
-
-    def run(self):
-        try:
-            logger.info('Deleting indices')
-            self.es.indices.delete(index='quamerdes_kb1,quamerdes_immix1')
-        except NotFoundError:
-            logger.info('Indices already deleted')
-
-
-class InitTestEnv(Command):
-
-    option_list = (
-        Option('--data', '-d', dest='datadir', default='/Users/bart/Desktop/quamerdes'),
-        Option('--samplesize', '-s', dest='sample_size', default=1000),
-    )
-
-    def run(self, datadir, sample_size):
-        delete_indices = DeleteIndices()
-        delete_indices.run()
-
-        put_settings = PutSettingsAndMappings()
-        put_settings.run()
-
-        load_kb = LoadSampleKB()
-        load_kb.run(datadir=datadir, sample_size=sample_size)
-
-        load_immix = LoadSampleImmix()
-        load_immix.run(datadir=datadir, sample_size=sample_size)
-
-        create_aliases = CreateAliases()
-        create_aliases.run()
-
-
-class AddUser(Command):
-    """
-    Create a new user from the command line.
-    """
-    def run(self):
-        user_opts = {}
-
-        user_opts['name'] = prompt('Name')
-        user_opts['email'] = prompt('Email')
-        user_opts['password'] = prompt_pass('Password')
-        user_opts['password'] = bcrypt.generate_password_hash(user_opts['password'], 12)
-        user_opts['organization'] = prompt('Organization')
-
-        user_opts['email_verified'] = True
-        user_opts['approved'] = True
-        user_opts['email_verification_token'] = 'test'
-        user_opts['approval_token'] = 'test'
-
-        user = User(**user_opts)
-        db.session.add(user)
-        db.session.commit()
-
-        print 'Created user: %s' % user
-
-
-manager = Manager(app)
-manager.add_command('runserver', Server(host='0.0.0.0'))
-manager.add_command('load_test_avr_data', LoadAVRDataToES())
-manager.add_command('transform_avr_data', TransformAVRData())
-manager.add_command('load_sample_kb', LoadSampleKB())
-manager.add_command('load_sample_immix', LoadSampleImmix())
-manager.add_command('create_aliases', CreateAliases())
-manager.add_command('put_settings', PutSettingsAndMappings())
-manager.add_command('init_test_env', InitTestEnv())
-manager.add_command('add_user', AddUser())
-manager.add_command('delete_indices', DeleteIndices())
+            yield {
+                '_index': index_name,
+                '_type': doc_type,
+                '_id': item[0],
+                '_source': item[1]
+            }
 
 
 if __name__ == '__main__':
-    manager.run()
+    cli()

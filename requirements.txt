@@ -5,3 +5,5 @@ Flask-Mail==0.9.0
 Flask-SQLAlchemy==1.0
 elasticsearch==1.1.1
 click==2.1
+blinker==1.3
+raven==5.1.0

@@ -18,6 +18,9 @@ ES_LOG_INDEX = 'avresearcher_logs'
 # User database URI
 SQLALCHEMY_DATABASE_URI = 'mysql://user:pass@host/db'
 
+# Sentry DNS; when ``False`` Sentry won't b used
+SENTRY_DSN = False
+
 # Email settings (used for account activation and user approval)
 MAIL_SERVER = 'localhost'
 MAIL_PORT = 25
