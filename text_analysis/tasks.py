@@ -192,7 +192,8 @@ class Corpus(object):
         else:
             self.tfidf_model = None
 
-    def get_analyzed_items(self, doc2bow=False, progress_cnt=5000):
+    def get_analyzed_items(self, doc2bow=False, return_filename=False,
+                           progress_cnt=5000):
         docno = 0
         for tarred_item_file in iglob(self.analyzed_items_path):
             with tarfile.open(tarred_item_file, 'r:gz') as tar:
@@ -207,7 +208,10 @@ class Corpus(object):
                         tokens.append(token[:-1].decode('utf-8'))
 
                     if doc2bow:
-                        yield f_item.name, self.dictionary.doc2bow(tokens)
+                        if return_filename:
+                            yield f_item.name, self.dictionary.doc2bow(tokens)
+                        else:
+                            yield self.dictionary.doc2bow(tokens)
                     else:
                         yield tokens
 
@@ -228,15 +232,31 @@ class Corpus(object):
         return model
 
     def get_descriptive_terms(self, top_n):
-        for item_name, doc_bow in self.get_analyzed_items(doc2bow=True):
+        n_seen_items = 0
+        analyzed_items = self.get_analyzed_items(doc2bow=True,
+                                                 return_filename=True)
+        for item_name, doc_bow in analyzed_items:
             top_n_tokens = sorted(self.tfidf_model[doc_bow],
                 key=lambda token: token[1], reverse=True)[:top_n]
 
             tokens = []
             for token_id, score in top_n_tokens:
-                tokens.append(self.dictionary[token_id])
+                token = self.dictionary[token_id]
+
+                if token not in ['null', 'nul', 'nou', 'kilometer', 'punt',
+                                 'applaus', 'radio']:
+                    tokens.append(token)
+
+            if n_seen_items % 100 == 0:
+                print item_name, tokens
 
             yield item_name, tokens
+
+            n_seen_items += 1
+            if n_seen_items % 5000 == 0:
+                print '*' * 20
+                print n_seen_items
+                print '*' * 20
 
     def descriptive_terms_es_actions(self, index, field_name, top_n_terms=10):
         for item_name, tokens in self.get_descriptive_terms(top_n_terms):
@@ -244,7 +264,7 @@ class Corpus(object):
             if doc_id[0] == '_':
                 doc_id = doc_id[1:]
 
-            yield {
+            action = {
                 '_op_type': 'update',
                 '_index': index,
                 '_type': 'item',
@@ -255,3 +275,5 @@ class Corpus(object):
                     }
                 }
             }
+
+            yield action
