@@ -2,18 +2,15 @@ DEBUG = False
 
 SECRET_KEY = ''
 
-# URL of the ElasticSearch instance that contains the AVResearcherXL
-# broadcasts index
+# URL of the ElasticSearch instance that contains the AVResearcherXL indexes
 ES_SEARCH_HOST = 'localhost'
 ES_SEARCH_PORT = 9200
-ES_SEARCH_URL_PREFIX = ''
 
 # URL of the ElasticSearch instance used to store usage logs (clicks,
 # queries, etc.)
 ES_LOG_HOST = ES_SEARCH_HOST
 ES_LOG_PORT = ES_SEARCH_PORT
-ES_LOG_URL_PREFIX = ES_SEARCH_URL_PREFIX
-ES_LOG_INDEX = 'avresearcher_logs'
+ES_LOG_INDEX = 'avresearcherxl_logs'
 
 # User database URI
 SQLALCHEMY_DATABASE_URI = 'mysql://user:pass@host/db'
@@ -282,9 +279,6 @@ ALLOWED_INTERVALS = ['year', 'month', 'week', 'day']
 # The facet that is used for the date range slider
 DATE_AGGREGATION = 'dates'
 DATE_STATS_AGGREGATION = 'dates_stats'
-
-# The fields that should be returned for each hit when searching
-# SEARCH_HIT_FIELDS = ['mainTitle', 'broadcastDates', 'summaries']
 
 MINIMUM_CLOUD_FONTSIZE = 10
 MAXIMUM_CLOUD_FONTSIZE = 30
