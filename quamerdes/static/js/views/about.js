@@ -18,10 +18,6 @@ function($, _, Backbone, d3, aboutTemplate){
 
             this.numberFormat = d3.format(',0f');
             this.dateFormat = d3.time.format('%e %B %Y');
-            // Get the about JSON document
-            $.get(ABOUT_PAGE_CONTENT_URL, function(data){
-                self.renderAboutText(data);
-            });
 
             this.model.on('change:stats', this.renderIndexStats, this);
 
@@ -41,13 +37,6 @@ function($, _, Backbone, d3, aboutTemplate){
             this.$el.html(_.template(aboutTemplate));
 
             return this;
-        },
-
-        renderAboutText: function(data){
-            if (DEBUG) console.log('AboutView:renderAboutText');
-
-            this.$el.find('h1').html(data.title);
-            this.$el.find('#abouttext').html(data.maintext);
         },
 
         renderIndexStats: function(){

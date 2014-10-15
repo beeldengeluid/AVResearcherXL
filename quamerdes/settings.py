@@ -313,13 +313,6 @@ ENABLE_USAGE_LOGGING = True
 #  - 'results': A result list is rendered. Log the visible doc_ids and model name.
 LOG_EVENTS = ['clicks', 'results']
 
-# The URL to the JSON file that contains the (textual) information
-# displayed on the 'about' page
-ABOUT_PAGE_CONTENT_URL = 'static/about.json'
-
-# URL to JSON file that contains text for 'help' page
-HELP_PAGE_CONTENT_URL = 'static/help.json'
-
 # Allow all settings to be overridden by a local file that is not in
 # the VCS.
 try:
