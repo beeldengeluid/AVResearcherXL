@@ -27,15 +27,7 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             }, this);
 
             this.model.on('change:dateHistogram', this.updateFacetValues, this);
-            this.model.on('change:interval', function() {
-                var date_stats = this.model.get('aggregations')[DATE_STATS_AGGREGATION];
-
-                if (date_stats.count === 0) return;
-
-                if (this.model.get('interval')) {
-                    this.updateSliderLabels(date_stats.min, date_stats.max);
-                }
-            }, this);
+            this.model.on('change:interval', this.updateHandleLablesText, this);
             
             app.vent.on('model:redraw:' + this.model.get('name'), function(){
                 var histogram = this.model.get('dateHistogram');
@@ -102,6 +94,33 @@ function($, _, Backbone, d3, app, timeSliderTemplate){
             });
 
             return this;
+        },
+
+        updateHandleLablesText: function() {
+            var interval = this.model.get('interval');
+            if (!interval) {
+                return;
+            }
+
+            this.slider_lower_label.text(this.convertTime[interval].display(new Date(this.timeslider.slider('values', 0))));
+
+            var lower_handle = this.$el.find('.ui-slider-handle')[0];
+            var lower_handle_left_px = parseFloat($(lower_handle).css('left'));
+            var lower_handle_width_px = $(lower_handle).width();
+            var lower_handle_center_px = lower_handle_left_px + (lower_handle_width_px / 2.0);
+
+            var lower_label_width_px = this.slider_lower_label.width() / 2.0;
+            this.slider_lower_label.css('left', (lower_handle_center_px - lower_label_width_px) + 'px');
+
+            this.slider_upper_label.text(this.convertTime[interval].display(new Date(this.timeslider.slider('values', 1))));
+
+            var upper_handle = this.$el.find('.ui-slider-handle')[1];
+            var upper_handle_left_px = parseFloat($(upper_handle).css('left'));
+            var upper_handle_width_px = $(upper_handle).width();
+            var upper_handle_center_px = upper_handle_left_px + (upper_handle_width_px / 2.0);
+
+            var upper_label_width_px = this.slider_upper_label.width() / 2.0;
+            this.slider_upper_label.css('left', (upper_handle_center_px - upper_label_width_px) + 'px');
         },
 
         updateHandleLables: function(event, ui, self) {

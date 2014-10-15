@@ -23,7 +23,6 @@ function($, _, Backbone, app, loginTemplate){
         },
 
         render: function(){
-            this.$el.html(_.template(loginTemplate));
             this.$el.find('#loginmodal').modal({
                 keyboard: false,
                 backdrop: 'static',

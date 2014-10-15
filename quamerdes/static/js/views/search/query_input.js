@@ -88,7 +88,7 @@ function($, _, Backbone, app, FieldsView, queryInputTemplate){
         },
 
         showNoResultsWarning: function() {
-            if (this.model.get('loading') === false && this.model.get('totalHits') === 0) {
+            if (this.model.get('loading') === false && this.model.get('totalHits') === 0 && this.model.get('ftQuery')) {
                 var warning = $('<div class="no-results alert alert-warning"><strong>No results!</strong> There are no documents in the collection that match your query.</div>');
                 this.$el.append(warning);
                 warning.fadeIn('fast', function() {

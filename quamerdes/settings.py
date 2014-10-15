@@ -78,7 +78,8 @@ COLLECTIONS_CONFIG = {
     'immix': {
         'name': 'iMMix metadata',
         'index_name': 'quamerdes_immix',
-        'enabled_facets': ['keywords', 'channels', 'persons', 'genres'],
+        'enabled_facets': ['descriptive_terms_subs', 'keywords', 'channels',
+                           'persons', 'genres'],
         'required_fields': ['title', 'date', 'meta.expressieID',
                             'meta.broadcasters', 'meta.titles'],
         'available_aggregations': {
@@ -147,7 +148,7 @@ COLLECTIONS_CONFIG = {
                 }
             },
             'keywords': {
-                'name': 'Keywords',
+                'name': 'Tags',
                 'description': '',
                 'buckets_path': 'filtered.filtered_buckets.buckets',
                 'nested': {
@@ -176,6 +177,14 @@ COLLECTIONS_CONFIG = {
                     'field': 'text',
                     'size': 15
                 }
+            },
+            'descriptive_terms_subs': {
+                'name': 'Words',
+                'description': '',
+                'terms': {
+                    'field': 'meta.subtitles_descriptive_terms',
+                    'size': 30
+                }
             }
         },
         'enabled_search_fields': ['titles', 'summaries', 'subtitles'],
@@ -202,7 +211,7 @@ COLLECTIONS_CONFIG = {
     'kb': {
         'name': 'KB kranten',
         'index_name': 'quamerdes_kb',
-        'enabled_facets': ['publication', 'article_type'],
+        'enabled_facets': ['descriptive_terms_text', 'publication', 'article_type'],
         'required_fields': ['title', 'date', 'meta.publication_name', 'source'],
         'available_aggregations': {
             'dates_stats': {
@@ -237,6 +246,14 @@ COLLECTIONS_CONFIG = {
                 'terms': {
                     'field': 'meta.publication_name',
                     'size': 15
+                }
+            },
+            'descriptive_terms_text': {
+                'name': 'Words',
+                'description': '',
+                'terms': {
+                    'field': 'meta.text_descriptive_terms',
+                    'size': 30
                 }
             }
         },
