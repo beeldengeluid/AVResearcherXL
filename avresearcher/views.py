@@ -79,7 +79,7 @@ def verify_email(user_id, token):
 
     msg.body = MESSAGES['email_approval_body'] % (user.name, user.organization,
                                                   user.email, approve_url)
-    #mail.send(msg)
+    mail.send(msg)
 
     messages = {
         'email_verified_title': MESSAGES['email_verified_title'] % user.name,
