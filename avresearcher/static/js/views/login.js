@@ -23,16 +23,17 @@ function($, _, Backbone, app, loginTemplate){
         },
 
         render: function(){
+            this.$el.html(_.template(loginTemplate));
             this.$el.find('#loginmodal').modal({
                 keyboard: false,
                 backdrop: 'static',
                 show: true
             });
 
-            // var self = this;
-            // this.$el.find('#loginmodal').on('shown', function(){
-            //     self.$el.find('input[name="email"]').focus();
-            // });
+            var self = this;
+            this.$el.find('#loginmodal').on('shown', function(){
+                self.$el.find('input[name="email"]').focus();
+            });
 
             return this;
         },
