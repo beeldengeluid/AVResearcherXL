@@ -113,7 +113,8 @@ def approve_user(user_id, token):
                   sender=current_app.config['MAIL_DEFAULT_SENDER'],
                   recipients=[user.email])
 
-    msg.body = MESSAGES['email_approved_body'] % (user.name, request.url_root + 'avresearcher/')
+    index_url = url_for('.index', _external=True)
+    msg.body = MESSAGES['email_approved_body'] % (user.name, index_url)
 
     mail.send(msg)
 
