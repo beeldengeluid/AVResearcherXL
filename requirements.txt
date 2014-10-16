@@ -7,3 +7,5 @@ elasticsearch==1.1.1
 click==2.1
 blinker==1.3
 raven==5.1.0
+psycopg2==2.5.4
+uWSGI==2.0.7
