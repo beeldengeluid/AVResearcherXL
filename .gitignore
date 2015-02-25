@@ -41,3 +41,6 @@ elasticsearch/
 dumps/
 indices/
 *.db
+
+# Editor temporaries
+*.sw[op]
