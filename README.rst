@@ -27,8 +27,8 @@ Installing AVResearcherXL
 
 .. code-block:: bash
 
-  $ git clone git@git.dispectu.com/dispectu/avresearcherxl.git
-  $ cd quamerdes
+  $ git clone git@github.com:beeldengeluid/AVResearcherXL.git
+  $ cd AVResearcherXL
 
 2. Create a virtualenv, activate it and install the required Python packages:
 
