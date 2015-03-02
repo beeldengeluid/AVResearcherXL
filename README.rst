@@ -85,12 +85,12 @@ Installing AVResearcherXL
 
   ./manage.py init_db
 
-10. Use a build-in WSGI server (like uWSGI) or a standalone WSGI container (like Gunicorn) to run the Flask application. Make sure to serve static assets directly through the webserver.
+11. Use a built-in WSGI server (like uWSGI) or a standalone WSGI container (like Gunicorn) to run the Flask application. Make sure to serve static assets directly through the webserver.
 
 .. code-block:: bash
 
    $ pip install gunicorn
-   $ gunicorn --bind 0.0.0.0 -w 4 avresearcher:app
+   $ gunicorn --bind 0.0.0.0 -w 4 wsgi:app
 
 
 Running the text analysis tasks
