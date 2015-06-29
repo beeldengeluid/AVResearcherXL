@@ -61,7 +61,7 @@ function($, _, Backbone, app, paginatorTemplate){
                 links_added++;
             }
 
-            this.$el.html(_.template(paginatorTemplate, {
+            this.$el.html(_.template(paginatorTemplate)({
                 currentPage: this.model.get('currentPage'),
                 totalPages: total_pages,
                 pages: page_links

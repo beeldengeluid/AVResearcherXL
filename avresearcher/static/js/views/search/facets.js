@@ -21,7 +21,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, facetsTemplate){
 
             this.representation = 'cloud';
             this.cloud = new CloudView({model: this.model});
-            this.barchart = new BarChartView({model: this.model, name: this.options.name });
+            this.barchart = new BarChartView({model: this.model, name: options.name });
 
             // Only show the facets when there are hits to be displayed
             this.model.on('change:totalHits', function() {
@@ -85,7 +85,7 @@ function($, _, Backbone, d3, app, CloudView, BarChartView, facetsTemplate){
                 });
             }
 
-            this.$el.html(_.template(facetsTemplate, {
+            this.$el.html(_.template(facetsTemplate)({
                 tabs: tabs,
                 active_tab: this.activeTab
             }));

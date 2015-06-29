@@ -4,7 +4,7 @@
     dir: "appdirectory-build",
     paths: {
         jquery: "lib/jquery.min",
-        underscore: "lib/underscore",
+        underscore: "lib/underscore.min",
         backbone: "lib/backbone.min",
         bootstrap: "lib/bootstrap.min",
         raven: "lib/raven-1.0-beta3.min",

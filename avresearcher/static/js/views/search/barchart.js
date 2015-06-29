@@ -11,7 +11,7 @@ function($, _, Backbone, d3, app, barchartTemplate){
         initialize: function(options){
             if (DEBUG) console.log('BarChartView:' + options.name + ':initialize');
 
-            var orient = (this.options.name === 'q1') ? 'right' : 'left';
+            var orient = (options.name === 'q1') ? 'right' : 'left';
             this.chart = {
                 x: d3.scale.linear(),
                 y: d3.scale.ordinal(),

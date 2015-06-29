@@ -33,7 +33,7 @@ define([
                     })
                 );
 
-                this.$el.html(_.template(cloudTemplate, {
+                this.$el.html(_.template(cloudTemplate)({
                     facetName: tab,
                     scale: this.fontSizeScale,
                     terms: facet_values,

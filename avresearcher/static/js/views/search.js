@@ -19,7 +19,7 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
     var SearchView = Backbone.View.extend({
         initialize: function(options){
             this.constructor.__super__.initialize.apply(this, [options]);
-            this.name = this.options.name;
+            this.name = options.name;
             
             this.collection_selector = new CollectionSelectorView({ model: this.model });
             this.query_input = new QueryInputView({ model: this.model });
@@ -34,7 +34,7 @@ function($, _, Backbone, BaseView, searchTemplate, CollectionSelectorView, Query
             this.paginator = new PaginatorView({ model: this.model });
             this.facets = new FacetsView({
                     model: this.model,
-                    name: this.options.name
+                    name: options.name
             });
             this.filters = new FiltersView({ model: this.model });
         },

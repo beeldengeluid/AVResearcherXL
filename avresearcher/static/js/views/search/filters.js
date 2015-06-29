@@ -32,7 +32,7 @@ function($, _, Backbone, app, filtersTemplate) {
             var filters = this.model.get('filters');
             var collection = this.model.get('collection');
 
-            this.$el.html(_.template(filtersTemplate, {
+            this.$el.html(_.template(filtersTemplate)({
                 filters: filters,
                 collection: collection
             }));

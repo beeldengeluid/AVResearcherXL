@@ -8,7 +8,7 @@ define([
 ],
 function($, _, Backbone, d3, app, ResultsModal){
     var TimeseriesView = Backbone.View.extend({
-        initialize: function() {
+        initialize: function(options) {
             this.ts_chart = this.chart();
             this.chart_width = 900;
             this.current_interval = null;
@@ -22,6 +22,10 @@ function($, _, Backbone, d3, app, ResultsModal){
             };
 
             this.y_axis_percentage_format = d3.format('.2%');
+
+            // HACK HACK HACK
+            // Previously this attribute magically appeared on the object...
+            this.options = options;
 
             var self = this;
             _.each(this.options.models, function(model, name) {
