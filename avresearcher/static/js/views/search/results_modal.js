@@ -48,7 +48,7 @@ function($, _, Backbone, app, ResultsListView, PaginatorView, AvrApiModel, resul
 
         render: function() {
             this.el.addClass(this.model.get('name'));
-            this.$el.html(_.template(resultsModalTemplate, {
+            this.$el.html(_.template(resultsModalTemplate)({
                 query: this.model.get('queryString'),
                 start: this.time_display_formats[this.model.get('interval')](new Date(this.startPubDate)),
                 end: this.time_display_formats[this.model.get('interval')](new Date(this.endPubDate))

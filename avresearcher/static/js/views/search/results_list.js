@@ -39,7 +39,7 @@ function($, _, Backbone, app, resultsListImmixTemplate, resultsListKbTemplate){
             if (DEBUG) console.log('ResultsListView:render');
 
             this.$el.find('li').remove();
-            this.$el.html(_.template(this.templates[this.model.get('collection')], {
+            this.$el.html(_.template(this.templates[this.model.get('collection')])({
                 hits: this.model.get('hits')
             }));
 

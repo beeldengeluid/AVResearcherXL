@@ -16,7 +16,7 @@ function($, _, Backbone, queryPropertiesTemplate){
         render: function(){
             if (DEBUG) console.log('QueryPropertiesView:render');
 
-            this.$el.html(_.template(queryPropertiesTemplate, {
+            this.$el.html(_.template(queryPropertiesTemplate)({
                 totalHits: this.model.get('totalHits'),
                 queryTimeMs: this.model.get('queryTimeMs')
             }));
