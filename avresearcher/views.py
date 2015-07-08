@@ -253,10 +253,10 @@ def logout():
 def search():
     payload = json.loads(request.form['payload'])
 
-    if type(payload) is dict:
+    if isinstance(payload, dict):
         index = current_app.config['COLLECTIONS_CONFIG'].get(payload.pop('index'))['index_name']
         results = current_app.es_search.search(index=index, body=payload)
-    elif type(payload) is list:
+    elif isinstance(payload, list):
         body = []
         for query in payload:
             body.append({'index': current_app.config['COLLECTIONS_CONFIG'].get(query.pop('index'))['index_name']})
