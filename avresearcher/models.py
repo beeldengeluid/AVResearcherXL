@@ -1,6 +1,14 @@
 from extensions import db
 
 
+class Query(db.Model):
+    # SHA1 of query payload.
+    hash = db.Column(db.Binary(20), unique=True, primary_key=True)
+    # Payloads are JSON-encoded.
+    payload = db.Column(db.String(), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
@@ -14,6 +22,7 @@ class User(db.Model):
     created_on = db.Column(db.DateTime, default=db.func.now(), nullable=False)
     updated_on = db.Column(db.DateTime, default=db.func.now(),
                            onupdate=db.func.now(), nullable=False)
+    user = db.relationship('Query', lazy='dynamic')
 
     def __init__(self, email, password, name, email_verification_token,
                  approval_token, organization=None, email_verified=False,

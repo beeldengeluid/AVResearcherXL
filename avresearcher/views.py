@@ -1,3 +1,5 @@
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+from hashlib import sha1
 import re
 import uuid
 import json
@@ -8,7 +10,7 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 from flask.ext.mail import Message
 
 from .extensions import db, mail, bcrypt
-from .models import User
+from .models import Query, User
 
 
 views = Blueprint('views', __name__)
@@ -246,6 +248,45 @@ def logout():
     logout_user()
 
     return jsonify({'success': True})
+
+
+@views.route('/api/loadquery', methods=['POST'])
+@login_required
+def load():
+    """Load saved query.
+
+    Takes a base-64-encoded SHA1.
+    """
+    h = request.form['hash']
+    if isinstance(h, unicode):
+        h = h.encode('ascii')   # urlsafe_b64decode won't handle unicode
+    h = urlsafe_b64decode(h)
+    query = db.session.query(Query).filter_by(hash=h).first()
+    return query.payload
+
+
+@views.route('/api/savequery', methods=['POST'])
+@login_required
+def save():
+    """Save a query for later replay.
+
+    Accepts the query in the same format as search().
+    Returns the SHA1 of the query after some minor normalization, in base-64
+    encoding. This encoding is slightly shorter than the usual hex encoding
+    (28 vs. 40 bytes), making for shorter URLs.
+    """
+    payload = json.loads(request.form['payload'])
+    payload = json.dumps(payload, sort_keys=True)   # Normalize
+    h = sha1(payload).digest()
+
+    # If a query with the given hash has already been saved, assume it's the
+    # same query and return without trying to save.
+    if db.session.query(Query).filter_by(hash=h).first() is None:
+        new = Query(hash=h, payload=payload, user_id=current_user.get_id())
+        db.session.add(new)
+        db.session.commit()
+
+    return urlsafe_b64encode(h)
 
 
 @views.route('/api/search', methods=['POST'])
