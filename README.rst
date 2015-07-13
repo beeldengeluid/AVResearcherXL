@@ -144,5 +144,8 @@ The package contains several text analysis tasks to generate the terms used in t
 License
 -------
 
-Copyright 2014 Dispectu B.V., distributed under the terms of the Apache 2.0
-License (see the file ``LICENSE``).
+Copyright 2014 Dispectu B.V.
+Parts copyright 2015 Netherlands eScience Center.
+
+AVResearcherXL is distributed under the terms of the Apache 2.0 License
+(see the file ``LICENSE``).
