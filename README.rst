@@ -66,7 +66,15 @@ Installing AVResearcherXL
 
 7. Set the options of the indexed collections (``COLLECTIONS_CONFIGzz).
 
-8. Provide the settings of the SMTP server that should be used to send notification emails during registration:
+8. Provide the URI of the database. The SQLAlchemy documentation provides information on how to `structure the URI <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html#database-urls>`_ for different databases. To use an SQLite database named ``avresearcher.db`` set ``DATABASE_URI`` to ``sqlite:///avresearcher.db``.
+
+9. Load the schema in the database configured in the previous step.
+
+.. code-block:: bash
+
+  ./manage.py init_db
+
+10. Provide the settings of the SMTP server that should be used to send notification emails during registration:
 
 .. code-block:: pycon
 
@@ -77,13 +85,9 @@ Installing AVResearcherXL
   MAIL_USERNAME = None
   MAIL_PASSWORD = None
 
-9. Provide the URI of the database. The SQLAlchemy documentation provides information on how to `structure the URI <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html#database-urls>`_ for different databases. To use an SQLite database named ``avresearcher.db`` set ``DATABASE_URI`` to ``sqlite:///avresearcher.db``.
-
-10. Load the schema in the database configured in the previous step.
-
-.. code-block:: bash
-
-  ./manage.py init_db
+If you don't want to run an SMTP server, you'll have to create user accounts
+from the command line. Issue ``python manage.py create_user --help`` to find
+out how.
 
 11. Use a built-in WSGI server (like uWSGI) or a standalone WSGI container (like Gunicorn) to run the Flask application. Make sure to serve static assets directly through the webserver.
 
