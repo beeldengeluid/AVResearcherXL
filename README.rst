@@ -66,7 +66,15 @@ Installing AVResearcherXL
 
 7. Set the options of the indexed collections (``COLLECTIONS_CONFIGzz).
 
-8. Provide the settings of the SMTP server that should be used to send notification emails during registration:
+8. Provide the URI of the database. The SQLAlchemy documentation provides information on how to `structure the URI <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html#database-urls>`_ for different databases. To use an SQLite database named ``avresearcher.db`` set ``DATABASE_URI`` to ``sqlite:///avresearcher.db``.
+
+9. Load the schema in the database configured in the previous step.
+
+.. code-block:: bash
+
+  ./manage.py init_db
+
+10. Provide the settings of the SMTP server that should be used to send notification emails during registration:
 
 .. code-block:: pycon
 
@@ -77,13 +85,9 @@ Installing AVResearcherXL
   MAIL_USERNAME = None
   MAIL_PASSWORD = None
 
-9. Provide the URI of the database. The SQLAlchemy documentation provides information on how to `structure the URI <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html#database-urls>`_ for different databases. To use an SQLite database named ``avresearcher.db`` set ``DATABASE_URI`` to ``sqlite:///avresearcher.db``.
-
-10. Load the schema in the database configured in the previous step.
-
-.. code-block:: bash
-
-  ./manage.py init_db
+If you don't want to run an SMTP server, you'll have to create user accounts
+from the command line. Issue ``python manage.py create_user --help`` to find
+out how.
 
 11. Use a built-in WSGI server (like uWSGI) or a standalone WSGI container (like Gunicorn) to run the Flask application. Make sure to serve static assets directly through the webserver.
 
@@ -133,13 +137,13 @@ The package contains several text analysis tasks to generate the terms used in t
 
 .. code-block:: bash
 
-  $ ./mange.py construct_tfidf_model gensim_data/immix_summaries.mm gensim_data/immix_summaries.tfidf_model
+  $ ./manage.py construct_tfidf_model gensim_data/immix_summaries.mm gensim_data/immix_summaries.tfidf_model
 
 7. Add the topN 'most descriptive' terms to each indexed document:
 
 .. code-block:: bash
 
-  $ ./mange.py analyze_text index_descriptive_terms "immix_analyzed/summaries/*.tar.gz"  gensim_data/immix_summaries_pruned.dict gensim_data/immix_summaries.tfidf_model gensim_data/immix_summaries.tfidf_model 'quamerdes_immix_20140920' 'text_descriptive_terms' 10
+  $ ./manage.py analyze_text index_descriptive_terms "immix_analyzed/summaries/*.tar.gz"  gensim_data/immix_summaries_pruned.dict gensim_data/immix_summaries.tfidf_model gensim_data/immix_summaries.tfidf_model 'quamerdes_immix_20140920' 'text_descriptive_terms' 10
 
 License
 -------

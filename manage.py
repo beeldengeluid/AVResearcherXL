@@ -5,7 +5,7 @@ import os
 import re
 import tarfile
 from datetime import datetime
-from glob import glob, iglob
+from glob import glob
 
 import click
 from elasticsearch import Elasticsearch
@@ -13,7 +13,8 @@ from elasticsearch.exceptions import TransportError
 from elasticsearch.helpers import bulk
 
 from avresearcher import create_app
-from avresearcher.extensions import db
+from avresearcher.extensions import bcrypt, db
+from avresearcher.models import User
 from avresearcher.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
 
 
@@ -60,6 +61,32 @@ def init_db():
 
     with app.app_context():
         db.create_all()
+
+
+@cli.command()
+@click.argument('name')
+@click.argument('email')
+@click.argument('password')
+@click.argument('organization', default='')
+def create_user(name, email, password, organization):
+    """Creates a new user without sending email
+
+    The user's account is immediately verified and approved.
+    None of the arguments are validated.
+    """
+
+    password = bcrypt.generate_password_hash(password, 12)
+
+    app = create_app()
+    with app.app_context():
+        user = User(name=name, email=email, password=password,
+                    email_verified=True, email_verification_token='manage.py',
+                    approved=True, approval_token='manage.py')
+        if organization:
+            user.organization = organization
+
+        db.session.add(user)
+        db.session.commit()
 
 
 @cli.group()
