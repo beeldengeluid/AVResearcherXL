@@ -46,7 +46,7 @@ MESSAGES = {
                                ' %s. After verification, a member of the '
                                'AVResearcherXL team will grant you access to the'
                                ' AVResearcherXL application. You will be notified'
-                               ' by email as soon as your account is approved.'
+                               ' by email as soon as your account has been approved.'
                                '\n\nRegards,\nThe AVResearcherXL team',
     'email_approval_subject': '[AVResearcherXL] New user registration',
     'email_approval_body': 'The following user registered a new AVResearcherXL '
@@ -54,21 +54,21 @@ MESSAGES = {
                            'address: %s\n\nClick the following link to approve '
                            'this registration and grant the user access to the '
                            'application: %s',
-    'email_approved_subject': 'Your AVResearcherXL account is approved',
-    'email_approved_body': 'Dear %s,\n\nYour AVResearcherXL account is approved '
+    'email_approved_subject': 'Your AVResearcherXL account has been approved',
+    'email_approved_body': 'Dear %s,\n\nYour AVResearcherXL account has been approved '
                            'and activated.\n\nTo start using the AVResearcherXL '
                            'visit: %s\n\nRegards,\nThe AVResearcherXL team',
     'invalid_email_or_password': 'Incorrect email or password',
-    'email_not_verified': 'You did not yet verifiy your email address. Please '
-                          'click the link in the email you recieved.',
+    'email_not_verified': 'You did not yet verify your email address. Please '
+                          'click the link in the email you received.',
     'account_not_approved': 'Your account first needs to be approved by a '
-                            'member of the AVResearcherXL team. You will recieve'
+                            'member of the AVResearcherXL team. You will receive'
                             ' an email as soon as permission is granted to use '
                             'the application.',
     'email_verified_title': 'Hi %s, thanks for verifying your mail address',
     'email_verified_content': 'A member of the AVResearcherXL team will review '
                               'your application. You will be notified by '
-                              'email as soon as your account is approved.',
+                              'email as soon as your account has been approved.',
     'user_approved_title': '%s can now login to the application',
     'login_failed': 'Incorrect email or password',
     'login_required': 'You must be logged in to use this function'
