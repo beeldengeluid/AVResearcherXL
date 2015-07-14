@@ -2,6 +2,7 @@ import re
 import uuid
 import json
 
+from elasticsearch.helpers import bulk
 from flask import (Blueprint, current_app, render_template, abort, request,
                    jsonify, url_for)
 from flask.ext.login import login_user, logout_user, login_required, current_user
@@ -283,16 +284,24 @@ def count():
 @views.route('/api/log_usage', methods=['POST'])
 @login_required
 def log_usage():
-    events = json.loads(request.form['events'])
-    user_id = current_user.id
-
-    bulkrequest = ''
-    # Add the user's ID to each event
-    for event in events:
-        event['user_id'] = user_id
-        bulkrequest = bulkrequest + '\n' + '{ "create" : { "_index" : "' + current_app.config['ES_LOG_INDEX'] + '", "_type" : "event" } }'
-        bulkrequest = bulkrequest + '\n' + json.dumps(event)
-
-    current_app.es_log.bulk(body=bulkrequest)
+    user_id = getattr(current_user, 'id', 'anonymous')  # For LOGIN_DISABLED.
+    bulk(current_app.es_log,
+         _gen_bulk_events(json.loads(request.form['events']),
+                          user_id=current_user.id,
+                          log_index=current_app.config['ES_LOG_INDEX']),
+         stats_only=True)   # Don't care about errors.
 
     return jsonify({'success': True})
+
+
+def _gen_bulk_events(events, user_id, log_index):
+    """Updates events (in-place) with user_id + metadata for bulk transfer."""
+    metadata = [
+        ('_op_type', 'create'),
+        ('_index', log_index),
+        ('_type', 'event'),
+        ('user_id', user_id),
+    ]
+    for event in events:
+        event.update(metadata)
+        yield event
