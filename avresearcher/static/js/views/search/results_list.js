@@ -40,6 +40,7 @@ function($, _, Backbone, app, resultsListImmixTemplate, resultsListKbTemplate){
 
             this.$el.find('li').remove();
             this.$el.html(_.template(this.templates[this.model.get('collection')], {
+                query: this.model.get('ftQuery'),
                 hits: this.model.get('hits')
             }));
 

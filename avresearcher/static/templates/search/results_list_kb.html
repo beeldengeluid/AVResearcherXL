@@ -10,8 +10,19 @@
           } else {
             title = '(untitled article)';
           }
+
+          // Bypass the KB resolver and go straight to Delpher. Not only does
+          // the KB resolver add noticeable latency, it also doesn't allow us
+          // to send the query string along.
+          var re = /http:\/\/resolver\.kb\.nl\/resolve\?urn=([^&]*)/;
+          var url = hit.fields.source;
+          var match = re.exec(url);
+          if (match) {
+            url = ('http://www.delpher.nl/nl/kranten/view?coll=ddd&identifier='
+                   + match[1] + '&query=' + encodeURIComponent(query));
+          }
         %>
-        <h2><a href="<%= hit.fields.source %>" target="_blank"><%= title %></a></h2>
+        <h2><a href="<%= url  %>" target="_blank"><%= title %></a></h2>
         <% if ('meta.publication_name' in hit.fields){ %><h3><%= hit.fields['meta.publication_name'] %></h3><% } %>
         <%
             var format = d3.time.format('%a %b %-e, %Y');
