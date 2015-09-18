@@ -1,0 +1,3 @@
+avresearcher/static/js/lib/* -diff
+hunspell/** -diff
+r.js -diff
