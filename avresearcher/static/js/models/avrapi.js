@@ -630,7 +630,7 @@ function($, _, Backbone, app){
             // Since we only have to replace hits, don't request aggregations.
             // This is less expensive on the ES side, and reduces the
             // size of the response.
-            delete payload.aggregations;
+            delete payload.aggs;
 
             this.http_post('search', payload, function(data){
                 self.set({
