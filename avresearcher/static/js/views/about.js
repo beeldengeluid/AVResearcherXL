@@ -21,14 +21,18 @@ function($, _, Backbone, d3, aboutTemplate){
 
             this.model.on('change:stats', this.renderIndexStats, this);
 
-            this.model.getTotalDocCount('kb');
-            this.model.getTotalDocCount('immix');
+            for (var i = 0; i < ENABLED_COLLECTIONS.length; i++) {
+                var coll = ENABLED_COLLECTIONS[i];
+                this.model.getTotalDocCount(coll);
+                this.model.getFirstLastDocDates(coll);
+            }
 
-            this.model.getFirstLastDocDates('kb');
-            this.model.getFirstLastDocDates('immix');
-
-            this.model.getImmixDocsWithSubtitleCount();
-            this.model.getKbDocsByTypeCount();
+            if (_.has(ENABLED_COLLECTIONS, 'immix')) {
+                this.model.getImmixDocsWithSubtitleCount();
+            }
+            if (_.has(ENABLED_COLLECTIONS, 'kb')) {
+                this.model.getKbDocsByTypeCount();
+            }
         },
 
         render: function(){
