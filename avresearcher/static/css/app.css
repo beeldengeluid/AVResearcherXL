@@ -1061,6 +1061,14 @@ ul.dropdown li {
 }
 
 /* Help page */
+#help .top {
+    background: white;
+    margin-left: 15px;
+    margin-right: 0;
+    padding-top: 5px;
+    padding-bottom: 10px;
+}
+
 #help .subject {
     background: #ffffff;
     margin: 20px 0;
