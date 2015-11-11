@@ -54,15 +54,16 @@ Installing AVResearcherXL
   >>> os.urandom(24)
   '\x86\xb8f\xcc\xbf\xd6f\x96\xf0\x08v\x90\xed\xad\x07\xfa\x01\xd0\\L#\x95\xf6\xdd'
 
-6. Set the URLs and names of the ElasticSearch indexes:
+6. Configure the connections to the Elasticsearch instance(s) and the log index:
 
 .. code-block:: pycon
 
-  ES_SEARCH_HOST = 'localhost'
-  ES_SEARCH_PORT = 9200
-  ES_LOG_HOST = ES_SEARCH_HOST
-  ES_LOG_PORT = ES_SEARCH_PORT
+  ES_SEARCH_CONFIG = {'hosts': ['index_host1', 'index_host2'], 'port': 9200}
+  ES_LOG_CONFIG = {'hosts': ['logging_host'] , 'port': 9200}
   ES_LOG_INDEX = 'avresearcher_logs'
+
+See the comments in ``avresearcher/settings.py`` for more advanced
+configuration options and examples.
 
 7. Set the options of the indexed collections (``COLLECTIONS_CONFIGzz).
 

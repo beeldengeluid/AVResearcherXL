@@ -2,14 +2,20 @@ DEBUG = False
 
 SECRET_KEY = ''
 
-# URL of the ElasticSearch instance that contains the AVResearcherXL indexes
-ES_SEARCH_HOST = 'localhost'
-ES_SEARCH_PORT = 9200
+# ElasticSearch instance that contains the document collection(s).
+ES_SEARCH_CONFIG = {'hosts': ['localhost'], 'port': 9200}
 
-# URL of the ElasticSearch instance used to store usage logs (clicks,
-# queries, etc.)
-ES_LOG_HOST = ES_SEARCH_HOST
-ES_LOG_PORT = ES_SEARCH_PORT
+# To connect to an Elasticsearch instance via a secure (HTTPS) connection,
+# use a setting like the following. This works for ES_LOG_CONFIG, too.
+#
+#import certifi
+#ES_SEARCH_CONFIG = {'hosts': ['host1', 'host2'],
+#                    'http_auth': ('username', 's3cr3tp4ssw0rd'),
+#                    'port': 443, 'use_ssl': True,
+#                    'verify_certs': True, 'ca_certs': certifi.where()}
+
+# ElasticSearch instance used to store usage logs (clicks, queries, etc.).
+ES_LOG_CONFIG = ES_SEARCH_CONFIG    # Same instance that holds the collections.
 ES_LOG_INDEX = 'avresearcherxl_logs'
 
 # User database URI

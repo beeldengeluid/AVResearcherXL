@@ -40,12 +40,8 @@ def create_app(package_name='avresearcher', settings_override=None):
 
     login_manager.setup_app(app)
 
-    app.es_search = Elasticsearch([
-        {'host': app.config['ES_SEARCH_HOST'], 'port': app.config['ES_SEARCH_PORT']}
-    ])
-    app.es_log = Elasticsearch([
-        {'host': app.config['ES_LOG_HOST'], 'port':  app.config['ES_LOG_PORT']}
-    ])
+    app.es_search = Elasticsearch(**app.config['ES_SEARCH_CONFIG'])
+    app.es_log = Elasticsearch(**app.config['ES_LOG_CONFIG'])
 
     for bp in DEFAULT_BLUEPRINTS:
         app.register_blueprint(bp)
