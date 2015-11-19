@@ -15,6 +15,8 @@ ES_SEARCH_CONFIG = {'hosts': ['localhost'], 'port': 9200}
 #                    'verify_certs': True, 'ca_certs': certifi.where()}
 
 # ElasticSearch instance used to store usage logs (clicks, queries, etc.).
+# To disable logs, use:
+# ES_LOG_CONFIG = None
 ES_LOG_CONFIG = ES_SEARCH_CONFIG    # Same instance that holds the collections.
 ES_LOG_INDEX = 'avresearcherxl_logs'
 
