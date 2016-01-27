@@ -283,6 +283,11 @@ def count():
 @views.route('/api/log_usage', methods=['POST'])
 @login_required
 def log_usage():
+    success = jsonify({'success': True})
+
+    if current_app.es_log is None:
+        return success
+
     events = json.loads(request.form['events'])
     user_id = current_user.id
 
@@ -295,4 +300,4 @@ def log_usage():
 
     current_app.es_log.bulk(body=bulkrequest)
 
-    return jsonify({'success': True})
+    return success

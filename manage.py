@@ -14,7 +14,7 @@ from elasticsearch.helpers import bulk
 
 from avresearcher import create_app
 from avresearcher.extensions import db
-from avresearcher.settings import ES_SEARCH_HOST, ES_SEARCH_PORT
+from avresearcher.settings import ES_SEARCH_CONFIG
 
 
 logging.getLogger('elasticsearch').setLevel(logging.INFO)
@@ -34,7 +34,7 @@ es_log = logging.getLogger('elasticsearch.trace')
 es_log.addHandler(log_sh)
 es_log.setLevel(logging.ERROR)
 
-es = Elasticsearch(host=ES_SEARCH_HOST, port=ES_SEARCH_PORT)
+es = Elasticsearch(**ES_SEARCH_CONFIG)
 
 
 @click.group()
