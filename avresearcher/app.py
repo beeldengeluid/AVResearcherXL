@@ -44,17 +44,39 @@ def create_app(package_name='avresearcher', settings_override=None):
 
     login_manager.setup_app(app)
 
-    app.es_search = Elasticsearch(**app.config['ES_SEARCH_CONFIG'])
-    log_config = app.config.get('ES_LOG_CONFIG', None)
-    if log_config is not None:
-        app.es_log = Elasticsearch(**log_config)
-    else:
-        app.es_log = None
+    app.es_search, app.es_log = _check_es_config(app.config)
 
     for bp in DEFAULT_BLUEPRINTS:
         app.register_blueprint(bp)
 
     return app
+
+
+def _check_es_config(config):
+    # Check whether we have ES_SEARCH_CONFIG and ES_LOG_CONFIG;
+    # if not, set them from the deprecated ES_{SEARCH,LOG}_{HOST,PORT}
+    # settings;
+    # if successful, return Elasticsearch instances.
+
+    for estype in ["SEARCH", "LOG"]:
+        es_config = "ES_%s_CONFIG" % estype
+        if es_config not in config:
+            host = "ES_%s_HOST" % estype
+            port = "ES_%s_PORT" % estype
+            if host not in config or port not in config:
+                raise ValueError("need either %s setting or %s and %s"
+                                 % (es_config, host, port))
+
+            config[es_config] = {
+                "hosts": [config[host]],
+                "port": config[port],
+            }
+
+    es_log = None
+    es_log_config = config["ES_LOG_CONFIG"]
+    if es_log_config is not None:
+        es_log = Elasticsearch(es_log_config)
+    return Elasticsearch(**config["ES_SEARCH_CONFIG"]), es_log
 
 
 def _validate(config):

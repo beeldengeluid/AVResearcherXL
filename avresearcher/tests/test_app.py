@@ -1,8 +1,8 @@
-from avresearcher.app import _validate
-
+from avresearcher.app import _check_es_config, _validate
 from copy import deepcopy
+from elasticsearch import Elasticsearch
 
-from nose.tools import assert_raises
+from nose.tools import assert_equal, assert_in, assert_raises, assert_true
 
 
 config = {
@@ -22,6 +22,28 @@ config = {
     },
     "ENABLED_COLLECTIONS": ["index1"],
 }
+
+
+def test_check_es_config():
+    assert_raises(ValueError, _check_es_config, config)
+
+    c = deepcopy(config)
+    c["ES_SEARCH_HOST"] = "localhost"
+    c["ES_SEARCH_PORT"] = 9200
+    c["ES_LOG_HOST"] = "loghost"
+    c["ES_LOG_PORT"] = 9200
+    es_search, es_log = _check_es_config(c)
+
+    assert_in("ES_SEARCH_CONFIG", c)
+    assert_equal(c["ES_SEARCH_CONFIG"], {"hosts": ["localhost"], "port": 9200})
+    assert_in("ES_LOG_CONFIG", c)
+    assert_equal(c["ES_LOG_CONFIG"], {"hosts": ["loghost"], "port": 9200})
+
+    # Allow ES_LOG_CONFIG = None
+    c["ES_LOG_CONFIG"] = None
+    es_search, es_log = _check_es_config(c)
+    assert_true(isinstance(es_search, Elasticsearch))
+    assert_equal(es_log, None)
 
 
 def test_validate():

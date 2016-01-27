@@ -3,7 +3,7 @@ DEBUG = False
 SECRET_KEY = ''
 
 # ElasticSearch instance that contains the document collection(s).
-ES_SEARCH_CONFIG = {'hosts': ['localhost'], 'port': 9200}
+#ES_SEARCH_CONFIG = {'hosts': ['localhost'], 'port': 9200}
 
 # To connect to an Elasticsearch instance via a secure (HTTPS) connection,
 # use a setting like the following. This works for ES_LOG_CONFIG, too.
@@ -15,10 +15,12 @@ ES_SEARCH_CONFIG = {'hosts': ['localhost'], 'port': 9200}
 #                    'verify_certs': True, 'ca_certs': certifi.where()}
 
 # ElasticSearch instance used to store usage logs (clicks, queries, etc.).
+# This has the same format as ES_SEARCH_CONFIG; use the following to use the
+# same host for logging:
+#ES_LOG_CONFIG = ES_SEARCH_CONFIG
+#ES_LOG_INDEX = 'avresearcherxl_logs'
 # To disable logs, use:
-# ES_LOG_CONFIG = None
-ES_LOG_CONFIG = ES_SEARCH_CONFIG    # Same instance that holds the collections.
-ES_LOG_INDEX = 'avresearcherxl_logs'
+#ES_LOG_CONFIG = None
 
 # User database URI
 SQLALCHEMY_DATABASE_URI = 'mysql://user:pass@host/db'
