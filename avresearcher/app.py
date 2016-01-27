@@ -6,6 +6,9 @@ from .models import User
 from .extensions import mail, db, bcrypt, sentry, login_manager
 
 
+__all__ = ['create_app']
+
+
 DEFAULT_BLUEPRINTS = (
     views,
 )
@@ -23,6 +26,7 @@ def create_app(package_name='avresearcher', settings_override=None):
 
     app.config.from_object('avresearcher.settings')
     app.config.from_object(settings_override)
+    _validate(app.config)
 
     if app.config['DEBUG'] and app.config['SENTRY_DSN']:
         sentry.init_app(app)
@@ -51,3 +55,34 @@ def create_app(package_name='avresearcher', settings_override=None):
         app.register_blueprint(bp)
 
     return app
+
+
+def _validate(config):
+    # Settings validation: should catch common settings.py/local_settings.py
+    # mistakes. Add rules as needed.
+
+    collections_config = config['COLLECTIONS_CONFIG']
+    for coll in config['ENABLED_COLLECTIONS']:
+        if coll not in collections_config:
+            raise ValueError("collection %r enabled, but not configured"
+                             " in COLLECTIONS_CONFIG" % (coll))
+
+    for index, settings in collections_config.iteritems():
+        index_name = settings.get('index_name')
+        if not isinstance(index_name, basestring):
+            raise TypeError("not a valid index_name for index %r: %r of %r"
+                            % (index, index_name, type(index_name)))
+
+        aggregations = settings.get('available_aggregations', [])
+        for facet in settings.get('enabled_facets', []):
+            if facet not in aggregations:
+                raise ValueError("facet %r not among available_aggregations=%r"
+                                 " for index %r"
+                                 % (facet, list(aggregations.keys()), index))
+
+        avail_fields = settings['available_search_fields']
+        for field in settings['enabled_search_fields']:
+            if field not in avail_fields:
+                raise ValueError("search field %r not among"
+                                 " available_search_fields=%r for index %r"
+                                 % (field, list(avail_fields), index))
