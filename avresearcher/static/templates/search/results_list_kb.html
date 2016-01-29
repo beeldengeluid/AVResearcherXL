@@ -5,7 +5,7 @@
           var title;
           if ('highlight' in hit && 'title' in hit.highlight) {
             title = hit.highlight.title[0];
-          } if (hit.fields.title[0]) {
+          } else if (hit.fields.title[0]) {
             title = hit.fields.title;
           } else {
             title = '(untitled article)';
