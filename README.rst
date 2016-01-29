@@ -133,13 +133,13 @@ The package contains several text analysis tasks to generate the terms used in t
 
 .. code-block:: bash
 
-  $ ./mange.py construct_tfidf_model gensim_data/immix_summaries.mm gensim_data/immix_summaries.tfidf_model
+  $ ./manage.py construct_tfidf_model gensim_data/immix_summaries.mm gensim_data/immix_summaries.tfidf_model
 
 7. Add the topN 'most descriptive' terms to each indexed document:
 
 .. code-block:: bash
 
-  $ ./mange.py analyze_text index_descriptive_terms "immix_analyzed/summaries/*.tar.gz"  gensim_data/immix_summaries_pruned.dict gensim_data/immix_summaries.tfidf_model gensim_data/immix_summaries.tfidf_model 'quamerdes_immix_20140920' 'text_descriptive_terms' 10
+  $ ./manage.py analyze_text index_descriptive_terms "immix_analyzed/summaries/*.tar.gz"  gensim_data/immix_summaries_pruned.dict gensim_data/immix_summaries.tfidf_model gensim_data/immix_summaries.tfidf_model 'quamerdes_immix_20140920' 'text_descriptive_terms' 10
 
 License
 -------
